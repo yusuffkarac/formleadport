@@ -240,6 +240,12 @@ def firma_duzenle(request):
     if request.method == "POST":
         form_type = request.POST.get("form_type")
         if form_type == "firma":
+            # POST verilerini debug et
+            print("=== POST DATA DEBUG ===")
+            print(f"POST data: {request.POST}")
+            print(f"FILES data: {request.FILES}")
+            print("=== END POST DEBUG ===")
+            
             firma_form = FirmaForm(request.POST, request.FILES, instance=firma if firma else None)
             smtp_form  = SmtpForm(instance=smtp)  # diğer form boş görünmesin
             try:
