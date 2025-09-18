@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profil bearbeiten | {{ user.username }}{% endblock %}
+{% block description %}Bearbeite dein Profil (Benutzername, E-Mail, Vorname, Nachname). Änderungen werden sofort
+übernommen.{% endblock %}
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar">
+    <div id="kt_toolbar_container" class="container-xxl d-flex flex-stack flex-wrap">
+        <h3 class="text-white fw-bolder fs-2qx me-5">Profil bearbeiten</h3>
+    </div>
+</div>
+<!--end::Toolbar-->
+<!--benim::Container-->
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+    <!--begin::Post-->
+    <div class="content flex-row-fluid" id="kt_content">
+        <!--begin::Layout - Settings-->
+        <div class="d-flex flex-column flex-xl-row">
+            <!--begin::Content-->
+            <div class="flex-lg-row-fluid ms-lg-10">
+                {% include 'widgets/messages.html' %}
+                <!--begin::Basic info-->
+                <div class="card mb-5 mb-xl-10">
+                    <div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse"
+                        data-bs-target="#kt_account_profile_details" aria-expanded="true"
+                        aria-controls="kt_account_profile_details">
+                        <div class="card-title m-0">
+                            <h3 class="fw-bold m-0">Profildetails</h3>
+                        </div>
+                    </div>
+
+                    <div id="kt_account_settings_profile_details" class="collapse show">
+                        <form id="kt_account_profile_details_form" enctype="multipart/form-data" class="form fv-plugins-bootstrap5 fv-plugins-framework" method="post" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="profile">
+                            <div class="card-body border-top p-9">
+
+                              <!-- Profilbild (mit Vorschau) -->
+                              <div class="row mb-6">
+                                <label class="col-12 col-lg-4 col-form-label fw-semibold fs-6 mb-2 mb-lg-0">
+                                  Profilbild
+                                  <span class="ms-1" data-bs-toggle="tooltip"
+                                        aria-label="Laden Sie ein quadratisches Bild hoch, z. B. 512×512"
+                                        data-bs-original-title="Laden Sie ein quadratisches Bild hoch, z. B. 512×512">
+                                    <i class="ki-duotone ki-information-5 text-gray-500 fs-6">
+                                      <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                    </i>
+                                  </span>
+                                </label>
+
+                                <div class="col-12 col-lg-8">
+                                  <!-- xs: dikey, sm+: yatay; wrap + gap ile taşma engellenir -->
+                                  <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center flex-wrap gap-3">
+                                    <!-- Önizleme -->
+                                    <div class="symbol symbol-75px symbol-md-100px me-0 me-sm-3 flex-shrink-0">
+                                      <img id="avatar_preview"
+                                          class="rounded img-fluid"
+                                          alt="Profilbild Vorschau"
+                                          src="{% if user.resim %}{{ user.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}">
+                                    </div>
+
+                                    <!-- Input ve yardım metni -->
+                                    <div class="flex-grow-1 w-100">
+                                      <!-- Dosya inputu mümkünse form-control sınıfıyla renderlansın -->
+                                      {{ form.resim }}
+                                      {% if form.resim.errors %}
+                                        <div class="invalid-feedback d-block">
+                                          {{ form.resim.errors|striptags }}
+                                        </div>
+                                      {% endif %}
+
+                                      <div class="form-text mt-2">
+                                        Erlaubte Formate: JPG, PNG, WEBP. Empfohlen: quadratisch (z. B. 512×512), max. 5 MB.
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+
+                                <!-- Vollständiger Name -->
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label required fw-semibold fs-6">Vollständiger
+                                        Name</label>
+                                    <div class="col-lg-8">
+                                        <div class="row">
+                                            <!-- Vorname -->
+                                            <div class="col-lg-6 fv-row fv-plugins-icon-container mb-2">
+                                                {{ form.first_name }}
+                                                {% if form.first_name.errors %}
+                                                <div
+                                                    class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                                                    {{ form.first_name.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <!-- Nachname -->
+                                            <div class="col-lg-6 fv-row fv-plugins-icon-container mb-2">
+                                                {{ form.last_name }}
+                                                {% if form.last_name.errors %}
+                                                <div
+                                                    class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                                                    {{ form.last_name.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Benutzername -->
+                                <div class="row mb-6">
+                                    <label
+                                        class="col-lg-4 col-form-label required fw-semibold fs-6">Benutzername</label>
+                                    <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                                        {{ form.username }}
+                                        {% if form.username.errors %}
+                                        <div
+                                            class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                                            {{ form.username.errors|striptags }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- E-Mail -->
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label required fw-semibold fs-6">
+                                        E-Mail
+                                        <span class="ms-1" data-bs-toggle="tooltip"
+                                            aria-label="E-Mail muss gültig und erreichbar sein"
+                                            data-bs-original-title="E-Mail muss gültig und erreichbar sein">
+                                            <i class="ki-duotone ki-information-5 text-gray-500 fs-6"><span
+                                                    class="path1"></span><span class="path2"></span><span
+                                                    class="path3"></span></i>
+                                        </span>
+                                    </label>
+                                    <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                        <div
+                                            class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                                            {{ form.email.errors|striptags }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="card-footer d-flex justify-content-end py-6 px-9">
+                                <a href="{% url 'profil_goruntule' %}"
+                                    class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                                <button type="submit" class="btn btn-primary" id="kt_account_profile_details_submit">
+                                    Änderungen speichern
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!--end::Basic info-->
+
+                <!-- Password -->
+                <div class="card mb-5 mb-xl-10">
+                  <div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse" data-bs-target="#kt_account_signin_method">
+                    <div class="card-title m-0">
+                      <h3 class="fw-bold m-0">Anmeldemethode</h3>
+                    </div>
+                  </div>
+                  <div id="kt_account_settings_signin_method" class="collapse show">
+                    <div class="card-body border-top p-9">
+                      <div class="d-flex flex-wrap align-items-center mb-1">
+                        <div id="kt_signin_password">
+                          <div class="fs-6 fw-bold mb-1">Passwort</div>
+                          <div class="fw-semibold text-gray-600">************</div>
+                        </div>
+                        <div id="kt_signin_password_button" class="ms-auto">
+                          <button class="btn btn-light btn-active-light-primary" type="button" data-bs-toggle="modal" data-bs-target="#passwordChangeModal">Passwort zurücksetzen</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <!--end::Content-->
+        </div>
+        <!--end::Layout - Settings-->
+    </div>
+    <!--end::Post-->
+</div>
+<!--end::Container-->
+
+<!-- Password Change Modal -->
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <form method="post" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="password">
+
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Passwort ändern</h5>
+          <button type="button" class="btn btn-icon btn-sm" data-bs-dismiss="modal" aria-label="Close">
+            <i class="ki-duotone ki-cross fs-2"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          {# Genel (non_field) hatalar #}
+          {% if password_form.non_field_errors %}
+            <div class="alert alert-danger mb-6">
+              {{ password_form.non_field_errors|striptags }}
+            </div>
+          {% endif %}
+
+          <!-- Eski şifre -->
+          <div class="mb-6">
+            <label class="form-label fw-semibold">Altes Passwort</label>
+            <div class="position-relative">
+              {{ password_form.old_password }}
+              <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle"
+                    data-password-toggle>
+                <i class="fa-solid fa-eye"></i>
+                <i class="fa-solid fa-eye-slash d-none"></i>
+              </span>
+            </div>
+            {% if password_form.old_password.errors %}
+              <div class="invalid-feedback d-block">
+                {{ password_form.old_password.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Yeni şifre -->
+          <div class="mb-6">
+            <label class="form-label fw-semibold">Neues Passwort</label>
+            <div class="position-relative">
+              {{ password_form.new_password1 }}
+              <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle"
+                    data-password-toggle>
+                <i class="fa-solid fa-eye"></i>
+                <i class="fa-solid fa-eye-slash d-none"></i>
+              </span>
+            </div>
+            {% if password_form.new_password1.help_text %}
+              <div class="form-text">{{ password_form.new_password1.help_text }}</div>
+            {% endif %}
+            {% if password_form.new_password1.errors %}
+              <div class="invalid-feedback d-block">
+                {{ password_form.new_password1.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Yeni şifre (Tekrar) -->
+          <div class="mb-2">
+            <label class="form-label fw-semibold">Neues Passwort (Wiederholung)</label>
+            <div class="position-relative">
+              {{ password_form.new_password2 }}
+              <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle"
+                    data-password-toggle>
+                <i class="fa-solid fa-eye"></i>
+                <i class="fa-solid fa-eye-slash d-none"></i>
+              </span>
+            </div>
+            {% if password_form.new_password2.errors %}
+              <div class="invalid-feedback d-block">
+                {{ password_form.new_password2.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">
+            Passwort speichern
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block script %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // 3.1) Modalı server-side hatadan sonra otomatik aç (open_password_modal bayrağı)
+  {% if open_password_modal %}
+    const pwdModalEl = document.getElementById('passwordChangeModal');
+    if (pwdModalEl) {
+      const modal = new bootstrap.Modal(pwdModalEl);
+      modal.show();
+    }
+  {% endif %}
+
+  // 3.2) Göz ikonları: input sağ paddingi ekle ve toggle yap
+  function ensureRightPadding(btn) {
+    const wrap = btn.closest('.position-relative');
+    if (!wrap) return;
+    const input = wrap.querySelector('input[type="password"], input[type="text"]');
+    if (input) input.classList.add('pe-12'); // ikonla çakışmayı önler
+  }
+
+  // Mevcut tüm toggle butonları için sağ padding ver
+  document.querySelectorAll('[data-password-toggle]').forEach(ensureRightPadding);
+
+  // Delegasyon ile tıklama
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest('[data-password-toggle]');
+    if (!btn) return;
+
+    const wrap = btn.closest('.position-relative');
+    const input = wrap && wrap.querySelector('input[type="password"], input[type="text"]');
+    if (!input) return;
+
+    const eye = btn.querySelector('.fa-eye');
+    const eyeSlash = btn.querySelector('.fa-eye-slash');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (eye) eye.classList.add('d-none');
+      if (eyeSlash) eyeSlash.classList.remove('d-none');
+    } else {
+      input.type = 'password';
+      if (eye) eye.classList.remove('d-none');
+      if (eyeSlash) eyeSlash.classList.add('d-none');
+    }
+  });
+});
+</script>
+<script>
+(function() {
+  const input = document.getElementById('id_resim');
+  const preview = document.getElementById('avatar_preview');
+
+  if (input && preview) {
+    input.addEventListener('change', function (e) {
+      const [file] = this.files || [];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        preview.src = url;
+        preview.onload = () => URL.revokeObjectURL(url);
+      }
+    });
+  }
+})();
+</script>
+
+{% endblock %}

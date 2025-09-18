@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+{% load static tz %}
+
+{% block title %}Dashboard – Übersicht und wichtige Informationen{% endblock %}
+{% block description %}Behalten Sie den Überblick: Alle wichtigen Statistiken, Benachrichtigungen und Schnellzugriffe auf einen Blick in Ihrem Dashboard.{% endblock %}
+{% block head %}
+<style>
+  .symbol .img-circle {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* Resmi orantılı kırp */
+    border-radius: 50%;  /* Daima yuvarlak olsun */
+    display: block;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar">
+  <div id="kt_toolbar_container" class="container-xxl d-flex flex-stack flex-wrap">
+    <h3 class="text-white fw-bolder fs-2qx me-5">Dashboard</h3>
+  </div>
+</div>
+<!--end::Toolbar-->
+
+<!--begin::Container-->
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+  <div class="content flex-row-fluid" id="kt_content">
+    <div class="row g-5 g-xl-8">
+      <div class="col-xxl-6">
+
+        <!--begin::List Widget 5-->
+        <div class="card card-xl-stretch mb-5 mb-xl-8">
+          <!--begin::Header-->
+          <div class="card-header border-0 pt-5">
+            <h3 class="card-title align-items-start flex-column">
+              <span class="card-label fw-bold text-dark">Top-Benutzer</span>
+              <span class="mt-1 fw-semibold fs-7">Die 4 aktivsten Nutzer mit den meisten Formularen</span>
+            </h3>
+          </div>
+          <!--end::Header-->
+
+          <!--begin::Body-->
+          <div class="card-body pt-5">
+            <div class="row">
+              {% for row in top_kullanicilar %}
+                <div class="col-md-6 mb-7">
+                  <div class="d-flex align-items-sm-center">
+                    <div class="symbol symbol-circle symbol-50px me-5">
+                      <span class="symbol-label">
+                        <img src="{% if row.kullanici__resim %}/media/{{ row.kullanici__resim }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
+                      </span>
+                    </div>
+                    <div class="d-flex align-items-center flex-row-fluid flex-wrap">
+                      <div class="flex-grow-1 me-2">
+                        <span class="text-gray-800 fs-6 fw-bold">
+                          {% if row.kullanici__first_name or row.kullanici__last_name %}
+                            {{ row.kullanici__first_name }} {{ row.kullanici__last_name }}
+                          {% endif %}
+                        </span>
+                        <span class="fw-semibold d-block fs-7">{{ row.kullanici__username }}</span>
+                      </div>
+                      <span class="badge badge-light fw-bold my-2">{{ row.cnt }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="col-12">Noch keine Daten.</div>
+              {% endfor %}
+            </div>
+          </div>
+          <!--end::Body-->
+
+
+        </div>
+        <!--end::List Widget 5-->
+
+
+      </div>
+
+
+      <div class="col-xxl-6">
+        <!--begin::Row-->
+        <div class="row g-5 g-xl-8">
+          <!--begin::Col-->
+          <div class="col-xxl-6">
+            <!--begin::Statistics Widget - Today-->
+            <div class="card card-xxl-stretch-50 mb-5 mb-xl-8">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="symbol symbol-40px me-4">
+                    <span class="symbol-label bg-light-success">
+                      <i class="ki-duotone ki-calendar fs-2 text-success">
+                        <span class="path1"></span><span class="path2"></span>
+                      </i>
+                    </span>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">Heutige Einträge</div>
+                    <div class="fs-1 fw-bolder text-gray-800">{{ today_count }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::Statistics Widget - Today-->
+
+            <!--begin::Statistics Widget - Total-->
+            <div class="card card-xxl-stretch-50 mb-xxl-8">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="symbol symbol-40px me-4">
+                    <span class="symbol-label bg-light-primary">
+                      <i class="ki-duotone ki-chart fs-2 text-primary">
+                        <span class="path1"></span><span class="path2"></span>
+                      </i>
+                    </span>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">Gesamteinträge</div>
+                    <div class="fs-1 fw-bolder text-gray-800">{{ total_count }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::Statistics Widget - Total-->
+
+
+          </div>
+          <!--end::Col-->
+
+          <!--begin::Col-->
+          <div class="col-xxl-6">
+
+            <!--begin::Mixed Widget - Tomorrow Appointments-->
+            <div class="card card-xxl-stretch-50 mb-5 mb-xl-8">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="symbol symbol-40px me-4">
+                    <span class="symbol-label bg-light-warning">
+                      <i class="ki-duotone ki-time fs-2 text-warning">
+                        <span class="path1"></span><span class="path2"></span>
+                      </i>
+                    </span>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">Termine für morgen</div>
+                    <div class="fs-1 fw-bolder text-gray-800">{{ tomorrow_appt_count }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::Mixed Widget - Tomorrow Appointments-->
+
+            <!--begin::Statistics Widget - This Month-->
+            <div class="card card-xxl-stretch-50 mb-xxl-8">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="symbol symbol-40px me-4">
+                    <span class="symbol-label bg-light-info">
+                      <i class="ki-duotone ki-graph-up fs-2 text-info">
+                        <span class="path1"></span><span class="path2"></span>
+                      </i>
+                    </span>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">Einträge dieses Monats</div>
+                    <div class="fs-1 fw-bolder text-gray-800">{{ month_count }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::Statistics Widget - This Month-->
+
+          </div>
+          <!--end::Col-->
+        </div>
+        <!--end::Row-->
+      </div>
+    </div>
+
+    <div class="card my-5">
+      <!-- Header -->
+      <div class="card-header border-0 pt-6">
+        <div class="card-title">
+          <div class="d-flex align-items-center position-relative my-1">
+            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
+              <span class="path1"></span><span class="path2"></span>
+            </i>
+            <input id="globalSearch" type="text" class="form-control form-control-solid w-250px ps-13"
+              placeholder="Formular suchen">
+          </div>
+        </div>
+
+        <div class="card-toolbar d-flex align-items-center gap-3">
+          {% if request.user.rol != 'Benutzer' %}
+          <!-- Sağdaki “Form ekle” butonu -->
+          <a href="#" class="btn btn-success my-2" data-bs-toggle="modal" data-bs-target="#kt_modal_musteri_form">
+            <i class="ki-duotone ki-abstract-10 fs-2"><span class="path1"></span><span class="path2"></span></i>
+            Neukunde
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body py-4">
+        <div class="table-responsive">
+          <table class="table align-middle table-row-dashed fs-6 gy-5" id="dt_forms" style="width:100%">
+            <thead>
+              <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                <th class="min-w-150px">Erstellt von</th> {# kullanici (altında müşteri adı-soyadı) #}
+                <th class="min-w-100px d-none">Kunde</th> {# musteri_isim + musteri_soyisim #}
+                <th class="min-w-125px text-start">Festnetz</th> {# sabit_telefon #}
+                <th class="min-w-125px text-start">Handy</th> {# telefon (+ verifiziert ikon) #}
+                <th class="min-w-200px">E-Mail</th> {# email (+ verifiziert ikon) #}
+                <th class="min-w-200px">Termin</th> {# randevu_tarihi #}
+                <th class="min-w-110px">Status</th> {# durum #}
+                <th class="min-w-150px text-end">Aktionen</th> {# Menü #}
+              </tr>
+            </thead>
+
+            <tbody class="text-black fw-semibold">
+              {% for f in formlar %}
+              <tr>
+                <!-- Erstellt von (creator) -->
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="symbol symbol-35px symbol-circle me-3">
+                      <span class="symbol-label bg-light fw-bold text-gray-600">
+                          <img src="{% if f.kullanici and f.kullanici.resim %}{{ f.kullanici.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
+                      </span>
+                    </div>
+                    <div class="d-flex flex-column">
+                      <span class="text-gray-800 text-hover-primary fw-bold">
+                        {% if f.kullanici %}
+                            {{ f.kullanici.username|default:f.kullanici.email|default:"—" }}
+                        {% else %}
+                          — 
+                        {% endif %}
+                      </span>
+                      <span class="fs-8">
+                        {{ f.olusturma_tarihi|localtime|date:"d.m.Y, H:i" }} Uhr
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Kunde -->
+                <td class="d-none">
+                  {% if f.musteri_isim or f.musteri_soyisim %}
+                    {{ f.musteri_isim }} {{ f.musteri_soyisim }}
+                  {% else %}
+                    <span>—</span>
+                  {% endif %}
+                </td>
+
+                <!-- Festnetz -->
+                <td>
+                  {% if f.sabit_telefon %}{{ f.sabit_telefon }}{% else %}<span>—</span>{% endif %}
+                </td>
+                <!-- Telefon -->
+                <td class="text-start">
+                  {% if f.telefon %}{{ f.telefon }}{% else %}<span>—</span>{% endif %}
+                  {% if f.telefon_onayli_mi %}
+                    <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
+                      <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                    </span>
+                  {% endif %}
+                </td>
+
+                <!-- E-Mail -->
+                <td>
+                  {% if f.email %}{{ f.email }}{% else %}<span>—</span>{% endif %}
+                  {% if f.email_onayli_mi %}
+                    <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
+                      <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                    </span>
+                  {% endif %}
+                </td>
+
+                <!-- Termin -->
+                <td data-order="{{ f.randevu_tarihi|date:'c' }}">
+                  {% if f.randevu_tarihi %}
+                    {{ f.randevu_tarihi|localtime|date:"d.m.Y, H:i" }} Uhr
+                  {% else %}
+                    <span>—</span>
+                  {% endif %}
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <select class="form-select form-select-sm form-select-solid w-auto"
+                            data-status-select
+                            data-form-id="{{ f.id }}">
+                      <option value="" disabled {% if not f.durum_id %}selected{% endif %}>Status wählen…</option>
+                      {% for d in durumlar %}
+                        <option value="{{ d.id }}" {% if f.durum_id == d.id %}selected{% endif %}>
+                          {{ d.isim }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </td>
+
+                <!-- Aktionen -->
+                <td class="text-end text-nowrap" data-order="Invalid date">
+                  <div class="d-inline-flex align-items-center gap-2" role="group" aria-label="Aktionen"
+                      data-form-id="{{ f.id }}"
+                      data-full-name="{{ f.musteri_isim|default:'' }} {{ f.musteri_soyisim|default:'' }}"
+                      data-email="{{ f.email|default:''|escape }}"
+                      data-telefon="{{ f.telefon|default:''|escape }}"
+                      data-sabit_telefon="{{ f.sabit_telefon|default:''|escape }}"
+                      data-durum="{{ f.durum|default:''|escape }}"
+                      data-randevu-human="{% if f.randevu_tarihi %}{{ f.randevu_tarihi|localtime|date:'d. M Y, H:i' }} Uhr{% else %}—{% endif %}"
+                      data-olusturma-human="{{ f.olusturma_tarihi|localtime|date:'d. M Y, H:i' }} Uhr">
+
+                    <a href="#" class="btn btn-sm btn-light btn-icon" title="Vorschau" aria-label="Anzeigen" data-bs-toggle="modal" data-bs-target="#modalFormGoruntule">
+                      <i class="ki-duotone ki-screen fs-5"><span class="path1"></span><span class="path2"></span></i>
+                    </a>
+
+                    {% if request.user.is_superuser or request.user.rol == 'Yönetici' or request.user.rol == 'Admin' or f.kullanici == request.user %}
+                    <a href="#" class="btn btn-sm btn-light btn-icon" data-bs-toggle="modal" data-bs-target="#kt_modal_musteri_form_duzenle" data-form-id="{{ f.id }}" title="Bearbeiten" aria-label="Bearbeiten">
+                      <i class="ki-duotone ki-pencil fs-5"><span class="path1"></span><span class="path2"></span></i>
+                    </a>
+                    {% endif %}
+                    
+                    <a href="#" class="btn btn-sm btn-light btn-icon" title="Mit Benutzer teilen" aria-label="Freigaben anzeigen" data-bs-toggle="modal" data-bs-target="#modalFormPaylasimlari" data-form-id="{{ f.id }}">
+                      <i class="ki-duotone ki-share fs-5"><span class="path1"></span><span class="path2"></span></i>
+                    </a>
+
+                    <a href="#" class="btn btn-sm btn-light btn-icon" title="Per E-Mail teilen" aria-label="" data-bs-toggle="modal" data-bs-target="#modalEmailPaylas" data-form-id="{{ f.id }}">
+                      <i class="fa-duotone fa-solid fa-envelope"></i>
+                    </a>
+
+                    <a href="#" class="btn btn-sm btn-light btn-icon" title="Notiz hinzufügen" aria-label="Notizen anzeigen" data-bs-toggle="modal" data-bs-target="#modalFormNotlari" data-form-id="{{ f.id }}">
+                      <i class="fa-duotone fa-solid fa-note-sticky"></i>
+                    </a>
+
+                    {% if request.user.is_superuser or request.user.rol == 'Yönetici' or request.user.rol == 'Admin' %}
+                    <button type="button" class="btn btn-sm btn-light-danger btn-icon" title="Löschen" aria-label="Löschen" data-form-id="{{ f.id }}" data-form-name="{{ f.musteri_isim }} {{ f.musteri_soyisim }}" data-bs-toggle="modal" data-bs-target="#modalDelete">
+                      <i class="ki-duotone ki-trash fs-5"><span class="path1"></span><span class="path2"></span></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- /Body -->
+    </div>
+
+
+  </div>
+</div>
+<!--end::Container-->
+{% include 'widgets/form_olustur.html' %}
+{% if request.user.is_superuser or request.user.rol == 'Yönetici' or request.user.rol == 'Admin' %}
+{% include 'widgets/form_duzenle.html' %}
+{% include 'widgets/form_sil.html' %}
+{% include 'widgets/form_paylas.html' %}
+{% include 'widgets/email_paylas.html' %}
+{% endif %}
+{% include 'widgets/form_goruntule.html' %}
+{% include 'widgets/notlar.html' %}
+{% endblock %}
+{% block script %}
+<!-- DataTables (aynı sürüm) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.6/r-3.0.3/datatables.min.css" />
+<script src="https://cdn.datatables.net/v/bs5/dt-2.1.6/r-3.0.3/datatables.min.js"></script>
+
+<script>
+(function () {
+  const table = new DataTable('#dt_forms', {
+    responsive: true,
+    pageLength: 15,
+    lengthMenu: [15, 25, 50, 100],
+    pagingType: 'numbers',
+    language: {
+      "emptyTable": "Keine Daten in der Tabelle vorhanden",
+      "info": "_START_ bis _END_ von _TOTAL_ Einträgen",
+      "infoEmpty": "0 bis 0 von 0 Einträgen",
+      "infoFiltered": "(gefiltert von _MAX_ Einträgen insgesamt)",
+      "lengthMenu": "_MENU_ Einträge anzeigen",
+      "loadingRecords": "Wird geladen...",
+      "processing": "Bitte warten...",
+      "search": "Suchen:",
+      "zeroRecords": "Keine passenden Einträge gefunden",
+      "paginate": { "first": "", "last": "", "next": "", "previous": "" },
+      "aria": { "sortAscending": ": aufsteigend sortieren", "sortDescending": ": absteigend sortieren" }
+    },
+    columnDefs: [
+      { targets: [6], orderable: false } // Aktionen sıralanmasın
+    ],
+    dom: "<'row'<'col-sm-12'tr>>" +
+         "<'row mt-5'<'col-6 d-flex align-items-center'i>" +
+         "<'col-6 d-flex justify-content-end'p>>"
+  });
+  const globalSearch = document.getElementById('globalSearch');
+  if (globalSearch) {
+    globalSearch.addEventListener('keyup', function () {
+      table.search(this.value).draw();
+    });
+  }
+})();
+</script>
+<script>
+  (function () {
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    document.addEventListener('change', async function (e) {
+      const sel = e.target.closest('[data-status-select]');
+      if (!sel) return;
+
+      const formId = sel.getAttribute('data-form-id');
+      const durumId = sel.value;
+      if (!durumId) return;
+
+      const row = sel.closest('tr');
+      const badge = row ? row.querySelector('[data-status-badge]') : null;
+
+      sel.disabled = true;
+      try {
+        const resp = await fetch(`/musteri-formlari/${formId}/durum/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          },
+          body: new URLSearchParams({ durum_id: durumId }).toString()
+        });
+
+        if (!resp.ok) throw new Error('Güncelleme başarısız.');
+        const data = await resp.json();
+        if (!data.ok) throw new Error('Sunucu hatası.');
+
+        // Sadece metin güncellenir; badge class sabit kalır.
+        if (badge) {
+          badge.textContent = data.isim || '—';
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Durum güncellenemedi. Lütfen tekrar deneyin.');
+      } finally {
+        sel.disabled = false;
+      }
+    });
+  })();
+</script>
+
+
+{% endblock %}

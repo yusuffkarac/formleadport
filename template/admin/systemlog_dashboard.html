@@ -1,0 +1,239 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:sayfalar_systemlog_changelist' %}">{% trans 'System logs' %}</a>
+&rsaquo; {% trans 'Dashboard' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module filtered" id="changelist">
+    <div class="results">
+        <h1>{{ title }}</h1>
+        
+        <!-- İstatistikler -->
+        <div class="results" style="margin-bottom: 20px;">
+            <div class="module" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="background: #f8f8f8; padding: 15px; border-radius: 5px; min-width: 150px;">
+                    <h3 style="margin: 0 0 5px 0; color: #333;">Toplam Log</h3>
+                    <div style="font-size: 24px; font-weight: bold; color: #417690;">{{ stats.total_logs }}</div>
+                </div>
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; min-width: 150px;">
+                    <h3 style="margin: 0 0 5px 0; color: #333;">Bugünkü Loglar</h3>
+                    <div style="font-size: 24px; font-weight: bold; color: #28a745;">{{ stats.today_logs }}</div>
+                </div>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; min-width: 150px;">
+                    <h3 style="margin: 0 0 5px 0; color: #333;">Durum Değişiklikleri</h3>
+                    <div style="font-size: 24px; font-weight: bold; color: #ffc107;">{{ stats.status_changes }}</div>
+                </div>
+                <div style="background: #d1ecf1; padding: 15px; border-radius: 5px; min-width: 150px;">
+                    <h3 style="margin: 0 0 5px 0; color: #333;">Form Oluşturma</h3>
+                    <div style="font-size: 24px; font-weight: bold; color: #17a2b8;">{{ stats.form_creates }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtreler -->
+        <div class="module filtered" style="margin-bottom: 20px;">
+            <h2>Filtreler</h2>
+            <form method="get" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: end;">
+                <div>
+                    <label for="action_type">Aksiyon Tipi:</label>
+                    <select name="action_type" id="action_type">
+                        <option value="">Tümü</option>
+                        {% for value, label in action_types %}
+                            <option value="{{ value }}" {% if request.GET.action_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="severity">Önem Derecesi:</label>
+                    <select name="severity" id="severity">
+                        <option value="">Tümü</option>
+                        {% for value, label in severity_levels %}
+                            <option value="{{ value }}" {% if request.GET.severity == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="date_from">Başlangıç Tarihi:</label>
+                    <input type="date" name="date_from" id="date_from" value="{{ request.GET.date_from }}">
+                </div>
+                <div>
+                    <label for="date_to">Bitiş Tarihi:</label>
+                    <input type="date" name="date_to" id="date_to" value="{{ request.GET.date_to }}">
+                </div>
+                <div>
+                    <input type="submit" value="Filtrele" class="default">
+                    <a href="?" class="button">Temizle</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Son Aktiviteler -->
+        <div class="module" style="margin-bottom: 20px;">
+            <h2>Son Aktiviteler</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f8f8;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Zaman</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Kullanıcı</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Aksiyon</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Başlık</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Önem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in recent_activities %}
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ activity.get_formatted_timestamp }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            {% if activity.kullanici %}
+                                {{ activity.kullanici.username }}
+                                {% if activity.kullanici.get_full_name %}
+                                    ({{ activity.kullanici.get_full_name }})
+                                {% endif %}
+                            {% else %}
+                                Sistem
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ activity.get_action_type_display }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ activity.title }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            <span style="color: {% if activity.severity == 'ERROR' %}red{% elif activity.severity == 'WARNING' %}orange{% elif activity.severity == 'SUCCESS' %}green{% else %}blue{% endif %}; font-weight: bold;">
+                                {{ activity.get_severity_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 20px; text-align: center; color: #666;">Henüz log kaydı bulunmuyor.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detaylı Log Listesi -->
+        <div class="module">
+            <h2>Detaylı Log Listesi</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f8f8;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">ID</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Zaman</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Kullanıcı</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Aksiyon</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Başlık</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Açıklama</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Önem</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ log.id }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ log.get_formatted_timestamp }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            {% if log.kullanici %}
+                                {{ log.kullanici.username }}
+                                {% if log.kullanici.get_full_name %}
+                                    ({{ log.kullanici.get_full_name }})
+                                {% endif %}
+                            {% else %}
+                                Sistem
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ log.get_action_type_display }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ log.title }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">{{ log.get_short_description }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            <span style="color: {% if log.severity == 'ERROR' %}red{% elif log.severity == 'WARNING' %}orange{% elif log.severity == 'SUCCESS' %}green{% else %}blue{% endif %}; font-weight: bold;">
+                                {{ log.get_severity_display }}
+                            </span>
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            <a href="{% url 'admin:sayfalar_systemlog_change' log.id %}" class="button">Detay</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="padding: 20px; text-align: center; color: #666;">Filtre kriterlerine uygun log bulunamadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.module {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.module h2 {
+    background: #f8f8f8;
+    margin: 0;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.module h3 {
+    margin: 0 0 5px 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.results {
+    padding: 15px;
+}
+
+table {
+    font-size: 13px;
+}
+
+th {
+    font-weight: bold;
+    text-align: left;
+}
+
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+.button:hover {
+    background: #205067;
+}
+
+.default {
+    background: #417690;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.default:hover {
+    background: #205067;
+}
+</style>
+{% endblock %}

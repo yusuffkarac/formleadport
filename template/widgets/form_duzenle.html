@@ -1,0 +1,1529 @@
+<!-- Edit Modal -->
+<div class="modal fade bd-example-modal-lg" id="kt_modal_musteri_form_duzenle"
+     tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Kundenformular bearbeiten</h2>
+        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Off">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </button>
+      </div>
+
+      <div class="modal-body py-lg-10 px-lg-10">
+        <div class="stepper stepper-pills stepper-column d-flex flex-column flex-xl-row flex-row-fluid" id="musteri_form_duzenle_stepper">
+          <!-- Steps -->
+          <div class="d-flex justify-content-center justify-content-xl-start flex-row-auto w-100 w-xl-300px">
+            <div class="stepper-nav ps-lg-10">
+              <div class="stepper-item current" data-step="1">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px"><i class="stepper-check fas fa-check"></i><span class="stepper-number">1</span></div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Grundinformationen</h3>
+                  <div class="stepper-desc">Termin und Kontakt</div>
+                </div>
+              </div>
+              <div class="stepper-item" data-step="2">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px"><i class="stepper-check fas fa-check"></i><span class="stepper-number">2</span></div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Familie & Versicherung</h3>
+                  <div class="stepper-desc">Familienstand und Versicherung</div>
+                </div>
+              </div>
+              <div class="stepper-item" data-step="3">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px"><i class="stepper-check fas fa-check"></i><span class="stepper-number">3</span></div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Bestätigen & Senden</h3>
+                  <div class="stepper-desc">Übersicht und Versand</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-row-fluid py-lg-5 px-lg-15">
+            <form class="form" id="musteri_form_duzenle" method="post" novalidate data-endpoint="">
+              {% csrf_token %}
+              <input type="hidden" id="duzenle_form_id" name="duzenle_form_id" value="">
+
+              <!-- Step 1 -->
+              <div class="step-content current" data-step-content="1">
+                <div class="row g-6">
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">Termin am</label>
+                    <input type="datetime-local" class="form-control form-control-lg form-control-solid" name="randevu_tarihi" id="randevu_tarihi_duzenle" required>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Terminart</label>
+                    <select class="form-select form-select-lg form-select-solid" name="randevu_tipi" id="randevu_tipi_duzenle">
+                      <option value="">Bitte auswählen</option>
+                      <option value="Video">Video</option>
+                      <option value="Telefon">Telefon</option>
+                      <option value="Vor Ort">Vor Ort</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">Firmenname</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="firma_adi" id="firma_adi_duzenle" required>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="form-label">Geschlecht</label>
+                    <div class="d-flex gap-3">
+                      <label class="form-check form-check-custom form-check-solid">
+                        <input class="form-check-input me-3" name="musteri_cinsiyet" id="musteri_cinsiyet_erkek" type="radio" value="Erkek">
+                        <span class="form-check-label"><strong>Herr</strong></span>
+                      </label>
+                      <label class="form-check form-check-custom form-check-solid">
+                        <input class="form-check-input me-3" name="musteri_cinsiyet" id="musteri_cinsiyet_kadin" type="radio" value="Kadın">
+                        <span class="form-check-label"><strong>Frau</strong></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Name</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="musteri_isim" id="musteri_isim_duzenle" required>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Nachname</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="musteri_soyisim" id="musteri_soyisim_duzenle" required>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Geburtsdatum</label>
+                    <input type="date" class="form-control form-control-lg form-control-solid" name="musteri_dogum_tarihi" id="musteri_dogum_tarihi_duzenle" required>
+                  </div>
+                  <div class="col-12 fv-row">
+                    <label class="required form-label">Adresse</label>
+                    <textarea class="form-control form-control-lg form-control-solid" name="adres" id="adres_duzenle" rows="2" required></textarea>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label d-flex align-items-center">Festnetz</label>
+                    <input type="tel" class="form-control form-control-lg form-control-solid" name="sabit_telefon" id="sabit_telefon_duzenle" placeholder="+49">
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">PLZ</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="posta_kodu" id="posta_kodu_duzenle" placeholder="20354" required>
+                    <input type="hidden" name="posta_kodu_id" id="posta_kodu_id_duzenle">
+                  </div>
+                  <div class="col-md-4 fv-row d-none">
+                    <label class="form-label">Stadt</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="sehir" id="sehir_duzenle" readonly>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Stadt</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="ilce" id="ilce_duzenle">
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label d-flex align-items-center">
+                      Handy
+                      <button type="button" id="btn_tel_gonder_duzenle" class="btn btn-sm btn-light-primary ms-3">Verifizieren</button>
+                    </label>
+                    <input type="tel" class="form-control form-control-lg form-control-solid" name="telefon" id="telefon_duzenle" placeholder="+49">
+                    <div id="tel_kod_wrap_duzenle" class="mt-3 d-none">
+                      <label class="form-label">Handy-Bestätigungscode</label>
+                      <div class="d-flex gap-3">
+                        <input type="text" class="form-control form-control-lg form-control-solid" id="telefon_kod_duzenle" placeholder="XXXXXX">
+                        <button type="button" id="btn_tel_kod_dogrula_duzenle" class="btn btn-primary">Code bestätigen</button>
+                      </div>
+                      <div id="tel_error_duzenle" class="text-danger small mt-2"></div>
+                    </div>
+                    <input type="hidden" name="telefon_onayli_mi" id="telefon_onayli_mi_duzenle" value="false">
+                  </div>
+                  <div class="col-md-6 {% if firma.email_dogrulama == False %}mt-5 pt-6 fv-row{% endif %}">
+                    <label class="form-label d-flex align-items-center">
+                      E-Mail
+                      <button type="button" id="btn_mail_gonder_duzenle" class="btn btn-sm btn-light-primary ms-3 {% if firma.email_dogrulama == False %}d-none{% endif %}">Verifizieren</button>
+                    </label>
+                    <input type="email" class="form-control form-control-lg form-control-solid" name="email" id="email_duzenle" placeholder="beispiel@mail.com">
+                    <div id="mail_kod_wrap_duzenle" class="mt-3 d-none">
+                      <label class="form-label">E-Mail-Bestätigungscode</label>
+                      <div class="d-flex gap-3">
+                        <input type="text" class="form-control form-control-lg form-control-solid" id="email_kod_duzenle" placeholder="XXXXXX">
+                        <button type="button" id="btn_mail_kod_dogrula_duzenle" class="btn btn-primary">Code bestätigen</button>
+                      </div>
+                      <div id="mail_error_duzenle" class="text-danger small mt-2"></div>
+                    </div>
+                    <input type="hidden" name="email_onayli_mi" id="email_onayli_mi_duzenle" value="false">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="step-content" data-step-content="2">
+                <div class="row g-6">
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Familienstand</label>
+                    <select class="form-select form-select-lg form-select-solid" name="medeni_durum" id="medeni_durum_duzenle">
+                      <option value="Bekar">Ledig</option>
+                      <option value="Evli">Verheiratet</option>
+                      <option value="Boşanmış">Geschieden</option>
+                      <option value="Dul">Verwitwet</option>
+                      <option value="Kayıtlı Ortaklık">Eingetragene Partnerschaft</option>
+                      <option value="Diğer">Andere</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Anzahl der Kinder</label>
+                    <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="aile_cocuk_sayisi" id="aile_cocuk_sayisi_duzenle" placeholder="0">
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Beschäftigungsstatus</label>
+                    <select class="form-select form-select-lg form-select-solid" name="calisma_durumu" id="calisma_durumu_duzenle">
+                      <option value="">Bitte wählen</option>
+                      <option value="Arbeitnehmer">Arbeitnehmer</option>
+                      <option value="Selbstständig">Selbstständig</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Versicherungsart</label>
+                    <select class="form-select form-select-lg form-select-solid" name="sigorta" id="sigorta_duzenle">
+                      <option value="">Bitte wählen</option>
+                      <option value="Özel">Privat</option>
+                      <option value="Yasal">Gesetzlich</option>
+                      <option value="Sigorta Yok">Nicht Versichert</option>
+                    </select>
+                  </div>
+
+                  <!-- Versicherungsgesellschaft: Picker (oluştur modalindeki gibi) -->
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label d-block mb-2">Versicherungsgesellschaft</label>
+                    <!-- Gizli gerçek alan (FK id) -->
+                    <input type="hidden" name="sigorta_sirket" id="sigorta_sirket_duzenle">
+                    <!-- Satır: Sol geniş seçim butonu + sağ temizle -->
+                    <div class="d-flex align-items-stretch gap-2">
+                      <!-- Seçim butonu -->
+                      <button type="button"
+                              class="btn btn-light border w-100 d-flex align-items-center gap-2 text-start sigorta-picker-btn"
+                              id="btn_sigorta_sec_duzenle">
+                        <!-- LOGO: BAŞLANGIÇTA GİZLİ -->
+                        <span id="sigorta_logo_wrap_duzenle" class="sigorta-logo-wrap d-none">
+                          <img id="sigorta_btn_logo_duzenle" src="" alt="" class="sigorta-logo">
+                        </span>
+                        <span id="sigorta_btn_label_duzenle" class="text-truncate">Gesellschaft auswählen</span>
+                      </button>
+                      <!-- Temizle -->
+                      <button type="button" id="btn_sigorta_temizle_duzenle" class="btn btn-light-danger d-none" title="Auswahl löschen">✕</button>
+                    </div>
+
+                    <!-- Modal: Şirket ızgarası -->
+                    <div class="modal fade" id="modal_sigorta_picker_duzenle" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Versicherungsgesellschaft wählen</h5>
+                            <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Kapat">
+                              <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <div class="mb-4">
+                              <input type="text" class="form-control" id="sigorta_search_duzenle" placeholder="Suchen... (Name)">
+                            </div>
+                            <div id="sigorta_grid_duzenle" class="row g-4"><!-- kartlar --></div>
+                            <div id="sigorta_empty_duzenle" class="text-muted text-center py-6 d-none">Keine Ergebnisse gefunden.</div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Seit wann</label>
+                    <input type="date" class="form-control form-control-lg form-control-solid" name="sigorta_baslangic_tarihi" id="sigorta_baslangic_tarihi_duzenle">
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label text-nowrap">Beitrag (für Alle Mit/Versicherten)</label>
+                    <input type="number" step="0.01" class="form-control form-control-lg form-control-solid" name="sigorta_katki_payi" id="sigorta_katki_payi_duzenle">
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label text-nowrap">Tarif</label>
+                    <select class="form-select form-select-lg form-select-solid" name="sigorta_tarife_vadesi" id="sigorta_tarife_vadesi_duzenle">
+                      <option value="">Bitte zuerst eine Gesellschaft wählen</option>
+                    </select>
+                    <div class="form-text">Die verfügbaren Tarife hängen von der gewählten Gesellschaft ab.</div>
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Selbstbeteiligung</label>
+                    <input type="number" step="0.01" class="form-control form-control-lg form-control-solid" name="sigorta_katilim_payi" id="sigorta_katilim_payi_duzenle">
+                  </div>
+                  <!-- Ehepartner & Kinder - nur sichtbar bei Familienstand "Bekar" oder "Diğer" -->
+                  <div class="col-md-6 fv-row ehepartner-fields d-none" id="ehepartner_fields_duzenle">
+                    <label class="form-label">Versicherungsstatus des Ehepartners</label>
+                    <select class="form-select form-select-lg form-select-solid" name="es_cocuk_sigorta" id="es_cocuk_sigorta_duzenle">
+                      <option value="Özel/Ortak Sigortalı">Privat/mitversichert</option>
+                      <option value="Yasal/Ortak Sigortalı">Gesetzlich/mitversichert</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 fv-row ehepartner-fields d-none" id="ehepartner_alter_duzenle">
+                    <label class="form-label">Alter: Partner</label>
+                    <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="es_yasi" id="es_yasi_duzenle">
+                  </div>
+                  <div class="col-12 ehepartner-fields d-none">
+                    <label class="form-label">Kinderalter</label>
+                    <div id="cocuk_listesi_duzenle" class="d-flex flex-column gap-3"></div>
+                    <button type="button" id="btn_cocuk_ekle_duzenle" class="btn btn-light-primary mt-3">Kind hinzufügen</button>
+                  </div>
+                  <div class="col-md-12 fv-row">
+                    <label class="form-label">Zusätzliche Versicherungsnotiz</label>
+                    <textarea class="form-control form-control-lg form-control-solid" name="sigorta_ek_yazi" id="sigorta_ek_yazi_duzenle" rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- Step 3 -->
+              <div class="step-content" data-step-content="3">
+                <div class="mb-6">
+                  <label class="form-label">Benutzernotiz</label>
+                  <div class="mb-3 p-3 border rounded bg-light">
+                    <ul class="mb-0">
+                      <li>Versicherten (auch Partner + Kinder!) – Größe + Gewicht</li>
+                      <li>Gesundheitszustand ambulant: Letzte 3 Jahre (Diagnosen / Chronisches / Medis)</li>
+                      <li>Gesundheitszustand Krankenhaus: Letzten 5 Jahren (Diagnosen / Chronisches)</li>
+                      <li>Besondere Wünsche? (günstigerer Beitrag / bessere Absicherung etc.)</li>
+                    </ul>
+                  </div>
+                  <textarea class="form-control form-control-lg form-control-solid" name="paylasim_notu" id="paylasim_notu_duzenle" rows="3" placeholder="Deine eigene Notiz zu diesem Formular..."></textarea>
+                </div>
+                <div id="ozet_alani_duzenle" class="border rounded p-4 bg-light"></div>
+              </div>
+
+              <!-- inline submit error -->
+              <div id="submit_error_duzenle" class="text-danger small mt-4 d-none"></div>
+
+              <div class="d-flex flex-stack pt-10">
+                <div class="me-2">
+                  <button type="button" class="btn btn-lg btn-light-primary me-3" data-stepper-action="previous">Zurück</button>
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-lg btn-primary d-none" data-stepper-action="submit">
+                    <span class="indicator-label">Aktualisieren</span>
+                    <span class="indicator-progress d-none">Bitte warten...
+                      <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                  </button>
+                  <button type="button" class="btn btn-lg btn-primary" data-stepper-action="next">Weiter</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById('kt_modal_musteri_form_duzenle');
+  if(!modal) return;
+
+  // -------- Mini $ helper (modal scope)
+  const $ = (sel) => modal.querySelector(sel);
+
+  // -------- CSRF
+  function getCookie(name){
+    const v = `; ${document.cookie}`;
+    const p = v.split(`; ${name}=`);
+    if (p.length === 2) return p.pop().split(';').shift();
+  }
+  const CSRF = getCookie('csrftoken') || (document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '');
+
+  // -------- Stepper (modal içi)
+  const stepper = $('#musteri_form_duzenle_stepper');
+  const nextBtn = stepper?.querySelector('[data-stepper-action="next"]');
+  const prevBtn = stepper?.querySelector('[data-stepper-action="previous"]');
+  const submitBtn = stepper?.querySelector('[data-stepper-action="submit"]');
+  const submitErr = $('#submit_error_duzenle');
+  const form = $('#musteri_form_duzenle');
+  let currentStep = 1, totalSteps = 3;
+
+  function setStep(s){
+    currentStep = s;
+    stepper.querySelectorAll('.stepper-item').forEach(i=>{
+      const x = parseInt(i.getAttribute('data-step'));
+      i.classList.toggle('completed', x < currentStep);
+      i.classList.toggle('current', x === currentStep);
+    });
+    stepper.querySelectorAll('.step-content').forEach(c=>{
+      c.classList.toggle('current', parseInt(c.getAttribute('data-step-content')) === currentStep);
+    });
+    if(prevBtn) prevBtn.disabled = (currentStep === 1);
+    if(currentStep === totalSteps){ nextBtn?.classList.add('d-none'); submitBtn?.classList.remove('d-none'); buildSummary(); }
+    else { nextBtn?.classList.remove('d-none'); submitBtn?.classList.add('d-none'); }
+  }
+
+  function validateStep(s){
+    const cur = stepper?.querySelector('[data-step-content="'+s+'"]');
+    if(!cur) return true;
+    let ok = true;
+    cur.querySelectorAll('input,select,textarea').forEach(el=>{
+      const val = (el.value||'').trim();
+      let invalid = el.hasAttribute('required') && !val;
+      if(!invalid && el.type==='email' && val){
+        invalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      }
+      if(invalid){ el.classList.add('is-invalid'); ok=false; } else { el.classList.remove('is-invalid'); }
+    });
+    return ok;
+  }
+
+  // === Erişilebilir stepper gezinme ===
+  const nav = stepper.querySelector('.stepper-nav');
+  stepper.querySelectorAll('.stepper-item').forEach(item => {
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-label', `Schritt ${item.getAttribute('data-step')}`);
+  });
+  function jumpToStep(targetStep){
+    if (targetStep === currentStep) return;
+    if (targetStep < currentStep){ setStep(targetStep); return; }
+    for (let s = currentStep; s < targetStep; s++){
+      if (!validateStep(s)) { setStep(s); return; }
+    }
+    setStep(targetStep);
+  }
+  nav.addEventListener('click', (e) => {
+    const item = e.target.closest('.stepper-item'); if (!item) return;
+    const stepNum = parseInt(item.getAttribute('data-step')); if (!Number.isInteger(stepNum)) return;
+    jumpToStep(stepNum);
+  });
+  nav.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const item = e.target.closest('.stepper-item'); if (!item) return;
+    e.preventDefault();
+    const stepNum = parseInt(item.getAttribute('data-step')); if (!Number.isInteger(stepNum)) return;
+    jumpToStep(stepNum);
+  });
+
+  nextBtn?.addEventListener('click', ()=>{ if(!validateStep(currentStep)) return; if(currentStep<totalSteps) setStep(currentStep+1); });
+  prevBtn?.addEventListener('click', ()=>{ if(currentStep>1) setStep(currentStep-1); });
+
+  // -------- Helpers
+  function toLocalInput(dtISO){
+    if(!dtISO) return '';
+    const d = new Date(dtISO);
+    if (isNaN(d.getTime())) return (dtISO+'').slice(0,16);
+    const pad = (n)=> String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function setVerifyUI({btn, wrap, hidden, verified}){
+    if(!btn) return;
+    if(verified){
+      btn.textContent = 'Verifiziert';
+      btn.disabled = true;
+      btn.classList.remove('btn-light-primary');
+      btn.classList.add('btn-success');
+      wrap?.classList.add('d-none');
+      if(hidden) hidden.value = 'true';
+    }else{
+      btn.textContent = 'Verifizieren';
+      btn.disabled = false;
+      btn.classList.remove('btn-success');
+      btn.classList.add('btn-light-primary');
+      if(hidden) hidden.value = 'false';
+    }
+  }
+  function escapeHTML(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function buildSummaryDuzenle() {
+    const o = document.getElementById('ozet_alani_duzenle');
+    if (!o) return;
+
+    // Modal içindeki formu önceliklendir; yoksa ana form
+    const modalEl = o.closest('.modal');
+    const formEl = (modalEl && modalEl.querySelector('form')) || document.getElementById('musteri_form');
+    if (!formEl) return;
+
+    const fd = new FormData(formEl);
+
+    // ---------- Helpers ----------
+    const jq = window.jQuery;
+    const pad = n => String(n).padStart(2, '0');
+    const deWeekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+
+    function escapeHTML(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
+    }
+
+    function getVal(selector, fallbackName=null) {
+      if (jq && jq(selector).length) return jq(selector).val() || '';
+      const el = (modalEl || document).querySelector(selector) ||
+                (fallbackName ? formEl.querySelector(`[name="${fallbackName}"]`) : null);
+      return (el && 'value' in el) ? (el.value || '') : '';
+    }
+
+    function formatDeDateTime(val) {
+      if (!val) return '—';
+      let d = new Date(val);
+      if (isNaN(d)) {
+        const [datePart, timePart] = String(val).split('T');
+        const [Y,M,D] = (datePart||'').split('-').map(Number);
+        const [h,m]   = (timePart||'').split(':').map(Number);
+        d = new Date(Y || 0, (M||1)-1, D || 1, h || 0, m || 0);
+      }
+      if (isNaN(d)) return escapeHTML(val);
+      return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${deWeekdays[d.getDay()]} - ${pad(d.getHours())}:${pad(d.getMinutes())} Uhr`;
+    }
+
+    function formatDeDate(val) {
+      if (!val) return '—';
+      const [Y,M,D] = String(val).split('-').map(Number);
+      if (!Y || !M || !D) return escapeHTML(val);
+      return `${pad(D)}.${pad(M)}.${Y}`;
+    }
+
+    function formatEUR(val) {
+      if (val == null || val === '') return '—';
+      const num = Number(String(val).replace(/\./g,'').replace(',', '.'));
+      if (isNaN(num)) return escapeHTML(val);
+      const parts = num.toFixed(2).split('.');
+      const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      const decPart = parts[1];
+      return `${intPart},${decPart}`;
+    }
+
+    function yn(b) { return (String(b).toLowerCase() === 'true' || b === true || b === '1') ? 'Ja' : 'Nein'; }
+
+    // "Stuttgart-Ost" -> "Stuttgart"
+    function firstWord(str) {
+      if (!str) return '';
+      const m = String(str).trim().match(/^[^\s/-]+/u);
+      return m ? m[0] : String(str).trim();
+    }
+
+    // ---------- STEP 1 (Form etiketleriyle) ----------
+    const randevu = formatDeDateTime(fd.get('randevu_tarihi') || '');
+    const firma   = fd.get('firma_adi') || '';
+    const isim    = fd.get('musteri_isim') || '';
+    const soyisim = fd.get('musteri_soyisim') || '';
+    const dtraw   = fd.get('musteri_dogum_tarihi') || '';
+    const geburts = dtraw ? formatDeDate(dtraw) : '—';
+
+    // Adres — TEK SATIR: "PLZ Adres, Ort / StadtFirstWord"
+    const adresRaw = (fd.get('adres') || '').trim();
+    const plz      = (fd.get('posta_kodu') || '').trim();
+    const ortRaw   = (getVal('#sehir_duzenle','#sehir') || getVal('#sehir','sehir') || '').trim();
+    const stadtRaw = (getVal('#ilce_duzenle','#ilce') || getVal('#ilce','ilce') || '').trim();
+    const stadtFW  = firstWord(stadtRaw);
+
+    const leftAddr = [plz, adresRaw].filter(Boolean).join(' ').trim();
+    let rightAddr  = '';
+    if (ortRaw && stadtFW) rightAddr = `${ortRaw} / ${stadtFW}`;
+    else if (ortRaw)       rightAddr = ortRaw;
+    else if (stadtFW)      rightAddr = stadtFW;
+
+    const adresInline = [leftAddr, rightAddr].filter(Boolean).join(', ') || '—';
+
+    const tel    = (fd.get('telefon') || '').trim();
+    const telOk  = yn(fd.get('telefon_onayli_mi'));
+    const email  = (fd.get('email') || '').trim();
+    const mailOk = yn(fd.get('email_onayli_mi'));
+
+    // ---------- STEP 2 ----------
+    const medeniMap = { 'Bekar':'Ledig','Evli':'Verheiratet','Boşanmış':'Geschieden','Dul':'Verwitwet','Kayıtlı Ortaklık':'Eingetragene Partnerschaft','Diğer':'Andere' };
+    const medeniDE  = medeniMap[fd.get('medeni_durum')] || fd.get('medeni_durum') || '—';
+
+    const cocukSayisiRaw = fd.get('aile_cocuk_sayisi');
+    const cocukSayisi    = (cocukSayisiRaw === null || cocukSayisiRaw === undefined || cocukSayisiRaw === '') ? '0' : String(cocukSayisiRaw);
+
+    const sigMap  = { 'Özel':'Privat', 'Yasal':'Gesetzlich', 'Sigorta Yok':'Nicht Versichert' };
+    const sigDE   = sigMap[fd.get('sigorta')] || fd.get('sigorta') || '—';
+
+    const DEFAULT_LABEL = 'Gesellschaft auswählen';
+    const compLabelEl   = (modalEl || document).querySelector('#sigorta_btn_label_duzenle') ||
+                          document.getElementById('sigorta_btn_label');
+    const sirketRaw     = ((compLabelEl && compLabelEl.textContent) ? compLabelEl.textContent : '').trim();
+    const sirketText    = (sirketRaw && sirketRaw !== DEFAULT_LABEL) ? sirketRaw : '';
+
+    const sigBas    = formatDeDate(fd.get('sigorta_baslangic_tarihi') || '');
+    const sigKatki  = formatEUR(fd.get('sigorta_katki_payi'));
+    const sigVadeRaw = fd.get('sigorta_tarife_vadesi') || '';
+    const sigVade = sigVadeRaw ? (getVal('#sigorta_tarife_vadesi_duzenle') || sigVadeRaw) : '—';
+    const sigKatilim= formatEUR(fd.get('sigorta_katilim_payi'));
+    const sigEkYazi = (fd.get('sigorta_ek_yazi') || '').trim();
+
+    // ---------- STEP 3 ----------
+    const esMap        = { 'Özel/Ortak Sigortalı':'Privat/mitversichert', 'Yasal/Ortak Sigortalı':'Gesetzlich/mitversichert' };
+    const esSigortaDE  = esMap[fd.get('es_cocuk_sigorta')] || fd.get('es_cocuk_sigorta') || '—';
+    const esYasiRaw    = fd.get('es_yasi');
+    const esYasi       = (esYasiRaw === null || esYasiRaw === undefined || esYasiRaw === '') ? '—' : String(esYasiRaw);
+
+    const agesInputs   = (modalEl || document).querySelectorAll('input[name="cocuk_yasi[]"]');
+    const cocukYaslari = [...agesInputs].map(i => (i.value||'').trim()).filter(Boolean).join(', ') || '—';
+
+    // ---------- STEP 4 ----------
+    const newNoteValEl = (modalEl || document).querySelector('#duzenle_yeni_not');
+    const bigNoteValEl = (modalEl || document).querySelector('#paylasim_notu_duzenle') || document.getElementById('paylasim_notu');
+    const newNoteVal   = (newNoteValEl ? newNoteValEl.value : '')?.trim();
+    const bigNoteVal   = (bigNoteValEl ? bigNoteValEl.value : '')?.trim();
+    const paylasimNotu = newNoteVal || bigNoteVal || '';
+
+    // ---------- RENDER (Bölüm başlıkları eklendi) ----------
+    const sections = [];
+    const CINSIYET_TR2DE = { 'Erkek': 'Herr', 'Kadın': 'Frau' };
+    const cinsiyetVal   = (fd.get('musteri_cinsiyet') || '').trim();
+    const cinsiyetLabel = CINSIYET_TR2DE[cinsiyetVal] || '—';
+    
+    // Eksik değişkenleri tanımla
+    const aileAktif = '—'; // AN (Aktif) durumu - form alanı yok
+    const aileS = '—'; // S (Sigortalı) durumu - form alanı yok
+
+    // Kundenübersicht
+    sections.push(`
+      <div class="mb-4">
+        <div class="fw-semibold text-muted mb-2">Kundenübersicht</div>
+        <ul class="mb-0">
+          <li><strong>Termin am:</strong> ${escapeHTML(randevu)}</li>
+          <li><strong>Firmenname:</strong> ${escapeHTML(firma || '—')}</li>
+          <li><strong>Geschlecht:</strong> ${escapeHTML(cinsiyetLabel)}</li>
+          <li><strong>Name:</strong> ${escapeHTML(isim || '—')}</li>
+          <li><strong>Nachname:</strong> ${escapeHTML(soyisim || '—')}</li>
+          <li><strong>Geburtsdatum:</strong> ${escapeHTML(geburts)}</li>
+          <li><strong>Adresse:</strong> ${escapeHTML(adresInline)}</li>
+          <li><strong>Handy:</strong> ${escapeHTML(tel || '—')} ${tel ? (telOk==='Ja'?'(Bestätigt)':'(Nicht bestätigt)') : ''}</li>
+          <li><strong>E-Mail:</strong> ${escapeHTML(email || '—')} ${email ? (mailOk==='Ja'?'(Bestätigt)':'(Nicht bestätigt)') : ''}</li>
+        </ul>
+      </div>
+    `);
+
+    // Familienstand & Versicherung
+    sections.push(`
+      <div class="mb-4">
+        <div class="fw-semibold text-muted mb-2">Familienstand & Versicherung</div>
+        <ul class="mb-0">
+          <li><strong>Familienstand:</strong> ${escapeHTML(medeniDE)}</li>
+          <li><strong>Anzahl der Kinder:</strong> ${escapeHTML(cocukSayisi)}</li>
+          <li><strong>Beschäftigungsstatus:</strong> ${escapeHTML(fd.get('calisma_durumu') || '—')}</li>
+          <li><strong>Status: AN:</strong> ${escapeHTML(aileAktif)}</li>
+          <li><strong>S:</strong> ${escapeHTML(aileS)}</li>
+          <li><strong>Versicherungsart:</strong> ${escapeHTML(sigDE)}</li>
+          <li><strong>Versicherungsgesellschaft:</strong> ${escapeHTML(sirketText || '—')}</li>
+          <li><strong>Seit wann:</strong> ${escapeHTML(sigBas)}</li>
+          <li><strong>Beitrag (für Alle Mit/Versicherten):</strong> ${sigKatki !== '—' ? `${sigKatki} €` : '—'}</li>
+          <li><strong>Tarif:</strong> ${escapeHTML(sigVade)}</li>
+          <li><strong>Selbstbeteiligung:</strong> ${sigKatilim !== '—' ? `${sigKatilim} €` : '—'}</li>
+          <li><strong>Zusätzliche Versicherungsnotiz:</strong> ${sigEkYazi ? escapeHTML(sigEkYazi) : '—'}</li>
+        </ul>
+      </div>
+    `);
+
+    // Ehepartner & Kinder
+    sections.push(`
+      <div class="mb-4">
+        <div class="fw-semibold text-muted mb-2">Ehepartner & Kinder</div>
+        <ul class="mb-0">
+          <li><strong>Versicherungsstatus des Ehepartners:</strong> ${escapeHTML(esSigortaDE)}</li>
+          <li><strong>Alter des Ehepartners:</strong> ${escapeHTML(esYasi)}</li>
+          <li><strong>Kinderalter:</strong> ${escapeHTML(cocukYaslari)}</li>
+        </ul>
+      </div>
+    `);
+
+    // Benutzernotiz
+    sections.push(`
+      <div class="mb-0">
+        <div class="fw-semibold text-muted mb-2">Benutzernotiz</div>
+        <div>${paylasimNotu ? escapeHTML(paylasimNotu) : '—'}</div>
+      </div>
+    `);
+
+    o.innerHTML = sections.join('\n');
+  }
+
+  // Modal içi değişimleri dinle ve özet alanını güncelle
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    const modal = target.closest('.modal');
+    const ozet  = document.getElementById('ozet_alani_duzenle');
+    if (ozet && modal && modal.contains(target)) buildSummaryDuzenle();
+  });
+  document.addEventListener('input', (e) => {
+    const target = e.target;
+    const modal = target.closest('.modal');
+    const ozet  = document.getElementById('ozet_alani_duzenle');
+    if (ozet && modal && modal.contains(target)) buildSummaryDuzenle();
+  });
+
+  // Modal açıldığında ilk dolum (Bootstrap)
+  document.addEventListener('shown.bs.modal', (e) => {
+    const ozet = document.getElementById('ozet_alani_duzenle');
+    if (ozet && ozet.closest('.modal') === e.target) buildSummaryDuzenle();
+  });
+
+  // Sayfa ilk yüklemede modal açık olabilir; bir kere çalıştır
+  window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('ozet_alani_duzenle')) buildSummaryDuzenle();
+  });
+
+  // Dışarıdan tetiklemek için
+  window.buildSummaryDuzenle = buildSummaryDuzenle;
+
+  // Olay bağlayıcıları (modal içindeki değişimleri yakalayalım)
+  document.addEventListener('change', (e) => {
+    const wrap = document.getElementById('ozet_alani_duzenle');
+    if (wrap && wrap.closest('.modal')?.contains(e.target)) buildSummary();
+  });
+  document.addEventListener('input', (e) => {
+    const wrap = document.getElementById('ozet_alani_duzenle');
+    if (wrap && wrap.closest('.modal')?.contains(e.target)) buildSummary();
+  });
+
+  document.addEventListener('change', (e) => {
+    const wrap = document.getElementById('ozet_alani_duzenle');
+    if (wrap && wrap.closest('.modal')?.contains(e.target)) buildSummary();
+  });
+  document.addEventListener('input', (e) => {
+    const wrap = document.getElementById('ozet_alani_duzenle');
+    if (wrap && wrap.closest('.modal')?.contains(e.target)) buildSummary();
+  });
+
+  // -------- Notlar: UI ekle + fetch + post
+  function ensureNotesUI(){
+    const step4 = stepper?.querySelector('[data-step-content="4"]');
+    if (!step4) return;
+
+    // Not listesi kapsayıcı (yoksa oluştur)
+    if (!$('#duzenle_notlar_wrap')) {
+      const wrap = document.createElement('div');
+      wrap.id = 'duzenle_notlar_wrap';
+      wrap.className = 'mt-6';
+      wrap.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-semibold">Notlar</div>
+          <div id="duzenle_notlar_meta" class="text-muted small">—</div>
+        </div>
+        <ul id="duzenle_notlar_list" class="list-unstyled m-0 p-0"></ul>
+        <style>
+          #duzenle_notlar_list .note-item{display:flex;gap:.75rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px dashed var(--bs-border-color);}
+          #duzenle_notlar_list .note-item:last-child{border-bottom:0;}
+          #duzenle_notlar_list .dot{flex:0 0 .5rem;height:.5rem;border-radius:999px;margin-top:.5rem;opacity:.6;background:var(--bs-primary);}
+          #duzenle_notlar_list .meta{display:flex;gap:.5rem;align-items:center;font-size:.8rem;color:var(--bs-secondary-color);}
+          #duzenle_notlar_list .user{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50%;}
+          #duzenle_notlar_list .time{font-variant-numeric:tabular-nums;white-space:nowrap;}
+          #duzenle_notlar_list .text{margin-top:.125rem;word-break:break-word;}
+        </style>
+      `;
+      const summary = $('#ozet_alani_duzenle');
+      (summary ? summary.parentNode.insertBefore(wrap, summary) : step4.appendChild(wrap));
+    }
+
+    // Yeni not alanı (yoksa oluştur)
+    if (!$('#duzenle_yeni_not_wrap')) {
+      const addWrap = document.createElement('div');
+      addWrap.id = 'duzenle_yeni_not_wrap';
+      addWrap.className = 'mt-4';
+      addWrap.innerHTML = `
+        <label class="form-label">Neuen Notiz hinzufügen</label>
+        <div class="d-flex gap-3">
+          <input type="text" class="form-control form-control-lg form-control-solid" id="duzenle_yeni_not" placeholder="Ihre Notiz...">
+          <button type="button" class="btn btn-light-primary" id="duzenle_not_kaydet">Speichern</button>
+        </div>
+        <div class="small mt-2" id="duzenle_not_feedback"></div>
+      `;
+      const summary = $('#ozet_alani_duzenle');
+      (summary ? summary.parentNode.insertBefore(addWrap, summary) : step4.appendChild(addWrap));
+
+      // Kaydet butonu
+      $('#duzenle_not_kaydet')?.addEventListener('click', async ()=>{
+        const note = ($('#duzenle_yeni_not')?.value || '').trim();
+        const fb = $('#duzenle_not_feedback');
+        if(!note){ if(fb){ fb.className='small mt-2 text-danger'; fb.textContent='Bitte geben Sie eine Notiz ein.'; } return; }
+        const formId = form?.getAttribute('data-endpoint')?.match(/\/(\d+)\/?$/)?.[1];
+        if(!formId){ if(fb){ fb.className='small mt-2 text-danger'; fb.textContent='Form-ID fehlt.'; } return; }
+
+        try{
+          const ok = await postNote(formId, note);
+          if(ok){
+            if(fb){ fb.className='small mt-2 text-success'; fb.textContent='Notiz wurde gespeichert.'; }
+            $('#duzenle_yeni_not').value = '';
+            await fetchAndRenderNotes(formId); // listeyi tazele
+            buildSummary(); // özet güncelle
+          }else{
+            if(fb){ fb.className='small mt-2 text-danger'; fb.textContent='Notiz konnte nicht gespeichert werden.'; }
+          }
+        }catch(_e){
+          if(fb){ fb.className='small mt-2 text-danger'; fb.textContent='Verbindungsfehler beim Speichern.'; }
+        }
+      });
+    }
+  }
+
+  async function tryFetchJSON(url){
+    const r = await fetch(url, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+    if(!r.ok) return null;
+    try{ return await r.json(); }catch(_){ return null; }
+  }
+
+  async function fetchNotes(formId){
+    const urls = [
+      `/ajax/forms/musteri/${formId}/notlar/`,
+      `/ajax/forms/musteri/${formId}/notes/`,
+    ];
+    for (const u of urls){
+      const d = await tryFetchJSON(u);
+      if (d && (Array.isArray(d.notlar) || Array.isArray(d.notes) || Array.isArray(d.items))) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  async function postNote(formId, content){
+    const payload = { icerik: content, content };
+    const headers = {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF};
+    const urls = [
+      `/ajax/forms/musteri/${formId}/notlar/`,
+      `/ajax/forms/musteri/${formId}/notes/`,
+    ];
+    for (const u of urls){
+      try{
+        const r = await fetch(u, {method:'POST', headers, body: JSON.stringify(payload)});
+        if (r.ok) return true;
+      }catch(_){}
+    }
+    return false;
+  }
+
+  function renderNotes(d){
+    const list = $('#duzenle_notlar_list');
+    const meta = $('#duzenle_notlar_meta');
+    if(!list || !meta) return;
+
+    const items = (Array.isArray(d?.notlar) && d.notlar)
+               || (Array.isArray(d?.notes) && d.notes)
+               || (Array.isArray(d?.items) && d.items)
+               || [];
+
+    const n = items.length;
+    meta.textContent = n ? `${n} ${n===1?'Notiz':'Notizen'}` : '—';
+
+    if(!n){
+      list.innerHTML = '<li class="text-muted">Keine Einträge gefunden.</li>';
+      return;
+    }
+
+    list.innerHTML = items.map(x=>{
+      const k = escapeHTML(x.kullanici || x.user || '—');
+      const t = escapeHTML(x.tarih_human || x.updated_human || x.created_human || '—');
+      const i = escapeHTML(x.icerik || x.content || x.text || '');
+      return `
+        <li class="note-item">
+          <span class="dot"></span>
+          <div class="content">
+            <div class="meta"><span class="user">${k}</span><span>•</span><span class="time">${t}</span></div>
+            ${i ? `<div class="text">${i}</div>` : ``}
+          </div>
+        </li>`;
+    }).join('');
+  }
+
+  async function fetchAndRenderNotes(formId){
+    const d = await fetchNotes(formId);
+    if (d) renderNotes(d);
+    else {
+      const meta = $('#duzenle_notlar_meta');
+      if (meta) meta.textContent = '—';
+    }
+  }
+
+  // -------- Sigorta Şirketi Picker (EDIT)
+  const pickerBtn     = $('#btn_sigorta_sec_duzenle');
+  const pickerModal   = $('#modal_sigorta_picker_duzenle');
+  const grid          = $('#sigorta_grid_duzenle');
+  const emptyHint     = $('#sigorta_empty_duzenle');
+  const searchInput   = $('#sigorta_search_duzenle');
+
+  const inputHidden   = $('#sigorta_sirket_duzenle'); // FK id
+  const btnLabel      = $('#sigorta_btn_label_duzenle');
+  const btnLogo       = $('#sigorta_btn_logo_duzenle');
+  const logoWrap      = $('#sigorta_logo_wrap_duzenle');
+  const btnClear      = $('#btn_sigorta_temizle_duzenle');
+  const DEFAULT_LABEL = 'Gesellschaft auswählen';
+  const sigortaSelect = document.getElementById('sigorta_duzenle');
+
+  let allCompanies = [];
+  let bsModalInstance = null;
+
+  function ensureBsModal(){
+    if (!bsModalInstance && window.bootstrap?.Modal && pickerModal) {
+      bsModalInstance = new bootstrap.Modal(pickerModal);
+    }
+  }
+
+function updatePickerBtnState() {
+  const selectedValue = sigortaSelect.value;
+  if (selectedValue === "Sigorta Yok") {
+    pickerBtn.disabled = true; // Buton tıklanamaz
+  } else {
+    pickerBtn.disabled = false; // Buton aktif
+  }
+}
+
+// Sayfa yüklenirken ve her seçim değiştiğinde durumu güncelle
+sigortaSelect.addEventListener('change', updatePickerBtnState);
+
+
+  async function loadCompanies(){
+    try{
+      // Seçilen sigorta türünü al
+      const sigortaType = document.getElementById('sigorta_duzenle'); // id düzeltilmeli
+      const typ = sigortaType ? sigortaType.value : '';
+
+      
+      // URL parametresi olarak gönder
+      const url = typ ? `/ajax/sigorta-sirketleri/?typ=${encodeURIComponent(typ)}` : '/ajax/sigorta-sirketleri/';
+      console.log('İstek URL:', url);
+      const r = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const d = await r.json();
+      if (d?.ok && Array.isArray(d.items)) {
+        allCompanies = d.items;
+        renderGrid(allCompanies);
+      } else {
+        allCompanies = [];
+        renderGrid(allCompanies);
+      }
+    }catch(e){
+      allCompanies = [];
+      renderGrid(allCompanies);
+    }
+  }
+
+  function escapeHtml(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function renderGrid(list){
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (!list.length){ emptyHint?.classList.remove('d-none'); return; }
+    emptyHint?.classList.add('d-none');
+
+    list.forEach(item => {
+      const col = document.createElement('div');
+      col.className = 'col-6 col-sm-4 col-md-3';
+      col.innerHTML = `
+        <button type="button" class="w-100 btn p-0 border-0 bg-transparent sigorta-card" data-id="${item.id}" data-isim="${escapeHtml(item.isim)}" data-resim="${escapeHtml(item.resim || '')}">
+          <div class="card h-100 shadow-sm hover-elevate-up">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+              <div class="rounded bg-light d-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;overflow:hidden;">
+                <img src="${item.resim || 'https://via.placeholder.com/80x80?text=%20'}" alt="${escapeHtml(item.isim)}" style="max-width:100%;max-height:100%;object-fit:contain;">
+              </div>
+              <div class="text-center fw-semibold small">${escapeHtml(item.isim)}</div>
+            </div>
+          </div>
+        </button>
+      `;
+      grid.appendChild(col);
+    });
+
+    grid.querySelectorAll('.sigorta-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id   = btn.getAttribute('data-id');
+        const isim = btn.getAttribute('data-isim');
+        const res  = btn.getAttribute('data-resim') || '';
+
+        if (inputHidden) inputHidden.value = id || '';
+
+        if (btnLabel) btnLabel.textContent = isim || DEFAULT_LABEL;
+        if (res) {
+          if (btnLogo) btnLogo.src = res;
+          logoWrap?.classList.remove('d-none');
+        } else {
+          if (btnLogo) btnLogo.src = '';
+          logoWrap?.classList.add('d-none');
+        }
+        btnClear?.classList.remove('d-none');
+
+        ensureBsModal();
+        bsModalInstance?.hide();
+        
+        // Şirket seçildiğinde tarifleri yükle
+        loadUntergesellschaftenDuzenle(id);
+        
+        buildSummary();
+      });
+    });
+  }
+
+  // Arama
+  let searchTimer = null;
+  searchInput?.addEventListener('input', ()=>{
+    clearTimeout(searchTimer);
+    const q = (searchInput.value || '').toLowerCase().trim();
+    searchTimer = setTimeout(()=>{
+      if (!q) { renderGrid(allCompanies); return; }
+      const filtered = allCompanies.filter(i => (i.isim||'').toLowerCase().includes(q));
+      renderGrid(filtered);
+    }, 150);
+  });
+
+  // Aç
+  pickerBtn?.addEventListener('click', ()=>{
+    // Parent modal'ın data-form-id'sini al ve sigorta picker modal'ına geçir
+    const parentModal = pickerBtn.closest('.modal');
+    const formId = parentModal?.getAttribute('data-form-id') || parentModal?.dataset.formId;
+    if (formId && pickerModal[0]) {
+      pickerModal[0].setAttribute('data-form-id', formId);
+    }
+    
+    ensureBsModal();
+    bsModalInstance?.show();
+    
+    // Her açılışta mevcut sigorta türüne göre şirketleri yükle
+    loadCompanies();
+  });
+
+  // Temizle
+  btnClear?.addEventListener('click', ()=>{
+    if (inputHidden) inputHidden.value = '';
+    if (btnLabel) btnLabel.textContent = DEFAULT_LABEL;
+    if (btnLogo) btnLogo.src = '';
+    logoWrap?.classList.add('d-none');
+    btnClear?.classList.add('d-none');
+    
+    // Tarif select'i de temizle
+    const altSelect = document.getElementById('sigorta_tarife_vadesi_duzenle');
+    if (altSelect) {
+      altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+    }
+    
+    buildSummary();
+  });
+
+  // Sigorta türü değiştiğinde şirketleri yeniden yükle
+  const sigortaTypeSelect = document.getElementById('sigorta');
+  if (sigortaTypeSelect) {
+    sigortaTypeSelect.addEventListener('change', () => {
+      // Gesellschaft seçimini sıfırla
+      if (inputHidden) inputHidden.value = '';
+      if (btnLabel) btnLabel.textContent = DEFAULT_LABEL;
+      if (btnLogo) btnLogo.src = '';
+      logoWrap?.classList.add('d-none');
+      btnClear?.classList.add('d-none');
+
+      // Tarif select'i de temizle
+      const altSelect = document.getElementById('sigorta_tarife_vadesi_duzenle');
+      if (altSelect) {
+        altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+      }
+
+      // Şirketleri yeniden yükle (eğer modal açıksa veya şirketler yüklenmişse)
+      if (allCompanies.length > 0) {
+        loadCompanies();
+      }
+      
+      buildSummary();
+    });
+  }
+
+  // Dışarıdan doldurma (detaydan gelen veriyi butona yansıt)
+  window.__setSigortaPickerFromDataDuzenle = function(d){
+    const id   = d.sigorta_sirket_id || d.sigorta_sirket || '';
+    const isim = d.sigorta_sirket_ad
+              || d.sigorta_sirket_adi
+              || d.sigorta_sirket_isim
+              || d.sigorta_sirket_name
+              || '';
+    const res  = d.sigorta_sirket_logo || d.sigorta_sirket_resim || d.sigorta_sirket_logo_url || '';
+    const tarifId = d.sigorta_tarife_vadesi || '';
+
+    if (inputHidden) inputHidden.value = id || '';
+
+    if (id && isim){
+      if (btnLabel) btnLabel.textContent = isim;
+      if (res) {
+        if (btnLogo) btnLogo.src = res;
+        logoWrap?.classList.remove('d-none');
+      } else {
+        if (btnLogo) btnLogo.src = '';
+        logoWrap?.classList.add('d-none');
+      }
+      btnClear?.classList.remove('d-none');
+      
+      // Şirket seçildiğinde tarifleri yükle ve mevcut tarifi seç
+      loadUntergesellschaftenDuzenle(id, tarifId);
+    } else {
+      if (btnLabel) btnLabel.textContent = DEFAULT_LABEL;
+      if (btnLogo) btnLogo.src = '';
+      logoWrap?.classList.add('d-none');
+      btnClear?.classList.add('d-none');
+    }
+  };
+
+  // Tarif yükleme fonksiyonu (düzenle modal için)
+  async function loadUntergesellschaftenDuzenle(companyId, selectedTarifId = null) {
+    const altSelect = document.getElementById('sigorta_tarife_vadesi_duzenle');
+    if (!altSelect) return;
+    if (!companyId) {
+      altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+      return;
+    }
+    altSelect.innerHTML = '<option value="">Wird geladen…</option>';
+    try {
+      const r = await fetch("/ajax/sigorta-alt-list/?sirket_id=" + encodeURIComponent(companyId), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const d = await r.json();
+      const items = (d?.ok && Array.isArray(d.items)) ? d.items : [];
+      if (!items.length) {
+        altSelect.innerHTML = '<option value="">Kein Tarif vorhanden</option>';
+        return;
+      }
+      altSelect.innerHTML = '<option value="">Bitte Tarif auswählen</option>';
+      items.forEach(it => {
+        const opt = document.createElement('option');
+        opt.value = it.id;
+        opt.textContent = it.isim;
+        // Eğer bu tarif seçili olması gereken tarifse, selected yap
+        if (selectedTarifId && it.id == selectedTarifId) {
+          opt.selected = true;
+        }
+        altSelect.appendChild(opt);
+      });
+    } catch(e) {
+      altSelect.innerHTML = '<option value="">Fehler beim Laden</option>';
+    }
+  }
+
+  function setRadioByValue(name, value){
+    const nodes = document.querySelectorAll(`input[name="${name}"]`);
+    nodes.forEach(n => {
+      const shouldCheck = (n.value === (value || '').trim());
+      if (n.checked !== shouldCheck) {
+        n.checked = shouldCheck;
+        // Görsel/bağlı scriptler güncellensin
+        n.dispatchEvent(new Event('change', { bubbles: true }));
+        n.dispatchEvent(new Event('input',  { bubbles: true }));
+      }
+    });
+  }
+
+
+  // -------- Familienstand değişikliği dinleyicisi
+  function toggleEhepartnerFields() {
+    const medeniSelect = $('#medeni_durum_duzenle');
+    const ehepartnerFields = document.querySelectorAll('.ehepartner-fields');
+    
+    if (medeniSelect) {
+      const value = medeniSelect.value;
+      const shouldShow = value === 'Bekar' || value === 'Diğer';
+      
+      ehepartnerFields.forEach(field => {
+        if (shouldShow) {
+          field.classList.remove('d-none');
+        } else {
+          field.classList.add('d-none');
+        }
+      });
+    }
+  }
+  
+  // Medeni durum değişikliklerini dinle
+  const medeniSelect = $('#medeni_durum_duzenle');
+  if (medeniSelect) {
+    medeniSelect.addEventListener('change', toggleEhepartnerFields);
+  }
+
+  // -------- Formu veri ile doldur
+  function fillForm(d){
+    // Step 1
+    $('#randevu_tarihi_duzenle')?.setAttribute('value', toLocalInput(d.randevu_tarihi));
+    if($('#randevu_tipi_duzenle')) $('#randevu_tipi_duzenle').value = d.randevu_tipi || '';
+    $('#firma_adi_duzenle')?.setAttribute('value', d.firma_adi||'');
+    const gender = (d.musteri_cinsiyet || '').trim();
+    setRadioByValue('musteri_cinsiyet', gender);
+    $('#musteri_isim_duzenle')?.setAttribute('value', d.musteri_isim||'');
+    $('#musteri_soyisim_duzenle')?.setAttribute('value', d.musteri_soyisim||'');
+    $('#musteri_dogum_tarihi_duzenle')?.setAttribute('value', (d.musteri_dogum_tarihi||'').slice(0,10));
+    if($('#adres_duzenle')) $('#adres_duzenle').value = d.adres||'';
+
+    if($('#posta_kodu_duzenle')) $('#posta_kodu_duzenle').value = d.posta_kodu || '';
+    if($('#sabit_telefon_duzenle')) $('#sabit_telefon_duzenle').value = d.sabit_telefon || '';
+    if($('#sehir_duzenle')) $('#sehir_duzenle').value = d.sehir || '';
+    if($('#ilce_duzenle')) $('#ilce_duzenle').value = (d.sehir_for_input || d.ilce || '');
+    (function ensureHiddenPlz(){
+      let hidden = $('#posta_kodu_id_duzenle');
+      if(!hidden){
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'posta_kodu_id';
+        hidden.id   = 'posta_kodu_id_duzenle';
+        form?.appendChild(hidden);
+      }
+      hidden.value = d.posta_kodu_id || '';
+    })();
+
+    if($('#telefon_duzenle')) $('#telefon_duzenle').value = d.telefon || '';
+    if($('#telefon_onayli_mi_duzenle')) $('#telefon_onayli_mi_duzenle').value = d.telefon_onayli_mi ? 'true':'false';
+
+    if($('#email_duzenle')) $('#email_duzenle').value = d.email || '';
+    if($('#email_onayli_mi_duzenle')) $('#email_onayli_mi_duzenle').value = d.email_onayli_mi ? 'true':'false';
+
+    // Step 2
+    if($('#medeni_durum_duzenle')) $('#medeni_durum_duzenle').value = d.medeni_durum || 'Bekar';
+    if($('#aile_cocuk_sayisi_duzenle')) $('#aile_cocuk_sayisi_duzenle').value = (d.aile_cocuk_sayisi ?? '') + '';
+    if($('#calisma_durumu_duzenle')) $('#calisma_durumu_duzenle').value = d.calisma_durumu || '';
+
+    if($('#sigorta_duzenle')) $('#sigorta_duzenle').value = d.sigorta || '';
+    if($('#sigorta_ek_yazi_duzenle')) $('#sigorta_ek_yazi_duzenle').value = d.sigorta_ek_yazi || '';
+    if($('#sigorta_katki_payi_duzenle')) $('#sigorta_katki_payi_duzenle').value = d.sigorta_katki_payi || '';
+    // --- ŞİRKET PICKER (FK) ---
+    if($('#sigorta_sirket_duzenle')) $('#sigorta_sirket_duzenle').value = d.sigorta_sirket_id || '';
+    // Buton + logo + temizle güncelle
+    window.__setSigortaPickerFromDataDuzenle(d);
+
+    if($('#sigorta_baslangic_tarihi_duzenle')) $('#sigorta_baslangic_tarihi_duzenle').value = (d.sigorta_baslangic_tarihi||'').slice(0,10);
+    // Tarif değeri __setSigortaPickerFromDataDuzenle fonksiyonunda set ediliyor
+    if($('#sigorta_katilim_payi_duzenle')) $('#sigorta_katilim_payi_duzenle').value = d.sigorta_katilim_payi || '';
+
+    // Ehepartner alanları (artık Step 2'de)
+    if($('#es_cocuk_sigorta_duzenle')) $('#es_cocuk_sigorta_duzenle').value = d.es_cocuk_sigorta || '';
+    if($('#es_yasi_duzenle')) $('#es_yasi_duzenle').value = (d.es_yasi ?? '') + '';
+    
+    // Medeni duruma göre ehepartner alanlarını göster/gizle
+    toggleEhepartnerFields();
+
+    // Step 3
+
+    // Step 4
+    const noteEl = document.getElementById('paylasim_notu_duzenle');
+    if (noteEl) noteEl.value = d.paylasim_notu || '';
+
+    // Çocuk yaşları
+    const list = $('#cocuk_listesi_duzenle');
+    if(list){
+      list.innerHTML = '';
+      (d.cocuk_yaslari || []).forEach(y=>{
+        const row=document.createElement('div');
+        row.className='d-flex align-items-center gap-2';
+        row.innerHTML = `
+          <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="cocuk_yasi[]" value="${y}">
+          <button type="button" class="btn btn-icon btn-light-danger" title="Löschen">✕</button>
+        `;
+        row.querySelector('button').addEventListener('click',()=>row.remove());
+        list.appendChild(row);
+      });
+    }
+  }
+
+  // -------- OTP (TEK KEZ bağla)
+  let wiredOtp = false;
+  function wireOtp(){
+    if(wiredOtp) return;
+    wiredOtp = true;
+
+    // Telefon OTP
+    const btnTel = $('#btn_tel_gonder_duzenle');
+    const telWrap = $('#tel_kod_wrap_duzenle');
+    const btnTelOk = $('#btn_tel_kod_dogrula_duzenle');
+    const telOk    = $('#telefon_onayli_mi_duzenle');
+    const telErr   = $('#tel_error_duzenle');
+    const telInput = $('#telefon_duzenle');
+
+    function telShowErr(msg){ telErr.textContent=msg; telErr.classList.remove('text-success'); telErr.classList.add('text-danger'); }
+    function telShowOk(msg){  telErr.textContent=msg; telErr.classList.remove('text-danger');  telErr.classList.add('text-success'); }
+
+    btnTel?.addEventListener('click', async ()=>{
+      telErr.textContent='';
+      const tel=(telInput?.value||'').trim();
+      if(!tel){ telShowErr('Bitte geben Sie eine Telefonnummer ein.'); return; }
+      try{
+        const r = await fetch('/ajax/otp/send/phone/',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF},
+          body: JSON.stringify({telefon:tel})
+        });
+        const txt=await r.text(); let d=null; try{d=JSON.parse(txt)}catch(_){}
+        if(r.ok && (d?.ok===true || txt==='')){ telWrap?.classList.remove('d-none'); telShowOk('Bestätigungscode wurde gesendet.'); }
+        else{ telShowErr(d?.hata || d?.error || txt || 'SMS konnte nicht gesendet werden.'); }
+      }catch(e){ telShowErr('SMS konnte nicht gesendet werden (Verbindung).'); }
+    });
+
+    btnTelOk?.addEventListener('click', async ()=>{
+      telErr.textContent='';
+      const kod=($('#telefon_kod_duzenle')?.value||'').trim();
+      const tel=(telInput?.value||'').trim();
+      if(!kod){ telShowErr('Bitte geben Sie den Bestätigungscode ein.'); return; }
+      try{
+        const r = await fetch('/ajax/otp/verify/phone/',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF},
+          body: JSON.stringify({telefon:tel,kod})
+        });
+        const txt=await r.text(); let d=null; try{d=JSON.parse(txt)}catch(_){}
+        if(r.ok && d?.valid){
+          setVerifyUI({btn:btnTel, wrap:telWrap, hidden:telOk, verified:true});
+          telShowOk('Telefon wurde verifiziert.');
+        }else{
+          telShowErr('Code ist ungültig.');
+        }
+      }catch(e){ telShowErr('Verifizierungsfehler.'); }
+    });
+
+    telInput?.addEventListener('input', ()=>{ setVerifyUI({btn:btnTel, wrap:telWrap, hidden:telOk, verified:false}); });
+
+    // E-posta OTP
+    const btnMail = $('#btn_mail_gonder_duzenle');
+    const mailWrap= $('#mail_kod_wrap_duzenle');
+    const btnMailOk=$('#btn_mail_kod_dogrula_duzenle');
+    const mailOk  = $('#email_onayli_mi_duzenle');
+    const mailErr = $('#mail_error_duzenle');
+    const mailInput=$('#email_duzenle');
+
+    function showErr(msg){ mailErr.textContent=msg; mailErr.classList.remove('text-success'); mailErr.classList.add('text-danger'); }
+    function showOk(msg){  mailErr.textContent=msg; mailErr.classList.remove('text-danger');  mailErr.classList.add('text-success'); }
+
+    btnMail?.addEventListener('click', async ()=>{
+      mailErr.textContent='';
+      const email=(mailInput?.value||'').trim();
+      if(!email){ showErr('Bitte geben Sie eine E-Mail-Adresse ein.'); return; }
+      try{
+        const r = await fetch('/ajax/otp/send/email/',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF},
+          body: JSON.stringify({email})
+        });
+        const txt=await r.text(); let d=null; try{d=JSON.parse(txt)}catch(_){}
+        if(r.ok && (d?.ok===true || txt==='')){ mailWrap?.classList.remove('d-none'); showOk('Bestätigungscode wurde gesendet.'); }
+        else{ showErr(d?.hata || d?.error || txt || 'E-Mail konnte nicht gesendet werden.'); }
+      }catch(e){ showErr('E-Mail konnte nicht gesendet werden (Verbindung).'); }
+    });
+
+    btnMailOk?.addEventListener('click', async ()=>{
+      mailErr.textContent='';
+      const kod=($('#email_kod_duzenle')?.value||'').trim();
+      const email=(mailInput?.value||'').trim();
+      if(!kod){ showErr('Bitte geben Sie den Bestätigungscode ein.'); return; }
+      try{
+        const r = await fetch('/ajax/otp/verify/email/',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF},
+          body: JSON.stringify({email,kod})
+        });
+        const txt=await r.text(); let d=null; try{d=JSON.parse(txt)}catch(_){}
+        if(r.ok && d?.valid){
+          setVerifyUI({btn:btnMail, wrap:mailWrap, hidden:mailOk, verified:true});
+          showOk('E-Mail wurde verifiziert.');
+        }else{
+          showErr('Code ist ungültig.');
+        }
+      }catch(e){ showErr('Verifizierungsfehler.'); }
+    });
+
+    mailInput?.addEventListener('input', ()=>{ setVerifyUI({btn:btnMail, wrap:mailWrap, hidden:mailOk, verified:false}); });
+  }
+
+  // -------- Posta Kodu lookup (modal içi)
+  (function wirePosta(){
+    const posta = $('#posta_kodu_duzenle'), sehir = $('#sehir_duzenle'), ilce = $('#ilce_duzenle');
+    let t;
+    posta?.addEventListener('input', ()=>{
+      clearTimeout(t);
+      const v = (posta.value||'').trim();
+      if(v.length < 3){ if(sehir) sehir.value=''; if(ilce) ilce.value=''; return; }
+      t = setTimeout(async ()=>{
+        try{
+          const r = await fetch(`/ajax/posta-kodu/lookup/?q=${encodeURIComponent(v)}`, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+          if(!r.ok) throw 0;
+          const d = await r.json();
+          if(sehir) sehir.value = d?.il || '';
+          if(ilce) ilce.value = d?.ilce || '';
+          let hidden = $('#posta_kodu_id_duzenle');
+          if(!hidden){
+            hidden = document.createElement('input');
+            hidden.type='hidden'; hidden.name='posta_kodu_id'; hidden.id='posta_kodu_id_duzenle';
+            form.appendChild(hidden);
+          }
+          hidden.value = d?.id || '';
+        }catch(e){}
+      }, 350);
+    });
+  })();
+
+  // -------- Çocuk yaşları ekle
+  $('#btn_cocuk_ekle_duzenle')?.addEventListener('click', ()=>{
+    const list = $('#cocuk_listesi_duzenle'); if(!list) return;
+    const row = document.createElement('div');
+    row.className = 'd-flex align-items-center gap-2';
+    row.innerHTML = `
+      <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="cocuk_yasi[]" placeholder="Alter">
+      <button type="button" class="btn btn-icon btn-light-danger" title="Löschen">✕</button>
+    `;
+    row.querySelector('button').addEventListener('click', ()=>row.remove());
+    list.appendChild(row);
+  });
+
+  // -------- Submit (Güncelle)
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    submitErr?.classList.add('d-none');
+    if(!validateStep(currentStep)) return;
+
+    const fd = new FormData(form);
+    const cocuklar = [...modal.querySelectorAll('input[name="cocuk_yasi[]"]')].map(i=>i.value).filter(Boolean);
+    fd.append('cocuk_yaslari_json', JSON.stringify(cocuklar));
+
+    // Geri uyumluluk: yeni küçük not alanını textarea'ya push et (backend hâlâ eski alanı okuyorsa)
+    const newNoteVal = ($('#duzenle_yeni_not')?.value || '').trim();
+    if (newNoteVal && !fd.get('paylasim_notu')) {
+      fd.set('paylasim_notu', newNoteVal);
+    }
+
+    const endpoint = form.getAttribute('data-endpoint');
+    submitBtn?.classList.add('disabled');
+    submitBtn?.querySelector('.indicator-progress')?.classList.remove('d-none');
+
+    try{
+      const res = await fetch(endpoint, {
+        method:'POST',
+        body: fd,
+        headers: {'X-Requested-With':'XMLHttpRequest'}
+      });
+      let data=null; try{ data = await res.json(); }catch(_){}
+      if(!res.ok || !data || data.ok === false){
+        const msg = (data && (data.hata || data.error || data.message)) || 'Bei der Aktualisierung ist ein Fehler aufgetreten.';
+        submitErr.textContent = msg;
+        submitErr.classList.remove('d-none');
+        return;
+      }
+      const target = (data.redirect && String(data.redirect)) || "/panel/";
+      window.location.href = target;
+    }catch(err){
+      submitErr.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+      submitErr.classList.remove('d-none');
+    }finally{
+      submitBtn?.classList.remove('disabled');
+      submitBtn?.querySelector('.indicator-progress')?.classList.add('d-none');
+    }
+  });
+
+  // -------- Modal açıldığında verileri yükle, UI ayarla
+  modal.addEventListener('show.bs.modal', async (ev)=>{
+    try{
+      const trigger = ev.relatedTarget;
+      const formId = trigger?.getAttribute('data-form-id') || trigger?.dataset.formId;
+      if(!formId){ console.error('Bearbeiten-Modal: data-form-id fehlt'); return; }
+
+      // Form endpoint
+      form?.setAttribute('data-endpoint', `/forms/musteri/duzenle/${formId}/`);
+
+      // Detayları çek
+      const res = await fetch(`/ajax/forms/musteri/${formId}/detail/`, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+      if(!res.ok){ console.error('Fehler beim Abrufen der Details', res.status); return; }
+      const d = await res.json();
+
+      // Doldur
+      fillForm(d);
+
+      // Doğrulama butonlarını mevcut duruma göre ayarla
+      setVerifyUI({
+        btn: $('#btn_tel_gonder_duzenle'),
+        wrap: $('#tel_kod_wrap_duzenle'),
+        hidden: $('#telefon_onayli_mi_duzenle'),
+        verified: !!d.telefon_onayli_mi
+      });
+      setVerifyUI({
+        btn: $('#btn_mail_gonder_duzenle'),
+        wrap: $('#mail_kod_wrap_duzenle'),
+        hidden: $('#email_onayli_mi_duzenle'),
+        verified: !!d.email_onayli_mi
+      });
+
+      // NOT: UI ve liste
+      ensureNotesUI();
+      await fetchAndRenderNotes(formId);
+
+      // OTP event’leri bir kez bağla
+      wireOtp();
+
+      // Stepper reset
+      setStep(1);
+    }catch(e){
+      console.error(e);
+    }
+  });
+
+  // Modal kapanınca OTP alanlarını temizle (görünüm)
+  modal.addEventListener('hidden.bs.modal', ()=>{
+    $('#tel_kod_wrap_duzenle')?.classList.add('d-none');
+    $('#mail_kod_wrap_duzenle')?.classList.add('d-none');
+    if($('#tel_error_duzenle')) $('#tel_error_duzenle').textContent = '';
+    if($('#mail_error_duzenle')) $('#mail_error_duzenle').textContent = '';
+    if($('#duzenle_not_feedback')) $('#duzenle_not_feedback').textContent = '';
+    // Picker temizliği UI olarak kalabilir; değerler bir dahaki açılışta backend’den gelir.
+  });
+
+  // İlk yüklemede stepper konumu
+  setStep(1);
+})();
+</script>
+
+<style>
+/* Modalı biraz genişlet */
+.mw-900px { max-width: 1140px; }
+
+/* Step içerik gösterimi */
+.step-content{display:none}.step-content.current{display:block}
+
+/* Step icon check davranışı */
+.stepper-item.completed .stepper-number{display:none}
+stepper-item.completed .stepper-check{display:inline-block}
+.stepper-item .stepper-check{display:none}
+
+/* Gutterları biraz büyüt, formlar ferah gözüksün */
+.row.g-6{ --bs-gutter-x:1.75rem; --bs-gutter-y:1.75rem; }
+
+/* Olası absolute/float stillerini kapat (Devam/Geri düzgün hizalansın) */
+#musteri_form_duzenle_stepper [data-stepper-action]{ position:static !important; float:none !important; }
+
+/* OTP alanlarını kompakt yap */
+#tel_kod_wrap_duzenle input.form-control,
+#mail_kod_wrap_duzenle input.form-control {
+  height: 38px;
+  padding: .375rem .75rem;
+  font-size: 0.875rem;
+}
+#tel_kod_wrap_duzenle button,
+#mail_kod_wrap_duzenle button {
+  padding: .375rem .75rem;
+  font-size: 0.875rem;
+}
+#musteri_form_stepper .stepper-item { cursor: pointer; }
+
+/* Sigorta picker butonu / logo görünümü (oluştur modalindeki ile aynı) */
+.sigorta-picker-btn { min-height: 44px; }
+.sigorta-logo-wrap {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 0 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.sigorta-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+</style>

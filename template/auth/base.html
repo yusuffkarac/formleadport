@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <title>{% block title %}{% endblock %}</title>
+  <meta charset="utf-8" />
+  <meta name="description" content="{% block description %}{% endblock %}" />
+  {% include 'widgets/author.html' %}
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="{% static 'assets/plugins/global/plugins.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="{% static 'assets/icons/icon.css' %}">
+  {% block head %}{% endblock %}
+  <style>
+    .auth-page-bg { background-image: url("{% static 'assets/media/illustrations/dozzy-1/14.png' %}"); }
+    [data-bs-theme="dark"] .auth-page-bg { background-image: url("{% static 'assets/media/illustrations/dozzy-1/14-dark.png' %}"); }
+  </style>
+</head>
+<body id="kt_body" class="auth-bg">
+  <!-- Theme mode setup -->
+  <script>
+    (function(){
+      var defaultThemeMode="light",d=document.documentElement,t;
+      if(d){
+        t=d.hasAttribute("data-bs-theme-mode")?d.getAttribute("data-bs-theme-mode"):(localStorage.getItem("data-bs-theme")||defaultThemeMode);
+        if(t==="system"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}
+        d.setAttribute("data-bs-theme",t);
+      }
+    })();
+  </script>
+
+  <div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed auth-page-bg">
+      <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
+        <a href="{% url 'giris' %}" class="mb-12">
+          <img alt="Logo" src="{{firma.logo.url}}" class="h-30px theme-dark-show" />
+        </a>
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Core scripts -->
+  <script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <!-- FormValidation plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/@form-validation/core@1.11.5/dist/umd/formvalidation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@form-validation/plugin-bootstrap5@1.11.5/dist/umd/bootstrap5.min.js"></script>
+  <!-- Page-specific scripts -->
+  <script src="{% static 'assets/js/custom/authentication/sign-in/general.js' %}"></script>
+  {% block script %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,1197 @@
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="kt_modal_musteri_form" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Kundenformular Erstellen</h2>
+        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Kapat">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </button>
+      </div>
+
+      <div class="modal-body py-lg-10 px-lg-10">
+        <div class="stepper stepper-pills stepper-column d-flex flex-column flex-xl-row flex-row-fluid" id="musteri_form_stepper">
+
+          <!-- NAV -->
+          <div class="d-flex justify-content-center justify-content-xl-start flex-row-auto w-100 w-xl-300px">
+            <div class="stepper-nav ps-lg-10">
+              <div class="stepper-item current" data-step="1">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px">
+                  <i class="stepper-check fas fa-check"></i><span class="stepper-number">1</span>
+                </div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Grundinformationen</h3>
+                  <div class="stepper-desc">Termin und Kontakt</div>
+                </div>
+              </div>
+              <div class="stepper-item" data-step="2">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px">
+                  <i class="stepper-check fas fa-check"></i><span class="stepper-number">2</span>
+                </div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Familie & Versicherung</h3>
+                  <div class="stepper-desc">Familienstand und Versicherung</div>
+                </div>
+              </div>
+              <div class="stepper-item" data-step="3">
+                <div class="stepper-line w-40px"></div>
+                <div class="stepper-icon w-40px h-40px">
+                  <i class="stepper-check fas fa-check"></i><span class="stepper-number">3</span>
+                </div>
+                <div class="stepper-label">
+                  <h3 class="stepper-title">Bestätigen & Senden</h3>
+                  <div class="stepper-desc">Übersicht und Versand</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTENT -->
+          <div class="flex-row-fluid py-lg-5 px-lg-15">
+            <form class="form" id="musteri_form" method="post" novalidate data-endpoint="{% url 'musteri_form_olustur' %}">
+              {% csrf_token %}
+
+              <!-- STEP 1 -->
+              <div class="step-content current" data-step-content="1">
+                <div class="row g-6">
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">Termin am</label>
+                    <input type="datetime-local" class="form-control form-control-lg form-control-solid" name="randevu_tarihi" required>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Terminart</label>
+                    <select class="form-select form-select-lg form-select-solid" name="randevu_tipi" id="randevu_tipi">
+                      <option value="">Bitte auswählen</option>
+                      <option value="Video">Video</option>
+                      <option value="Telefon">Telefon</option>
+                      <option value="Vor Ort">Vor Ort</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">Firmenname</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="firma_adi" required>
+                  </div>
+                  
+                  <div class="col-md-3 fv-row">
+                    <label class="form-label">Geschlecht</label>
+                    <div class="d-flex gap-3">
+                      <label class="form-check form-check-custom form-check-solid">
+                        <input class="form-check-input me-3" name="musteri_cinsiyet" checked type="radio" value="Erkek">
+                        <span class="form-check-label"><strong>Herr</strong></span>
+                      </label>
+                      <label class="form-check form-check-custom form-check-solid">
+                        <input class="form-check-input me-3" name="musteri_cinsiyet" type="radio" value="Kadın">
+                        <span class="form-check-label"><strong>Frau</strong></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Name</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="musteri_isim" required>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Nachname</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="musteri_soyisim" required>
+                  </div>
+                  <div class="col-md-3 fv-row">
+                    <label class="required form-label">Geburtsdatum</label>
+                    <input type="date" class="form-control form-control-lg form-control-solid" name="musteri_dogum_tarihi" required>
+                  </div>
+                  <div class="col-12 fv-row">
+                    <label class="required form-label">Adresse</label>
+                    <textarea class="form-control form-control-lg form-control-solid" name="adres" rows="2" required></textarea>
+                  </div>
+
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label d-flex align-items-center">Festnetz</label>
+                    <input type="tel" class="form-control form-control-lg form-control-solid" name="sabit_telefon" id="sabit_telefon" placeholder="+49" value="+49">
+                  </div>
+
+                  <div class="col-md-4 fv-row">
+                    <label class="required form-label">PLZ</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="posta_kodu" id="posta_kodu" placeholder="20354" required>
+                  </div>
+                  <div class="col-md-4 fv-row d-none">
+                    <label class="form-label">Ort</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="sehir" id="sehir" readonly>
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Stadt</label>
+                    <input type="text" class="form-control form-control-lg form-control-solid" name="ilce" id="ilce">
+                  </div>
+
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label d-flex align-items-center">
+                      Handy
+                      <button type="button" id="btn_tel_gonder" class="btn btn-sm btn-light-primary ms-3">Verifizieren</button>
+                    </label>
+                    <input type="tel" class="form-control form-control-lg form-control-solid" name="telefon" id="telefon" placeholder="+49" value="+49">
+                    <div id="tel_kod_wrap" class="mt-3 d-none">
+                      <label class="form-label">Handy-Bestätigungscode</label>
+                      <div class="d-flex gap-3">
+                        <input type="text" class="form-control form-control-lg form-control-solid" id="telefon_kod" placeholder="XXXXXX">
+                        <button type="button" id="btn_tel_kod_dogrula" class="btn btn-primary">Code bestätigen</button>
+                      </div>
+                      <div id="tel_error" class="text-danger small mt-2"></div>
+                    </div>
+                    <input type="hidden" name="telefon_onayli_mi" id="telefon_onayli_mi" value="false">
+                  </div>
+
+                  <div class="col-md-6 {% if firma.email_dogrulama == False %}mt-5 pt-6 fv-row{% endif %} fv-row">
+                    <label class="form-label d-flex align-items-center">
+                      E-Mail
+                      <button type="button" id="btn_mail_gonder" class="btn btn-sm btn-light-primary ms-3 {% if firma.email_dogrulama == False %}d-none{% endif %}">Verifizieren</button>
+                    </label>
+                    <input type="email" class="form-control form-control-lg form-control-solid" name="email" id="email" placeholder="beispiel@mail.com">
+                    <div id="mail_kod_wrap" class="mt-3 d-none">
+                      <label class="form-label">E-Mail-Bestätigungscode</label>
+                      <div class="d-flex gap-3">
+                        <input type="text" class="form-control form-control-lg form-control-solid" id="email_kod" placeholder="XXXXXX">
+                        <button type="button" id="btn_mail_kod_dogrula" class="btn btn-primary">Code bestätigen</button>
+                      </div>
+                      <div id="mail_error" class="text-danger small mt-2"></div>
+                    </div>
+                    <input type="hidden" name="email_onayli_mi" id="email_onayli_mi" value="false">
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 2 -->
+              <div class="step-content" data-step-content="2">
+                <div class="row g-6">
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Familienstand</label>
+                    <select class="form-select form-select-lg form-select-solid" name="medeni_durum">
+                      <option value="Bekar">Ledig</option>
+                      <option value="Evli">Verheiratet</option>
+                      <option value="Boşanmış">Geschieden</option>
+                      <option value="Dul">Verwitwet</option>
+                      <option value="Kayıtlı Ortaklık">Eingetragene Partnerschaft</option>
+                      <option value="Diğer">Andere</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Anzahl der Kinder</label>
+                    <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="aile_cocuk_sayisi" id="aile_cocuk_sayisi" placeholder="0">
+                  </div>
+                  <div class="col-md-4 fv-row">
+                    <label class="form-label">Beschäftigungsstatus</label>
+                    <select class="form-select form-select-lg form-select-solid" name="calisma_durumu" id="calisma_durumu">
+                      <option value="">Bitte wählen</option>
+                      <option value="Arbeitnehmer">Arbeitnehmer</option>
+                      <option value="Selbstständig">Selbstständig</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Versicherungsart</label>
+                    <select class="form-select form-select-lg form-select-solid" name="sigorta" id="sigorta">
+                      <option value="Özel">Privat</option>
+                      <option value="Yasal">Gesetzlich</option>
+                      <option value="Sigorta Yok">Nicht Versichert</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label d-block mb-2">Versicherungsgesellschaft</label>
+
+                    <!-- Gizli gerçek alan (FK id) -->
+                    <input type="hidden" name="sigorta_sirket" id="sigorta_sirket">
+
+                    <!-- Satır: Sol geniş buton + sağ temizle -->
+                    <div class="d-flex align-items-stretch gap-2">
+                      <!-- Seçim butonu -->
+                      <button type="button"
+                              class="btn btn-light border w-100 d-flex align-items-center gap-2 text-start sigorta-picker-btn"
+                              id="btn_sigorta_sec">
+                        <!-- LOGO: BAŞLANGIÇTA GÖRÜNMEYECEK -->
+                        <span id="sigorta_logo_wrap" class="sigorta-logo-wrap d-none">
+                          <img id="sigorta_btn_logo" src="" alt="" class="sigorta-logo">
+                        </span>
+                        <span id="sigorta_btn_label" class="text-truncate">Gesellschaft auswählen</span>
+                      </button>
+
+                      <!-- Temizle butonu: BAŞLANGIÇTA GİZLİ -->
+                      <button type="button" id="btn_sigorta_temizle" class="btn btn-light-danger d-none" title="Auswahl löschen">✕</button>
+                    </div>
+
+                    <!-- Modal: Şirket ızgarası -->
+                    <div class="modal fade" id="modal_sigorta_picker" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Versicherungsgesellschaft wählen</h5>
+                            <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Kapat">
+                              <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <div class="mb-4">
+                              <input type="text" class="form-control" id="sigorta_search" placeholder="Suchen... (Name)">
+                            </div>
+                            <div id="sigorta_grid" class="row g-4"><!-- kartlar --></div>
+                            <div id="sigorta_empty" class="text-muted text-center py-6 d-none">Keine Ergebnisse gefunden.</div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Seit wann</label>
+                    <input type="date" class="form-control form-control-lg form-control-solid" name="sigorta_baslangic_tarihi">
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Beitrag (für Alle Mit/Versicherten)</label>
+                    <input type="number" step="0.01" class="form-control form-control-lg form-control-solid" name="sigorta_katki_payi">
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Tarif</label>
+                    <select class="form-select form-select-lg form-select-solid" name="sigorta_tarife_vadesi" id="sigorta_alt_select">
+                      <option value="">Bitte zuerst eine Gesellschaft wählen</option>
+                    </select>
+                    <div class="form-text">Die verfügbaren Tarife hängen von der gewählten Gesellschaft ab.</div>
+                  </div>
+                  <div class="col-md-6 fv-row">
+                    <label class="form-label">Selbstbeteiligung</label>
+                    <input type="number" step="0.01" class="form-control form-control-lg form-control-solid" name="sigorta_katilim_payi">
+                  </div>
+                  <!-- Ehepartner & Kinder - nur sichtbar bei Familienstand "Bekar" oder "Diğer" -->
+                  <div class="col-md-6 fv-row ehepartner-fields d-none" id="ehepartner_fields">
+                    <label class="form-label">Versicherungsstatus des Ehepartners</label>
+                    <select class="form-select form-select-lg form-select-solid" name="es_cocuk_sigorta">
+                      <option value="Özel/Ortak Sigortalı">Privat/mitversichert</option>
+                      <option value="Yasal/Ortak Sigortalı">Gesetzlich/mitversichert</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 fv-row ehepartner-fields d-none" id="ehepartner_alter">
+                    <label class="form-label">Alter: Partner</label>
+                    <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="es_yasi">
+                  </div>
+                  <div class="col-12 ehepartner-fields d-none">
+                    <label class="form-label">Kinderalter</label>
+                    <div id="cocuk_listesi" class="d-flex flex-column gap-3"></div>
+                    <button type="button" id="btn_cocuk_ekle" class="btn btn-light-primary mt-3">Kinderalter hinzufügen</button>
+                  </div>
+                  <div class="col-md-12 fv-row">
+                    <label class="form-label">Zusätzliche Versicherungsnotiz</label>
+                    <textarea class="form-control form-control-lg form-control-solid" name="sigorta_ek_yazi" rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- STEP 3 -->
+              <div class="step-content" data-step-content="3">
+                <div class="mb-6">
+                  <label class="form-label">Benutzernotiz</label>
+                  <div class="mb-3 p-3 border rounded bg-light">
+                    <ul class="mb-0">
+                      <li>Versicherten (auch Partner + Kinder!) – Größe + Gewicht</li>
+                      <li>Gesundheitszustand ambulant: Letzte 3 Jahre (Diagnosen / Chronisches / Medis)</li>
+                      <li>Gesundheitszustand Krankenhaus: Letzten 5 Jahren (Diagnosen / Chronisches)</li>
+                      <li>Besondere Wünsche? (günstigerer Beitrag / bessere Absicherung etc.)</li>
+                    </ul>
+                  </div>
+                  <textarea class="form-control form-control-lg form-control-solid" name="paylasim_notu" rows="3" placeholder="Eigene Notizen zu diesem Formular..."></textarea>
+                </div>
+
+                <div id="ozet_alani" class="border rounded p-4 bg-light"></div>
+              </div>
+
+              <div id="submit_error" class="text-danger small mt-4 d-none"></div>
+
+              <div class="d-flex flex-stack pt-10">
+                <div class="me-2">
+                  <button type="button" class="btn btn-lg btn-light-primary me-3" data-stepper-action="previous">Zurück</button>
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-lg btn-primary d-none" data-stepper-action="submit">
+                    <span class="indicator-label">Absenden</span>
+                    <span class="indicator-progress d-none">Bitte warten...
+                      <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                  </button>
+                  <button type="button" class="btn btn-lg btn-primary" data-stepper-action="next">Weiter</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .mw-900px { max-width:1140px; }
+  .step-content{ display:none }
+  .step-content.current{ display:block }
+  .stepper-item.completed .stepper-number{ display:none }
+  .stepper-item.completed .stepper-check{ display:inline-block }
+  .stepper-item .stepper-check{ display:none }
+  .row.g-6 { --bs-gutter-x:1.75rem; --bs-gutter-y:1.75rem; }
+  #musteri_form_stepper [data-stepper-action]{ position:static !important; float:none !important; }
+  .hover-elevate-up:hover { transform: translateY(-2px); transition: .15s ease; }
+
+  /* === Sigorta butonu / logo ayarları === */
+  .sigorta-picker-btn { min-height: 44px; }
+  .sigorta-logo-wrap {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 0 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  .sigorta-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;   /* küçük logo tam sığsın */
+    object-position: center;
+    display: block;
+  }
+</style>
+
+<script>
+(function(){
+  const stepper=document.getElementById('musteri_form_stepper'); if(!stepper) return;
+  let currentStep=1, totalSteps=3;
+  const form=document.getElementById('musteri_form');
+  const nextBtn=stepper.querySelector('[data-stepper-action="next"]');
+  const prevBtn=stepper.querySelector('[data-stepper-action="previous"]');
+  const submitBtn=stepper.querySelector('[data-stepper-action="submit"]');
+  const submitErr=document.getElementById('submit_error');
+
+  function setStep(s){
+    currentStep=s;
+    stepper.querySelectorAll('.stepper-item').forEach(i=>{
+      const x=parseInt(i.getAttribute('data-step'));
+      i.classList.toggle('completed', x<currentStep);
+      i.classList.toggle('current', x===currentStep);
+    });
+    stepper.querySelectorAll('.step-content').forEach(c=>{
+      c.classList.toggle('current', parseInt(c.getAttribute('data-step-content'))===currentStep);
+    });
+    prevBtn.disabled=(currentStep===1);
+    if(currentStep===totalSteps){ nextBtn.classList.add('d-none'); submitBtn.classList.remove('d-none'); buildSummary(); }
+    else{ nextBtn.classList.remove('d-none'); submitBtn.classList.add('d-none'); }
+  }
+
+  function validateStep(s){
+    const cur=stepper.querySelector('[data-step-content="'+s+'"]'); if(!cur) return true;
+    let ok=true;
+    cur.querySelectorAll('input,select,textarea').forEach(el=>{
+      const val=(el.value||'').trim();
+      let invalid = el.hasAttribute('required') && !val;
+      if(!invalid && el.type==='email' && val) invalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      if(invalid){ el.classList.add('is-invalid'); ok=false; } else { el.classList.remove('is-invalid'); }
+    });
+    return ok;
+  }
+
+  // Nav click / key
+  const nav = stepper.querySelector('.stepper-nav');
+  stepper.querySelectorAll('.stepper-item').forEach(item => {
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-label', `Adım ${item.getAttribute('data-step')}`);
+  });
+  function jumpToStep(targetStep){
+    if (targetStep === currentStep) return;
+    if (targetStep < currentStep){ setStep(targetStep); return; }
+    for (let s = currentStep; s < targetStep; s++){
+      if (!validateStep(s)) { setStep(s); return; }
+    }
+    setStep(targetStep);
+  }
+  nav.addEventListener('click', (e) => {
+    const item = e.target.closest('.stepper-item'); if (!item) return;
+    const stepNum = parseInt(item.getAttribute('data-step')); if (!Number.isInteger(stepNum)) return;
+    jumpToStep(stepNum);
+  });
+  nav.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const item = e.target.closest('.stepper-item'); if (!item) return;
+    e.preventDefault();
+    const stepNum = parseInt(item.getAttribute('data-step')); if (!Number.isInteger(stepNum)) return;
+    jumpToStep(stepNum);
+  });
+
+  nextBtn.addEventListener('click',()=>{ if(!validateStep(currentStep)) return; if(currentStep<totalSteps) setStep(currentStep+1); });
+  prevBtn.addEventListener('click',()=>{ if(currentStep>1) setStep(currentStep-1); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitErr.classList.add('d-none');
+    submitErr.textContent = '';
+
+    if (!validateStep(currentStep)) return;
+
+    const fd = new FormData(form);
+    const cocuklar = [...document.querySelectorAll('input[name="cocuk_yasi[]"]')].map(i => i.value).filter(Boolean);
+    fd.append('cocuk_yaslari_json', JSON.stringify(cocuklar));
+
+    const endpoint = form.getAttribute('data-endpoint');
+
+    submitBtn.classList.add('disabled');
+    submitBtn.querySelector('.indicator-progress')?.classList.remove('d-none');
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+
+      if (!res.ok || !data || data.ok === false) {
+        const msg = (data && (data.hata || data.error || data.message)) || 'Beim Senden ist ein Fehler aufgetreten.';
+        submitErr.textContent = msg;
+        submitErr.classList.remove('d-none');
+        return;
+      }
+
+      const tplPanel = "{% url 'panel' %}";
+      const panelUrl = tplPanel.startsWith('{%') ? null : tplPanel;
+      const target = (data.redirect && String(data.redirect)) || panelUrl || "/panel/";
+      window.location.href = target;
+
+    } catch (err) {
+      submitErr.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+      submitErr.classList.remove('d-none');
+    } finally {
+      submitBtn.classList.remove('disabled');
+      submitBtn.querySelector('.indicator-progress')?.classList.add('d-none');
+    }
+  });
+
+  // Posta kodu -> şehir/ilçe
+  const posta=document.getElementById('posta_kodu'), sehir=document.getElementById('sehir'), ilce=document.getElementById('ilce');
+  let t;
+  posta.addEventListener('input',()=>{
+    clearTimeout(t);
+    const v=(posta.value||'').trim();
+    if(v.length<3){ sehir.value=''; ilce.value=''; return; }
+    t=setTimeout(async()=>{
+      try{
+        const r=await fetch(`/ajax/posta-kodu/lookup/?q=${encodeURIComponent(v)}`,{headers:{'X-Requested-With':'XMLHttpRequest'}});
+        if(!r.ok) throw 0;
+        const d=await r.json();
+        sehir.value=d?.il||''; ilce.value=d?.ilce||'';
+        let hidden=document.getElementById('posta_kodu_id');
+        if(!hidden){ hidden=document.createElement('input'); hidden.type='hidden'; hidden.name='posta_kodu_id'; hidden.id='posta_kodu_id'; form.appendChild(hidden); }
+        hidden.value=d?.id||'';
+      }catch(e){}
+    },350);
+  });
+
+  // ---- CSRF helper ----
+  function getCookie(name){
+    const v = `; ${document.cookie}`; const p = v.split(`; ${name}=`); if (p.length === 2) return p.pop().split(';').shift();
+  }
+  const CSRF_TOKEN = getCookie('csrftoken') || (document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '');
+
+  // ===========================
+  // Telefon OTP
+  // ===========================
+  const btnTel = document.getElementById('btn_tel_gonder'),
+        telWrap = document.getElementById('tel_kod_wrap'),
+        btnTelOk = document.getElementById('btn_tel_kod_dogrula'),
+        telOk   = document.getElementById('telefon_onayli_mi'),
+        telErr  = document.getElementById('tel_error');
+
+  function telShowErr(msg){ telErr.textContent = msg; telErr.classList.remove('text-success'); telErr.classList.add('text-danger'); }
+  function telShowOk(msg){ telErr.textContent = msg; telErr.classList.remove('text-danger'); telErr.classList.add('text-success'); }
+
+  btnTel.addEventListener('click', async ()=>{
+    telErr.textContent = '';
+    const tel = (document.getElementById('telefon').value || '').trim();
+    if(!tel){ telShowErr('Bitte Telefonnummer eingeben.'); return; }
+    try{
+      const r = await fetch('/ajax/otp/send/phone/', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({ telefon: tel })
+      });
+      const txt = await r.text(); let d = null; try { d = JSON.parse(txt); } catch(_){}
+      if(r.ok && (d?.ok === true || txt === '')){
+        telWrap.classList.remove('d-none'); telShowOk('Bestätigungscode wurde gesendet.');
+      } else {
+        if(r.status === 403) telShowErr('SMS konnte nicht gesendet werden (CSRF 403).');
+        else telShowErr(d?.hata || d?.error || txt || 'SMS konnte nicht gesendet werden.');
+      }
+    }catch(e){ telShowErr('SMS konnte nicht gesendet werden (Verbindung).'); }
+  });
+
+  btnTelOk.addEventListener('click', async ()=>{
+    telErr.textContent = '';
+    const kod = (document.getElementById('telefon_kod').value || '').trim();
+    const tel = (document.getElementById('telefon').value || '').trim();
+    if(!kod){ telShowErr('Bitte Bestätigungscode eingeben.'); return; }
+    try{
+      const r = await fetch('/ajax/otp/verify/phone/', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({ telefon: tel, kod })
+      });
+      const txt = await r.text(); let d = null; try { d = JSON.parse(txt); } catch(_){}
+      if(r.ok && d?.valid){
+        telOk.value = 'true';
+        document.getElementById('btn_tel_gonder').disabled = true;
+        telShowOk('Telefon wurde verifiziert.');
+      } else {
+        const reason = d?.reason;
+        if(reason === 'expired') telShowErr('Code ist abgelaufen. Bitte neuen Code anfordern.');
+        else if(reason === 'too_many_attempts') telShowErr('Zu viele falsche Versuche. Bitte später erneut versuchen.');
+        else if(reason === 'phone_mismatch') telShowErr('Telefonnummer stimmt nicht überein. Verwenden Sie die gleiche Nummer wie bei der Anforderung.');
+        else telShowErr('Ungültiger Code.');
+      }
+    }catch(e){ telShowErr('Fehler bei der Verifizierung.'); }
+  });
+
+  // ===========================
+  // E-posta OTP
+  // ===========================
+  const btnMail = document.getElementById('btn_mail_gonder'),
+        mailWrap = document.getElementById('mail_kod_wrap'),
+        btnMailOk = document.getElementById('btn_mail_kod_dogrula'),
+        mailOk = document.getElementById('email_onayli_mi'),
+        mailErr = document.getElementById('mail_error');
+
+  function showErr(msg){ mailErr.textContent=msg; mailErr.classList.remove('text-success'); mailErr.classList.add('text-danger'); }
+  function showOk(msg){ mailErr.textContent=msg; mailErr.classList.remove('text-danger'); mailErr.classList.add('text-success'); }
+
+  btnMail.addEventListener('click', async ()=>{
+    mailErr.textContent=''; const email=(document.getElementById('email').value||'').trim();
+    if(!email){ showErr('Bitte E-Mail eingeben.'); return; }
+    try{
+      const r=await fetch('/ajax/otp/send/email/',{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({email})
+      });
+      const txt=await r.text(); let data=null; try{ data=JSON.parse(txt);}catch(_){}
+      if(r.ok && (data?.ok===true || txt==='')){ mailWrap.classList.remove('d-none'); showOk('Bestätigungscode wurde gesendet.'); }
+      else{
+        if(r.status===403) showErr('E-Mail konnte nicht gesendet werden (CSRF 403).');
+        else showErr(data?.hata || data?.error || txt || 'E-Mail konnte nicht gesendet werden.');
+      }
+    }catch(e){ showErr('E-Mail konnte nicht gesendet werden (Verbindung).'); }
+  });
+
+  btnMailOk.addEventListener('click', async ()=>{
+    mailErr.textContent=''; const kod=(document.getElementById('email_kod').value||'').trim();
+    const email=(document.getElementById('email').value||'').trim();
+    if(!kod){ showErr('Bitte Bestätigungscode eingeben.'); return; }
+    try{
+      const r=await fetch('/ajax/otp/verify/email/',{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({email,kod})
+      });
+      const txt=await r.text(); let d=null; try{ d=JSON.parse(txt);}catch(_){}
+      if(r.ok && d?.valid){
+        mailOk.value='true';
+        document.getElementById('btn_mail_gonder').disabled=true;
+        showOk('E-Mail wurde verifiziert.');
+      }else{
+        const reason = d?.reason;
+        if(reason==='expired') showErr('Code ist abgelaufen. Bitte neuen Code anfordern.');
+        else if(reason==='too_many_attempts') showErr('Zu viele falsche Versuche. Bitte später erneut versuchen.');
+        else if(reason==='email_mismatch') showErr('E-Mail stimmt nicht überein. Verwenden Sie die gleiche Adresse wie bei der Anforderung.');
+        else showErr('Ungültiger Code.');
+      }
+    }catch(e){ showErr('Fehler bei der Verifizierung.'); }
+  });
+
+  // Familienstand değişikliği dinleyicisi
+  function toggleEhepartnerFields() {
+    const medeniSelect = document.querySelector('select[name="medeni_durum"]');
+    const ehepartnerFields = document.querySelectorAll('.ehepartner-fields');
+    
+    if (medeniSelect) {
+      const value = medeniSelect.value;
+      const shouldShow = value === 'Bekar' || value === 'Diğer';
+      
+      ehepartnerFields.forEach(field => {
+        if (shouldShow) {
+          field.classList.remove('d-none');
+        } else {
+          field.classList.add('d-none');
+        }
+      });
+    }
+  }
+  
+  // Medeni durum değişikliklerini dinle
+  const medeniSelect = document.querySelector('select[name="medeni_durum"]');
+  if (medeniSelect) {
+    medeniSelect.addEventListener('change', toggleEhepartnerFields);
+    // Sayfa yüklemesinde de kontrol et
+    toggleEhepartnerFields();
+  }
+
+  // Dinamik çocuk yaşları
+  document.getElementById('btn_cocuk_ekle')?.addEventListener('click',()=>{
+    const list=document.getElementById('cocuk_listesi');
+    const row=document.createElement('div');
+    row.className='d-flex align-items-center gap-2';
+    row.innerHTML=`
+      <input type="number" min="0" class="form-control form-control-lg form-control-solid" name="cocuk_yasi[]" placeholder="Alter">
+      <button type="button" class="btn btn-icon btn-light-danger" title="Löschen">✕</button>`;
+    row.querySelector('button').addEventListener('click',()=>row.remove());
+    list.appendChild(row);
+  });
+
+  // ===========================
+  // Sigorta Şirketi Picker
+  // ===========================
+  const pickerBtn     = document.getElementById('btn_sigorta_sec');
+  const pickerModal   = document.getElementById('modal_sigorta_picker');
+  const grid          = document.getElementById('sigorta_grid');
+  const emptyHint     = document.getElementById('sigorta_empty');
+  const searchInput   = document.getElementById('sigorta_search');
+
+  const inputHidden   = document.getElementById('sigorta_sirket'); // FK id
+  const btnLabel      = document.getElementById('sigorta_btn_label');
+  const btnLogo       = document.getElementById('sigorta_btn_logo');
+  const logoWrap      = document.getElementById('sigorta_logo_wrap');
+  const btnClear      = document.getElementById('btn_sigorta_temizle');
+  const DEFAULT_LABEL = 'Gesellschaft auswählen';
+  const sigortaSelect = document.getElementById('sigorta_duzenle');
+
+  let allCompanies = [];
+  let bsModalInstance = null;
+  
+  // Global erişim için window objesine ata
+  window.allCompanies = allCompanies;
+
+  function ensureBsModal(){
+    if (!bsModalInstance && window.bootstrap?.Modal) {
+      bsModalInstance = new bootstrap.Modal(pickerModal);
+    }
+  }
+
+  function updatePickerBtnState() {
+  const selectedValue = sigortaSelect.value;
+  if (selectedValue === "Sigorta Yok") {
+    pickerBtn.disabled = true; // Buton tıklanamaz
+  } else {
+    pickerBtn.disabled = false; // Buton aktif
+  }
+}
+
+  async function loadCompanies(){
+    try{
+      // Seçilen sigorta türünü al
+      const sigortaType = document.getElementById('sigorta'); // id düzeltilmeli
+      const typ = sigortaType ? sigortaType.value : '';
+
+      
+      
+      // URL parametresi olarak gönder
+      const url = typ ? `/ajax/sigorta-sirketleri/?typ=${encodeURIComponent(typ)}` : '/ajax/sigorta-sirketleri/';
+      const r = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const d = await r.json();
+      if (d?.ok && Array.isArray(d.items)) {
+        allCompanies = d.items;
+        window.allCompanies = allCompanies; // Global güncelleme
+        renderGrid(allCompanies);
+      } else {
+        allCompanies = [];
+        window.allCompanies = allCompanies; // Global güncelleme
+        renderGrid(allCompanies);
+      }
+    }catch(e){
+      allCompanies = [];
+      window.allCompanies = allCompanies; // Global güncelleme
+      renderGrid(allCompanies);
+    }
+  }
+  
+  // Global erişim için window objesine ata
+  window.loadCompanies = loadCompanies;
+
+  function escapeHtml(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function renderGrid(list){
+    grid.innerHTML = '';
+    if (!list.length){ emptyHint.classList.remove('d-none'); return; }
+    emptyHint.classList.add('d-none');
+
+    list.forEach(item => {
+      const col = document.createElement('div');
+      col.className = 'col-6 col-sm-4 col-md-3';
+      col.innerHTML = `
+        <button type="button" class="w-100 btn p-0 border-0 bg-transparent sigorta-card" data-id="${item.id}" data-isim="${escapeHtml(item.isim)}" data-resim="${escapeHtml(item.resim || '')}">
+          <div class="card h-100 shadow-sm hover-elevate-up">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+              <div class="rounded bg-light d-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;overflow:hidden;">
+                <img src="${item.resim || 'https://via.placeholder.com/80x80?text=%20'}" alt="${escapeHtml(item.isim)}" style="max-width:100%;max-height:100%;object-fit:contain;">
+              </div>
+              <div class="text-center fw-semibold small">${escapeHtml(item.isim)}</div>
+            </div>
+          </div>
+        </button>
+      `;
+      grid.appendChild(col);
+    });
+
+    grid.querySelectorAll('.sigorta-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id   = btn.getAttribute('data-id');
+        const isim = btn.getAttribute('data-isim');
+        const res  = btn.getAttribute('data-resim') || '';
+
+        // FK id yaz
+        inputHidden.value = id;
+
+        // Buton metni ve logo
+        if (btnLabel) btnLabel.textContent = isim;
+        if (res) {
+          btnLogo.src = res;
+          logoWrap.classList.remove('d-none');
+        } else {
+          btnLogo.src = '';
+          logoWrap.classList.add('d-none');
+        }
+
+        // Temizle butonunu göster
+        btnClear.classList.remove('d-none');
+
+        ensureBsModal();
+        bsModalInstance?.hide();
+
+        // 🔴 KRİTİK: Seçilen şirkete göre tarifleri getir
+        window.loadUntergesellschaften?.(id);
+      });
+    });
+
+  }
+
+  // Arama
+  let searchTimer = null;
+  searchInput?.addEventListener('input', ()=>{
+    clearTimeout(searchTimer);
+    const q = (searchInput.value || '').toLowerCase().trim();
+    searchTimer = setTimeout(()=>{
+      if (!q) { renderGrid(allCompanies); return; }
+      const filtered = allCompanies.filter(i => (i.isim||'').toLowerCase().includes(q));
+      renderGrid(filtered);
+    }, 150);
+  });
+
+  // Aç
+  pickerBtn?.addEventListener('click', ()=>{
+    ensureBsModal();
+    bsModalInstance?.show();
+    if (!allCompanies.length) loadCompanies();
+  });
+
+  // Temizle
+  btnClear?.addEventListener('click', ()=>{
+    inputHidden.value = '';
+    btnLabel.textContent = DEFAULT_LABEL;
+    btnLogo.src = '';
+    logoWrap.classList.add('d-none');     // LOGO SPAN'INI GİZLE
+    btnClear.classList.add('d-none');     // TEMİZLE'Yİ GİZLE
+    
+    // Tarif select'i de temizle
+    if (altSelect) {
+      altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+    }
+  });
+
+function buildSummary() {
+  const o = document.getElementById('ozet_alani');
+  if (!o) return;
+
+  const formEl = document.getElementById('musteri_form');
+  if (!formEl) return;
+
+  const fd = new FormData(formEl);
+
+  // ---------- Helpers ----------
+  const jq = window.jQuery;
+  const pad = n => String(n).padStart(2, '0');
+  const deWeekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+
+  function escapeHTML(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function getVal(selector, fallbackName=null) {
+    if (jq && jq(selector).length) return jq(selector).val() || '';
+    const el = document.querySelector(selector) || (fallbackName ? formEl.querySelector(`[name="${fallbackName}"]`) : null);
+    return (el && 'value' in el) ? (el.value || '') : '';
+  }
+
+  function formatDeDateTime(val) {
+    if (!val) return '—';
+    let d = new Date(val);
+    if (isNaN(d)) {
+      const [datePart, timePart] = String(val).split('T');
+      const [Y,M,D] = (datePart||'').split('-').map(Number);
+      const [h,m]   = (timePart||'').split(':').map(Number);
+      d = new Date(Y || 0, (M||1)-1, D || 1, h || 0, m || 0);
+    }
+    if (isNaN(d)) return escapeHTML(val);
+    return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${deWeekdays[d.getDay()]} - ${pad(d.getHours())}:${pad(d.getMinutes())} Uhr`;
+  }
+
+  function formatDeDate(val) {
+    if (!val) return '—';
+    const [Y,M,D] = String(val).split('-').map(Number);
+    if (!Y || !M || !D) return escapeHTML(val);
+    return `${pad(D)}.${pad(M)}.${Y}`;
+  }
+
+  function formatEUR(val) {
+    if (val == null || val === '') return '—';
+    const num = Number(String(val).replace(/\./g,'').replace(',', '.'));
+    if (isNaN(num)) return escapeHTML(val);
+    const parts = num.toFixed(2).split('.');
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const decPart = parts[1];
+    return `${intPart},${decPart}`;
+  }
+
+  function yn(b) { return (String(b).toLowerCase() === 'true' || b === true || b === '1') ? 'Ja' : 'Nein'; }
+
+  // "Stuttgart-Ost" -> "Stuttgart"
+  function firstWord(str) {
+    if (!str) return '';
+    const m = String(str).trim().match(/^[^\s/-]+/u);
+    return m ? m[0] : String(str).trim();
+  }
+
+  // ---------- STEP 1 (form etiketleriyle) ----------
+  const randevu   = formatDeDateTime(fd.get('randevu_tarihi') || '');
+  const firma     = fd.get('firma_adi') || '';
+  const isim      = fd.get('musteri_isim') || '';
+  const soyisim   = fd.get('musteri_soyisim') || '';
+  const dogumDT   = fd.get('musteri_dogum_tarihi') || '';
+  const geburts   = dogumDT ? formatDeDate(dogumDT) : '—';
+
+  // Adres — TEK SATIR: "PLZ Adres, Ort / StadtFirstWord"
+  const adresRaw  = (fd.get('adres') || '').trim();            // Adres (textarea)
+  const plz       = (fd.get('posta_kodu') || '').trim();       // PLZ
+  const ortRaw    = (getVal('#sehir','sehir') || '').trim();   // Ort (hidden)
+  const stadtRaw  = (getVal('#ilce','ilce') || '').trim();     // Stadt
+  const stadtFW   = firstWord(stadtRaw);
+
+  const leftAddr  = [plz, adresRaw].filter(Boolean).join(' ').trim();
+  let rightAddr   = '';
+  if (ortRaw && stadtFW) rightAddr = `${ortRaw} / ${stadtFW}`;
+  else if (ortRaw)       rightAddr = ortRaw;
+  else if (stadtFW)      rightAddr = stadtFW;
+
+  const adresInline = [leftAddr, rightAddr].filter(Boolean).join(', ') || '—';
+
+  const tel       = (fd.get('telefon') || '').trim();
+  const telOk     = yn(fd.get('telefon_onayli_mi'));
+  const email     = (fd.get('email') || '').trim();
+  const mailOk    = yn(fd.get('email_onayli_mi'));
+
+  // ---------- STEP 2 ----------
+  const medeniMap = { 'Bekar':'Ledig','Evli':'Verheiratet','Boşanmış':'Geschieden','Dul':'Verwitwet','Kayıtlı Ortaklık':'Eingetragene Partnerschaft','Diğer':'Andere' };
+  const medeniDE  = medeniMap[fd.get('medeni_durum')] || fd.get('medeni_durum') || '—';
+
+  const cocukSayisiRaw = fd.get('aile_cocuk_sayisi');
+  const cocukSayisi    = (cocukSayisiRaw === null || cocukSayisiRaw === undefined || cocukSayisiRaw === '') ? '0' : String(cocukSayisiRaw);
+
+  const sigMap     = { 'Özel':'Privat', 'Yasal':'Gesetzlich', 'Sigorta Yok':'Nicht Versichert' };
+  const sigDE      = sigMap[fd.get('sigorta')] || fd.get('sigorta') || '—';
+
+  const DEFAULT_LABEL = 'Gesellschaft auswählen';
+  const compLabelEl   = document.getElementById('sigorta_btn_label');
+  const sirketAdiRaw  = ((compLabelEl && compLabelEl.textContent) ? compLabelEl.textContent : '').trim();
+  const sirketText    = (sirketAdiRaw && sirketAdiRaw !== DEFAULT_LABEL) ? sirketAdiRaw : '';
+
+  const sigBas    = formatDeDate(fd.get('sigorta_baslangic_tarihi') || '');
+  const sigKatki  = formatEUR(fd.get('sigorta_katki_payi'));
+  const sigVadeRaw = fd.get('sigorta_tarife_vadesi') || '';
+  const sigVade = sigVadeRaw ? (getVal('#sigorta_alt_select') || sigVadeRaw) : '—';
+  const sigKatilim= formatEUR(fd.get('sigorta_katilim_payi'));
+  const sigEkYazi = (fd.get('sigorta_ek_yazi') || '').trim();
+
+  // ---------- STEP 3 ----------
+  const esMap        = { 'Özel/Ortak Sigortalı':'Privat/mitversichert', 'Yasal/Ortak Sigortalı':'Gesetzlich/mitversichert' };
+  const esSigortaDE  = esMap[fd.get('es_cocuk_sigorta')] || fd.get('es_cocuk_sigorta') || '—';
+  const esYasiRaw    = fd.get('es_yasi');
+  const esYasi       = (esYasiRaw === null || esYasiRaw === undefined || esYasiRaw === '') ? '—' : String(esYasiRaw);
+
+  const agesInputs   = document.querySelectorAll('input[name="cocuk_yasi[]"]');
+  const cocukYaslari = [...agesInputs].map(i => (i.value||'').trim()).filter(Boolean).join(', ') || '—';
+
+  // ---------- STEP 4 ----------
+  const paylasimNotu = (fd.get('paylasim_notu') || '').trim();
+
+  // ---------- RENDER (Eski yapı korunur; sadece etiketler formdakiyle aynı) ----------
+  const sections = [];
+  
+  // Eksik değişkenleri tanımla
+  const CINSIYET_TR2DE = { 'Erkek': 'Herr', 'Kadın': 'Frau' };
+  const cinsiyetVal = (fd.get('musteri_cinsiyet') || '').trim();
+  const cinsiyet = CINSIYET_TR2DE[cinsiyetVal] || '—';
+  const aileAktif = '—'; // AN (Aktif) durumu - form alanı yok
+  const aileS = '—'; // S (Sigortalı) durumu - form alanı yok
+
+  // Kundenübersicht (etiketler: Termin am, Firmenname, Name, Nachname, Geburtsdatum, Adresse, Tel, E-Mail)
+  sections.push(`
+    <div class="mb-4">
+      <div class="fw-semibold text-muted mb-2">Kundenübersicht</div>
+      <ul class="mb-0">
+        <li><strong>Termin am:</strong> ${escapeHTML(randevu)}</li>
+        <li><strong>Firmenname:</strong> ${escapeHTML(firma || '—')}</li>
+        <li><strong>Geschlecht:</strong> ${escapeHTML(cinsiyet || '—')}</li>
+        <li><strong>Name:</strong> ${escapeHTML(isim || '—')}</li>
+        <li><strong>Nachname:</strong> ${escapeHTML(soyisim || '—')}</li>
+        <li><strong>Geburtsdatum:</strong> ${escapeHTML(geburts)}</li>
+        <li><strong>Adresse:</strong> ${escapeHTML(adresInline)}</li>
+        <li><strong>Handy:</strong> ${escapeHTML(tel || '—')} ${tel ? (telOk==='Ja'?'(Bestätigt)':'(Nicht bestätigt)') : ''}</li>
+        <li><strong>E-Mail:</strong> ${escapeHTML(email || '—')} ${email ? (mailOk==='Ja'?'(Bestätigt)':'(Nicht bestätigt)') : ''}</li>
+      </ul>
+    </div>
+  `);
+
+  // Familienstand & Versicherung (etiketler formdaki alanlarla uyumlu)
+  sections.push(`
+    <div class="mb-4">
+      <div class="fw-semibold text-muted mb-2">Familienstand & Versicherung</div>
+      <ul class="mb-0">
+        <li><strong>Familienstand:</strong> ${escapeHTML(medeniDE)}</li>
+        <li><strong>Anzahl der Kinder:</strong> ${escapeHTML(cocukSayisi)}</li>
+        <li><strong>Beschäftigungsstatus:</strong> ${escapeHTML(fd.get('calisma_durumu') || '—')}</li>
+        <li><strong>Status: AN:</strong> ${escapeHTML(aileAktif)}</li>
+        <li><strong>S:</strong> ${escapeHTML(aileS)}</li>
+        <li><strong>Versicherungsart:</strong> ${escapeHTML(sigDE)}</li>
+        <li><strong>Versicherungsgesellschaft:</strong> ${escapeHTML(sirketText || '—')}</li>
+        <li><strong>Seit wann:</strong> ${escapeHTML(sigBas)}</li>
+        <li><strong>Beitrag (für Alle Mit/Versicherten):</strong> ${sigKatki !== '—' ? `${sigKatki} €` : '—'}</li>
+        <li><strong>Tarif:</strong> ${escapeHTML(sigVade)}</li>
+        <li><strong>Selbstbeteiligung:</strong> ${sigKatilim !== '—' ? `${sigKatilim} €` : '—'}</li>
+        <li><strong>Zusätzliche Versicherungsnotiz:</strong> ${sigEkYazi ? escapeHTML(sigEkYazi) : '—'}</li>
+      </ul>
+    </div>
+  `);
+
+  // Ehepartner & Kinder (formdaki etiketlerle)
+  sections.push(`
+    <div class="mb-4">
+      <div class="fw-semibold text-muted mb-2">Ehepartner & Kinder</div>
+      <ul class="mb-0">
+        <li><strong>Versicherungsstatus des Ehepartners:</strong> ${escapeHTML(esSigortaDE)}</li>
+        <li><strong>Alter des Ehepartners:</strong> ${escapeHTML(esYasi)}</li>
+        <li><strong>Kinderalter:</strong> ${escapeHTML(cocukYaslari)}</li>
+      </ul>
+    </div>
+  `);
+
+  // Notlar (formdaki etiketle)
+  sections.push(`
+    <div class="mb-4">
+      <div class="fw-semibold text-muted mb-2">Benutzernotiz</div>
+      <div>${paylasimNotu ? escapeHTML(paylasimNotu) : '—'}</div>
+    </div>
+  `);
+
+  o.innerHTML = sections.join('\n');
+}
+
+// Değişimleri izle (özet anlık güncellensin)
+document.addEventListener('change', (e) => {
+  const formEl = document.getElementById('musteri_form');
+  if (formEl && formEl.contains(e.target)) {
+    // Medeni durum değiştiğinde ehepartner alanlarını kontrol et
+    if (e.target.name === 'medeni_durum') {
+      toggleEhepartnerFields();
+    }
+    buildSummary();
+  }
+});
+document.addEventListener('input', (e) => {
+  const formEl = document.getElementById('musteri_form');
+  if (formEl && formEl.contains(e.target)) buildSummary();
+});
+
+// İlk yüklemede çalıştır
+window.addEventListener('DOMContentLoaded', () => { buildSummary(); });
+
+// Dışarıdan tetiklemek için:
+window.buildSummary = buildSummary;
+  // Başlangıç adımı
+  setStep(1);
+})();
+</script>
+<script>
+// ===========================
+// Kaskadlı Select Mantığı (Almanca metinli)
+// ===========================
+(function(){
+  // Mevcut picker değişkenlerin (sende zaten var):
+  // pickerBtn, pickerModal, grid, emptyHint, searchInput,
+  // inputHidden (#sigorta_sirket), btnLabel, btnLogo, logoWrap, btnClear, DEFAULT_LABEL,
+  // ensureBsModal(), loadCompanies(), renderGrid(), allCompanies, bsModalInstance
+
+  // Değişkenleri yeniden tanımla (IIFE scope'u için)
+  const inputHidden = document.getElementById('sigorta_sirket');
+  const btnLabel = document.getElementById('sigorta_btn_label');
+  const logoWrap = document.getElementById('sigorta_logo_wrap');
+  const btnClear = document.getElementById('btn_sigorta_temizle');
+  const DEFAULT_LABEL = 'Gesellschaft auswählen';
+  
+  // Global değişkenlere erişim (window objesi üzerinden)
+  const allCompanies = window.allCompanies || [];
+  const loadCompanies = window.loadCompanies;
+  const pickerModal = document.getElementById('modal_sigorta_picker');
+  let bsModalInstance = null;
+
+  function ensureBsModal(){
+    if (!bsModalInstance && window.bootstrap?.Modal && pickerModal) {
+      bsModalInstance = new bootstrap.Modal(pickerModal);
+    }
+  }
+
+  // Yeni elemanlar:
+  const sigortaType = document.getElementById('sigorta');                // Versicherungsart select
+  const altSelect   = document.getElementById('sigorta_alt_select');     // Untergesellschaft select
+  const pickerBtn   = document.getElementById('btn_sigorta_sec');        // Picker butonu
+
+  // Picker buton durumunu güncelle
+  function updatePickerBtnState() {
+    const selectedValue = sigortaType?.value;
+    if (selectedValue === "Sigorta Yok") {
+      if (pickerBtn) pickerBtn.disabled = true; // Buton tıklanamaz
+    } else {
+      if (pickerBtn) pickerBtn.disabled = false; // Buton aktif
+    }
+  }
+
+  // Sayfa yüklenirken ve her seçim değiştiğinde durumu güncelle
+  if (sigortaType) {
+    sigortaType.addEventListener('change', updatePickerBtnState);
+    // İlk yüklemede de kontrol et
+    updatePickerBtnState();
+  }
+
+  // 1) Versicherungsart değişince: seçimi temizle + tarif dropdown'ını boşalt + şirketleri yeniden yükle
+  if (sigortaType) {
+    sigortaType.addEventListener('change', () => {
+      // Gesellschaft seçimini sıfırla
+      if (inputHidden) inputHidden.value = '';
+      if (btnLabel) btnLabel.textContent = DEFAULT_LABEL;
+      // if (btnLogo) btnLogo.src = '';
+      if (logoWrap) logoWrap.classList.add('d-none');
+      if (btnClear) btnClear.classList.add('d-none');
+
+      // Tarif select'i boşalt
+      if (altSelect) {
+        altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+      }
+
+      // Şirketleri yeniden yükle (eğer modal açıksa veya şirketler yüklenmişse)
+      if (allCompanies.length > 0) {
+        loadCompanies();
+      }
+      
+      // Özet alanını güncelle
+      if (window.buildSummary) {
+        window.buildSummary();
+      }
+    });
+  }
+
+  // 2) Modal her açıldığında, tür filtresine göre şirketleri yükle
+  function loadCompaniesByType() {
+    // Mevcut loadCompanies() fonksiyonu zaten sigorta tipini kontrol ediyor
+    loadCompanies(); // grid'i doldurur
+  }
+
+  // Picker butonuna modal açmadan önce bağla
+  if (pickerBtn) {
+    pickerBtn.addEventListener('click', () => {
+      ensureBsModal();
+      loadCompaniesByType();
+      bsModalInstance?.show();
+    });
+  }
+
+  // 3) Seçilen Gesellschaft'a göre Untergesellschaft'ları getirip doldur
+  async function loadUntergesellschaften(companyId) {
+    if (!altSelect) return;
+    if (!companyId) {
+      altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+      return;
+    }
+    altSelect.innerHTML = '<option value="">Wird geladen…</option>';
+    try {
+      const r = await fetch("/ajax/sigorta-alt-list/?sirket_id=" + encodeURIComponent(companyId), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const d = await r.json();
+      const items = (d?.ok && Array.isArray(d.items)) ? d.items : [];
+      if (!items.length) {
+        altSelect.innerHTML = '<option value="">Kein Tarif vorhanden</option>';
+        return;
+      }
+      altSelect.innerHTML = '<option value="">Bitte Tarif auswählen</option>';
+      items.forEach(it => {
+        const opt = document.createElement('option');
+        opt.value = it.id;          // FK id'yi gönderiyoruz
+        opt.textContent = it.isim;  // Almanca ad set ediyorsan burada o gelir
+        altSelect.appendChild(opt);
+      });
+    } catch(e) {
+      altSelect.innerHTML = '<option value="">Fehler beim Laden</option>';
+    }
+  }
+
+  // Global erişim için window objesine ata
+  window.loadUntergesellschaften = loadUntergesellschaften;
+
+  // 4) Şirket seçimi tamamlandığında (MEVCUT picker kodunun içinde) altları yükle
+  // Aşağıdaki satırı, senin renderGrid(list) içinde .sigorta-card click handler’ına EKLE:
+  //  (Mevcut kodunu bozmuyor; sadece sonuna 1 satır ekliyorsun.)
+  //
+  //   loadUntergesellschaften(id);
+
+  // 5) "Temizle" (Gesellschaft sil) butonuna basıldığında tarifi de temizle
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      if (altSelect) {
+        altSelect.innerHTML = '<option value="">Bitte zuerst eine Gesellschaft wählen</option>';
+      }
+      // Özet alanını güncelle
+      if (window.buildSummary) {
+        window.buildSummary();
+      }
+    });
+  }
+
+  // 6) Sayfa edit modda açıldıysa, mevcut Gesellschaft id’yi bulup tarifleri yükle
+  if (inputHidden?.value) {
+    loadUntergesellschaften(inputHidden.value);
+  }
+})();
+</script>

@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Firma anzeigen – Unternehmens- & SMTP-Details{% endblock %}
+{% block description %}Sehen Sie alle Firmendaten (Name, Logo, Kontakt, Adresse) sowie SMTP-Einstellungen (Host, Port, Benutzername, Sicherheit) übersichtlich an einem Ort.{% endblock %}
+
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar_company_view">
+  <div id="kt_toolbar_container_company_view" class="container-xxl d-flex flex-stack flex-wrap">
+    <h3 class="text-white fw-bolder fs-2qx me-5">Firma anzeigen</h3>
+  </div>
+</div>
+<!--end::Toolbar-->
+
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+  <div class="content flex-row-fluid" id="kt_content">
+    <div class="d-flex flex-column flex-xl-row">
+      <div class="flex-lg-row-fluid">
+        {% if not firma %}
+          <div class="alert alert-warning mb-7" role="alert">
+            Es wurde noch keine <strong>Firma</strong> hinterlegt.
+          </div>
+        {% endif %}
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        {% if not smtp %}
+          <div class="alert alert-info mb-7" role="alert">
+            Es wurden noch keine <strong>SMTP-Einstellungen</strong> hinterlegt.
+          </div>
+        {% endif %}
+        {% endif %}
+
+        <!--begin::Firmendaten-->
+        <div class="card mb-5 mb-xl-10" id="kt_company_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Firmendaten</h3>
+            </div>
+            <a href="{% url 'firma_duzenle' %}" class="btn btn-primary align-self-center">Bearbeiten</a>
+          </div>
+
+          <div class="card-body p-9">
+            <!-- Firmenname -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Firmenname</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if firma %}{{ firma.isim }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Slogan</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if firma %}{{ firma.slogan }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Logo -->
+            <div class="row mb-7">
+                <label class="col-lg-4 fw-semibold text-muted">Logo</label>
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-start gap-4">
+                        <!-- Önizleme kutusu -->
+                        <div class="rounded border bg-light-subtle shadow-sm p-3"
+                            style="width: 140px; height: 100px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                            {% if firma and firma.logo %}
+                            <img src="{{ firma.logo.url }}" alt="Firmenlogo" loading="lazy"
+                                style="max-width:100%; max-height:100%; object-fit:contain;">
+                            {% else %}
+                            <div class="text-muted small">Kein Logo hochgeladen</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Icon -->
+            <div class="row mb-7">
+                <label class="col-lg-4 fw-semibold text-muted">Icon</label>
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-start gap-4">
+                        <!-- Önizleme kutusu (dama zemin) -->
+                        <div class="rounded border shadow-sm p-3 checkered"
+                            style="width: 100px; height: 70px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                            {% if firma and firma.icon %}
+                            <!-- <img src="{{ firma.icon.url }}" alt="Firmenicon" loading="lazy" -->
+                                style="max-width:100%; max-height:100%; object-fit:contain;">
+                            {% else %}
+                            <div class="text-muted small">Kein Icon hochgeladen</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telefonnummer -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Telefonnummer</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if firma and firma.telefon %}{{ firma.telefon }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Adresse -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Adresse</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if firma and firma.adres %}{{ firma.adres }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- SMS-Text -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">SMS</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if firma and firma.sms_yazisi %}{{ firma.sms_yazisi }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+                
+          </div>
+        </div>
+        <!--end::Firmendaten-->
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::E-Mail-Benachrichtigungen-->
+        <div class="card mb-5 mb-xl-10" id="kt_email_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">E-Mail-Benachrichtigungen</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+            <!-- E-Mail-Bestätigung -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">E-Mail-Bestätigung</label>
+              <div class="col-lg-8 d-flex align-items-center">
+                {% if firma and firma.email_dogrulama %}
+                  <span class="badge badge-success">Aktiv</span>
+                {% else %}
+                  <span class="badge badge-secondary">Inaktiv</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Bestätigungstext -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Bestätigungstext</label>
+              <div class="col-lg-8">
+                {% if firma and firma.email_onay_yazisi %}
+                  <div class="fw-bold fs-6 text-dark">
+                    {{ firma.email_onay_yazisi|safe }}
+                  </div>
+                {% else %}
+                  <span class="fw-bold fs-6 text-dark">—</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--end::E-Mail-Benachrichtigungen-->
+        {% endif %}
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::Berechtigungen-->
+        <div class="card mb-5 mb-xl-10" id="kt_email_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Berechtigungen</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+          </div>
+        </div>
+        <!--end::Berechtigungen-->
+        {% endif %}
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::Durum-Einstellungen-->
+        <div class="card mb-5 mb-xl-10" id="kt_smtp_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">SMTP-Einstellungen</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+            <!-- Host -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">SMTP-Server</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if smtp %}{{ smtp.host }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Port -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Port</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if smtp %}{{ smtp.port }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Benutzername -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Benutzername</label>
+              <div class="col-lg-8">
+                <span class="fw-bold fs-6 text-dark">
+                  {% if smtp and smtp.username %}{{ smtp.username }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <!-- Passwort (maskiert) -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Passwort</label>
+              <div class="col-lg-8 d-flex align-items-center">
+                <span class="fw-bold fs-6 text-dark">********</span>
+                <span class="badge badge-light ms-3">Aus Sicherheitsgründen verborgen</span>
+              </div>
+            </div>
+
+            <!-- Sicherheit -->
+            <div class="row mb-7">
+              <label class="col-lg-4 fw-semibold text-muted">Sicherheit</label>
+              <div class="col-lg-8 d-flex align-items-center gap-2">
+                <span class="fw-bold fs-6 text-dark me-3">
+                  TLS:
+                  {% if smtp and smtp.use_tls %}
+                    <span class="badge badge-success">Ja</span>
+                  {% else %}
+                    <span class="badge badge-secondary">Nein</span>
+                  {% endif %}
+                </span>
+                <span class="fw-bold fs-6 text-dark">
+                  SSL:
+                  {% if smtp and smtp.use_ssl %}
+                    <span class="badge badge-success">Ja</span>
+                  {% else %}
+                    <span class="badge badge-secondary">Nein</span>
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!--end::SMTP-Einstellungen-->
+        {% endif %}
+
+        <!--begin::Durum-Einstellungen-->
+        <div class="card mb-5 mb-xl-10" id="kt_durum_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Formstatus</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+            {% if form_durumlari %}
+              {% for d in form_durumlari %}
+                <div class="row mb-7">
+                  <label class="col-lg-4 fw-semibold text-muted">Status {{ forloop.counter }}</label>
+                  <div class="col-lg-8">
+                    <span class="fw-bold fs-6 text-dark">{{ d.isim }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-center text-muted py-10">
+                Keine Status vorhanden.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <!--end::Durum-Einstellungen-->
+
+        <!--begin::Versicherungsgesellschaften-->
+        <div class="card mb-5 mb-xl-10" id="kt_insurance_companies">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Versicherungsgesellschaften</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+            {% if sigorta_sirketleri %}
+              <div class="row g-6">
+                {% for s in sigorta_sirketleri %}
+                  <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                    <div class="d-flex align-items-center p-5 border rounded-3 h-100">
+                      <!-- Logo / Platzhalter -->
+                      <div class="symbol me-4 flex-shrink-0" style="width:45px; height:45px;">
+                        {% if s.resim %}
+                          <img src="{{ s.resim.url }}" alt="{{ s.isim }} Logo" class="rounded-2" style="width:100%; height:100%; object-fit:contain; background:#fff; padding:2px;" loading="lazy">
+                        {% else %}
+                          <div class="d-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small">
+                            Logo
+                          </div>
+                        {% endif %}
+                      </div>
+                      <!-- Text -->
+                      <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                          <span class="fw-bold fs-6 text-dark text-truncate" title="{{ s.isim }}">{{ s.isim }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="text-center text-muted py-10">
+                Keine Versicherungsgesellschaften vorhanden.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <!--end::Versicherungsgesellschaften-->
+
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::Footer-Inhalte-->
+        <div class="card mb-5 mb-xl-10" id="kt_footer_details_view">
+          <div class="card-header cursor-pointer">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Footer-Inhalte</h3>
+            </div>
+          </div>
+
+          <div class="card-body p-9">
+            {% if footer %}
+              <div class="row g-6">
+                <!-- Linker Inhalt -->
+                <div class="col-12 col-lg-4">
+                  <div class="border rounded bg-light p-5 h-100">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="fa-regular fa-square text-muted me-2"></i>
+                      <span class="fw-semibold text-muted">Linker Inhalt</span>
+                    </div>
+                    <div class="footer-content fs-6 text-dark">
+                      {{ footer.icerik_sol|default_if_none:""|safe }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Rechter Button + Modal -->
+                <div class="col-12 col-lg-4">
+                  <div class="border rounded bg-light p-5 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="fa-regular fa-square text-muted me-2"></i>
+                      <span class="fw-semibold text-muted">Rechter Button</span>
+                    </div>
+
+                    {% if footer.buton_yazi_sag %}
+                      <div class="mb-3">
+                        <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#footerRightModal">
+                          {{ footer.buton_yazi_sag }}
+                        </a>
+                      </div>
+                      <div class="small text-muted mt-auto">
+                        Modal-Inhalt wird beim Klick angezeigt.
+                      </div>
+                    {% else %}
+                      <div class="text-muted">Kein Button definiert.</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Rechter Button (Spalte 2) + Modal -->
+                <div class="col-12 col-lg-4">
+                  <div class="border rounded bg-light p-5 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="fa-regular fa-square text-muted me-2"></i>
+                      <span class="fw-semibold text-muted">Rechter Button (Spalte 2)</span>
+                    </div>
+
+                    {% if footer.buton_yazi_sag_iki %}
+                      <div class="mb-3">
+                        <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#footerRight2Modal">
+                          {{ footer.buton_yazi_sag_iki }}
+                        </a>
+                      </div>
+                      <div class="small text-muted mt-auto">
+                        Modal-Inhalt wird beim Klick angezeigt.
+                      </div>
+                    {% else %}
+                      <div class="text-muted">Kein zweiter Button definiert.</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              <div class="text-center text-muted py-10">
+                Kein Footer-Inhalt vorhanden.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <!--end::Footer-Inhalte-->
+        {% endif %}
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+<!--end::Container-->
+{% endblock %}

@@ -1,0 +1,34 @@
+<!--begin::Footer-->
+<div class="footer py-4" id="kt_footer">
+  <!--begin::Container-->
+  <div class="container-xxl d-flex flex-row align-items-center justify-content-between flex-nowrap overflow-auto">
+    <!--begin::Copyright-->
+    <div class="text-dark me-3 text-nowrap pt-5">
+      {{ footer.icerik_sol|safe }}
+    </div>
+    <!--end::Copyright-->
+
+    <!--begin::Menu-->
+    <ul class="menu menu-gray-600 menu-hover-primary fw-bold d-flex flex-row flex-nowrap gap-3 mb-0 ps-0 text-nowrap">
+
+      {% if footer.buton_yazi_sag %}
+      <li>
+        <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#footerRightModal">
+          {{ footer.buton_yazi_sag }}
+        </a>
+      </li>
+      {% endif %}
+      {% if footer.buton_yazi_sag_iki %}
+      <li>
+        <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#footerRight2Modal">
+          {{ footer.buton_yazi_sag_iki }}
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+    <!--end::Menu-->
+  </div>
+  <!--end::Container-->
+</div>
+<!--end::Footer-->
+{% include "widgets/footer_modals.html" %}

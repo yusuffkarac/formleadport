@@ -1,0 +1,377 @@
+{% load static %}<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Formulardetails</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  :root{
+    --bg:#f6f7f9; --surface:#fff; --border:#eef0f2; --text:#1f2937; --muted:#6b7280;
+    --success:#198754; --warn:#b8860b; --danger:#b91c1c;
+  }
+
+  /* Base */
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:Inter,system-ui,Segoe UI,Arial,Helvetica,sans-serif;}
+  .page{padding:16px;max-width:1240px;margin:0 auto;}
+  .surface{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:12px;margin-bottom:12px;box-shadow:0 0.5px 1px rgba(20,20,31,.06), 0 8px 24px rgba(20,20,31,.03);}
+  .section-title{font-weight:600;margin:0 0 .4rem;}
+  .small{font-size:.875rem;}
+  .muted{color:var(--muted);}
+  .fw-600{font-weight:600;}
+  .mb-4{margin-bottom:1rem;}
+  .mt-12{margin-top:.75rem;}
+  .text-right{text-align:right;}
+  .text-center{text-align:center;}
+
+  /* Grid (responsive) */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width: 900px){
+    .grid-2{grid-template-columns:1fr;}
+  }
+
+  /* Header (3 sütun) */
+  .header-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    align-items:start;
+    gap:16px;
+  }
+  .header-row > div:first-child{ text-align:left;  justify-self:start; align-self:start; }
+  .header-row > div:nth-child(2){   text-align:center;justify-self:center;align-self:center; }
+  .header-row > div:last-child{     text-align:right; justify-self:end;  align-self:start; }
+
+  @media (max-width: 900px){
+    .header-row{grid-template-columns:1fr; text-align:center;}
+    .header-row .text-right{ text-align:center; }
+  }
+
+  /* Brand */
+  .brand-box{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:0;
+  }
+  .brand-logo{max-height:40px;width:auto;object-fit:contain;display:inline-block;margin-bottom:6px;}
+
+  /* Key/Value list – GRID */
+  dl.kv{
+    display:grid;
+    grid-template-columns: 1fr 1.2fr;
+    column-gap:12px;
+    row-gap:.18rem;
+    margin:0;
+  }
+  dl.kv dt, dl.kv dd{margin:0;padding:.18rem 0;}
+  dl.kv dt{color:var(--muted);font-weight:500;}
+
+  dl.kv dd, dl.kv dd *{word-break:break-word;overflow-wrap:anywhere;}
+
+  /* Insurer */
+  .insurer{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+  .insurer-logo{max-width:90px;max-height:50px;object-fit:contain;}
+
+  /* Badge */
+  .badge{display:inline-block;border-radius:999px;padding:.25rem .5rem;border:1px solid var(--border);font-size:.8rem;}
+  .badge.success{background:#e9f7ef;color:var(--success);border-color:#d5efdf;}
+  .badge.warn{background:#fff6db;color:var(--warn);border-color:#f5e8b2;}
+  .badge.danger{background:#fde8e8;color:var(--danger);border-color:#f7caca;}
+
+  /* Notes */
+  .note-list{list-style:none;padding:0;margin:0;}
+  .note-list li{padding:8px 10px;border:1px solid var(--border);border-radius:8px;
+    margin-bottom:6px;background:#fcfcfd;font-size:.9rem;}
+  .note-meta{font-size:.8rem;color:var(--muted);margin-bottom:4px;}
+
+  /* Compact */
+  .surface.compact { padding:10px; }
+  .surface.compact .section-title{ margin:0 0 .3rem; font-size:.95rem; }
+  .surface.compact dl.kv dt,
+  .surface.compact dl.kv dd{ padding:.12rem 0; font-size:.9rem; line-height:1.25; }
+
+  /* Actions */
+  .page-actions{display:flex;justify-content:flex-end;margin-top:16px;}
+  @media (max-width: 600px){
+    .page-actions{justify-content:center;}
+  }
+  .btn-download{
+    appearance:none;border:0;cursor:pointer;border-radius:999px;padding:10px 14px;
+    background:#111827;color:#fff;font-weight:600;display:flex;align-items:center;gap:8px;
+    box-shadow:0 6px 16px rgba(0,0,0,.15);transition:transform .15s ease, filter .15s ease;
+  }
+  .btn-download:hover{filter:brightness(1.05);transform:translateY(-1px);}
+  .btn-download:active{transform:translateY(0);}
+  .btn-download svg{width:18px;height:18px}
+
+  /* Print (A4 portrait) */
+  @media print{
+    .print-hide{display:none !important;}
+    @page{size:A4 portrait; margin:10mm;}
+    body{background:#fff;}
+    html{font-size:15px;}
+    .page{padding:0;}
+
+    .surface{box-shadow:none;border-color:#ddd;padding:10px;margin-bottom:10px;
+             break-inside: avoid; page-break-inside: avoid;}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .section-title{margin-bottom:.25rem;}
+
+    .grid-2 > div{ display: contents; }
+
+    .sec-kunden   { grid-column: 1; }
+    .sec-familie  { grid-column: 2; }
+    .sec-versicherung { grid-column: 1 / -1; }
+    .sec-notizen      { grid-column: 1 / -1; }
+
+    .header-row{
+      display:grid !important;
+      grid-template-columns:1fr 1fr 1fr !important;
+      align-items:start !important;
+      gap:16px !important;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+    .header-row > div:first-child{
+      text-align:left !important;
+      justify-self:start !important;
+      align-self:start !important;
+    }
+    .header-row > div:nth-child(2){
+      text-align:center !important;
+      justify-self:center !important;
+      align-self:center !important;
+    }
+    .header-row > div:last-child{
+      text-align:right !important;
+      justify-self:end !important;
+      align-self:start !important;
+    }
+    .header-row .text-right{ text-align:right !important; }
+
+    .brand-box{ min-height:0 !important; }
+    .brand-logo{ max-height:40px; width:auto; object-fit:contain; }
+
+    .surface.mb-4{ break-inside:avoid; page-break-inside:avoid; }
+  }
+</style>
+
+
+</head>
+<body>
+  <div class="page">
+
+    <!-- ÜST KART -->
+    <section class="surface mb-4">
+      <div class="header-row">
+        <!-- Sol -->
+        <div>
+          <div class="muted small">Erstellt von</div>
+          <div class="fw-600">{{ kullanici_fullname|default:"—" }}</div>
+          <div class="muted">{{ olusturma_human|default:"—" }}</div>
+        </div>
+
+        <!-- Orta: Firma -->
+        <div>
+          <div class="brand-box">
+            {% if firma_logo_url %}
+              <img src="{{ firma_logo_url }}" class="brand-logo" alt="{{ firma_isim }} Logo">
+            {% endif %}
+            <div class="fw-600 text-center">{{ firma_isim }}</div>
+          </div>
+        </div>
+
+        <!-- Sağ: Termin + Durum -->
+        <div class="text-right">
+          <div class="muted small">Termin Datum</div>
+          <div class="fw-600">{{ randevu_human|default:"—" }}</div>
+          <div class="muted small" style="margin-top:4px;">Terminart</div>
+          <div class="fw-600">{{ randevu_tipi|default:"—" }}</div>
+          <div class="mt-12">
+            {% with st=durum_human %}
+              {% if st %}
+                {% with st_l=st|lower %}
+                  <span class="badge
+                    {% if 'termin' in st_l or 'rendezvous' in st_l or 'bestät' in st_l %}success
+                    {% elif 'wart' in st_l or 'offen' in st_l or 'bekliyor' in st_l %}warn
+                    {% elif 'abgelehnt' in st_l or 'iptal' in st_l or 'ret' in st_l %}danger
+                    {% endif %}">{{ st }}</span>
+                {% endwith %}
+              {% else %}
+                <span class="badge">—</span>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- İKİ SÜTUN: Sol/ Sağ -->
+    <div class="grid-2">
+      <!-- SOL SÜTUN -->
+      <div>
+        <!-- Kundenübersicht -->
+        <section class="surface compact sec-kunden">
+          <h6 class="section-title">Kundenübersicht</h6>
+          <dl class="kv">
+            <dt>Firmenname</dt><dd>{{ firma_adi|default:"—" }}</dd>
+            <dt>Name</dt><dd>{{ musteri_cinsiyet|default:"—" }} {{ musteri_tam_ad|default:"—" }}</dd>
+            <dt>Geburtsdatum</dt><dd>{{ dogum_human|default:"—" }}</dd>
+
+            <dt>Handy</dt>
+            <dd>
+              {% if telefon %}{{ telefon }}{% else %}—{% endif %}
+              {% if telefon_onayli_mi %} <span class="muted">(verifiziert)</span>{% endif %}
+            </dd>
+
+            <dt>Festnetz</dt>
+            <dd>{% if sabit_telefon %}{{ sabit_telefon }}{% else %}—{% endif %}</dd>
+
+            <dt>E-Mail</dt>
+            <dd>
+              {% if email %}{{ email }}{% else %}—{% endif %}
+              {% if email_onayli_mi %} <span class="muted">(verifiziert)</span>{% endif %}
+            </dd>
+
+            <dt>Adresse</dt>
+            <dd>
+              {% if adres or posta_kodu or il or ilce or ilce_first %}
+                {% if adres %}{{ adres }}<br>{% endif %}
+                {% with city=ilce_first|default:ilce %}
+                  {% if posta_kodu %}{{ posta_kodu }}{% endif %}{% if city %} {{ city }}{% endif %}{% if il %} / {{ il }}{% endif %}
+                {% endwith %}
+              {% else %}
+                —
+              {% endif %}
+            </dd>
+          </dl>
+        </section>
+
+      </div>
+
+      <!-- SAĞ SÜTUN -->
+      <div>
+        <!-- Familienstand & Versicherung -->
+        <section class="surface compact sec-versicherung">
+          <h6 class="section-title">Familienstand & Versicherung</h6>
+          <dl class="kv">
+            <dt>Versicherungsgesellschaft</dt>
+            <dd>
+              <div class="insurer">
+                {% if sigorta_sirket_logo %}
+                  <img class="insurer-logo" src="{{ sigorta_sirket_logo }}" alt="Logo">
+                {% endif %}
+                <span>{{ sigorta_sirket_ad|default:"—" }}</span>
+              </div>
+            </dd>
+
+            <dt>Versicherungsart</dt>
+            <dd>{{ sigorta_human|default:"—" }}</dd>
+
+            <dt>Seit wann</dt>
+            <dd>{{ sigorta_baslangic_human|default:"—" }}</dd>
+
+            <dt>Beitrag (für Alle Mit/Versicherten)</dt>
+            <dd>
+              {% if sigorta_katki_payi != "—" and sigorta_katki_payi %}
+                {{ sigorta_katki_payi }} €
+              {% else %}
+                —
+              {% endif %}
+            </dd>
+
+            <dt>Tarif</dt>
+            <dd>{{ sigorta_vade_human|default:"—" }}</dd>
+
+            <dt>Selbstbeteiligung</dt>
+            <dd>
+              {% if sigorta_katilim_payi != "—" and sigorta_katilim_payi %}
+                {{ sigorta_katilim_payi }} €
+              {% else %}
+                —
+              {% endif %}
+            </dd>
+
+            <dt>Mitversicherung (Ehe/Kind)</dt>
+            <dd>{{ es_cocuk_sigorta_human|default:"—" }}</dd>
+
+            <dt>Familienstand</dt>
+            <dd>{{ medeni_durum_human|default:"—" }}</dd>
+
+            <dt>Anzahl der Kinder</dt>
+            <dd>{{ aile_cocuk_sayisi|default:"—" }}</dd>
+
+            <dt>Beschäftigungsstatus</dt>
+            <dd>{{ calisma_durumu|default:"—" }}</dd>
+
+            <dt>Zusätzliche Versicherungsnotiz</dt>
+            <dd>{{ sigorta_ek_yazi|default:"—" }}</dd>
+          </dl>
+        </section>
+
+        <!-- Benutzernotiz -->
+        <section class="surface compact sec-notizen">
+          <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h6 class="section-title" style="margin:0;">Benutzernotiz</h6>
+            <!-- <div class="muted small">
+              {% if not_tarih_human %}{{ not_tarih_human }}{% else %}—{% endif %}
+            </div> -->
+          </div>
+
+          <ul class="note-list">
+            {% if not_ilk_icerik %}
+              <li>
+                <div class="note-meta">
+                  {% if not_kullanici_fullname %}{{ not_kullanici_fullname }} · {% endif %}
+                  <!-- {{ not_tarih_human }} -->
+                </div>
+                <div>{{ not_ilk_icerik|linebreaksbr }}</div>
+              </li>
+            {% else %}
+              <li class="muted">Kein Datensatz gefunden.</li>
+            {% endif %}
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- Sayfa sonu: İndir butonu -->
+    <div class="page-actions print-hide">
+      <button id="btn-save-pdf" class="btn-download" type="button" aria-label="Als PDF speichern">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"
+                stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Als PDF speichern
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+  (function(){
+    const btn = document.getElementById('btn-save-pdf');
+    if (!btn) return;
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function makeFilename(){
+      const raw = "{{ musteri_tam_ad|default:'Form'|escapejs }}";
+      const name = raw.trim().replace(/\s+/g,'_').replace(/[^\w\-.]+/g,'');
+      const d = new Date();
+      return `Formulardetails-${name}-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+    }
+
+    btn.addEventListener('click', function(){
+      const originalTitle = document.title;
+      document.title = makeFilename();
+      setTimeout(function(){
+        window.print();
+        setTimeout(function(){ document.title = originalTitle; }, 400);
+      }, 50);
+    });
+  })();
+  </script>
+</body>
+</html>

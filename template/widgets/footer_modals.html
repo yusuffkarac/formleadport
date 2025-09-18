@@ -1,0 +1,45 @@
+{% if footer %}
+  <!-- Modal 1 -->
+  {% if footer.buton_yazi_sag %}
+  <div class="modal fade" id="footerRightModal" tabindex="-1" aria-labelledby="footerRightModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold" id="footerRightModalLabel">
+            {{ footer.buton_yazi_sag }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+        <div class="modal-body">
+          {{ footer.buton_modal_icerik_sag|default_if_none:""|safe }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Modal 2 (optional) -->
+  {% if footer.buton_yazi_sag_iki %}
+  <div class="modal fade" id="footerRight2Modal" tabindex="-1" aria-labelledby="footerRight2ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold" id="footerRight2ModalLabel">
+            {{ footer.buton_yazi_sag_iki }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+        <div class="modal-body">
+          {{ footer.buton_modal_icerik_sag_iki|default_if_none:""|safe }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endif %}

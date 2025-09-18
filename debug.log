@@ -1,0 +1,28 @@
+INFO 2025-09-18 01:47:46,291 views 88985 6281031680 Şifremi unuttum sayfasına erişim
+INFO 2025-09-18 01:47:46,292 views 88985 6281031680 GET isteği - şifre sıfırlama formu gösteriliyor
+INFO 2025-09-18 01:47:51,540 views 88985 6196899840 Şifremi unuttum sayfasına erişim
+INFO 2025-09-18 01:47:51,542 views 88985 6196899840 POST isteği alındı - şifre sıfırlama
+INFO 2025-09-18 01:47:51,542 views 88985 6196899840 Email değeri: karac.yusuf1@gmail.com
+INFO 2025-09-18 01:47:51,570 views 88985 6196899840 Email formatı geçerli: karac.yusuf1@gmail.com
+INFO 2025-09-18 01:47:51,576 views 88985 6196899840 Kullanıcı bulundu: False
+INFO 2025-09-18 01:47:51,576 views 88985 6196899840 Kullanıcı bulunamadı: karac.yusuf1@gmail.com
+INFO 2025-09-18 01:47:51,576 views 88985 6196899840 Başarı mesajı gösterildi
+INFO 2025-09-18 01:48:14,856 views 88985 6196899840 Şifremi unuttum sayfasına erişim
+INFO 2025-09-18 01:48:14,857 views 88985 6196899840 GET isteği - şifre sıfırlama formu gösteriliyor
+INFO 2025-09-18 01:48:16,927 views 88985 6213726208 Şifremi unuttum sayfasına erişim
+INFO 2025-09-18 01:48:16,930 views 88985 6213726208 POST isteği alındı - şifre sıfırlama
+INFO 2025-09-18 01:48:16,931 views 88985 6213726208 Email değeri: 5t6gba@gmail.com
+INFO 2025-09-18 01:48:16,931 views 88985 6213726208 Email formatı geçerli: 5t6gba@gmail.com
+INFO 2025-09-18 01:48:16,946 views 88985 6213726208 Kullanıcı bulundu: True
+INFO 2025-09-18 01:48:16,946 views 88985 6213726208 Kullanıcı ID: 2, Email: 5t6gba@gmail.com
+INFO 2025-09-18 01:48:16,950 views 88985 6213726208 Eski token'lar temizlendi
+INFO 2025-09-18 01:48:16,950 views 88985 6213726208 Yeni token oluşturuldu: 0280188319...
+INFO 2025-09-18 01:48:16,953 views 88985 6213726208 Şifre sıfırlama talebi oluşturuldu: ID 3
+INFO 2025-09-18 01:48:16,953 views 88985 6213726208 Reset URL: http://localhost:8000/benutzer/passwort-zuruecksetzen/0280188319cdccc841082c6b5da474b1dc8588e5fcbbe8809f2f272ba988c20e/
+INFO 2025-09-18 01:48:16,954 views 88985 6213726208 SMTP ayarları: Host=smtp.ionos.de, Port=465, Username=admin@leadport.de, SSL=True, TLS=False
+INFO 2025-09-18 01:48:16,958 views 88985 6213726208 SMTP bağlantısı oluşturuldu
+INFO 2025-09-18 01:48:16,959 views 88985 6213726208 Email konusu: Passwort zurücksetzen – admin@leadport.de
+INFO 2025-09-18 01:48:16,972 views 88985 6213726208 Email template'leri render edildi
+INFO 2025-09-18 01:48:16,973 views 88985 6213726208 Email mesajı hazırlandı: From=admin@leadport.de, To=5t6gba@gmail.com
+INFO 2025-09-18 01:48:17,815 views 88985 6213726208 Email başarıyla gönderildi: 5t6gba@gmail.com, Sonuç: 1
+INFO 2025-09-18 01:48:17,816 views 88985 6213726208 Başarı mesajı gösterildi

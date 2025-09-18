@@ -1,0 +1,1006 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sistem Logları{% endblock %}
+{% block description %}Sistem logları ve aktivite geçmişi{% endblock %}
+
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar">
+  <div id="kt_toolbar_container" class="container-xxl d-flex flex-stack flex-wrap">
+    <h3 class="text-white fw-bolder fs-2qx me-5">Sistem Logları</h3>
+  </div>
+</div>
+<!--end::Toolbar-->
+
+<!--begin::Container-->
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+  <div class="content flex-row-fluid" id="kt_content">
+    
+    <!-- İstatistikler -->
+    <div class="row g-5 g-xl-8 mb-5">
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-primary">
+                <i class="ki-duotone ki-chart fs-2 text-primary">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Toplam Log</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.total_logs }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-success">
+                <i class="ki-duotone ki-calendar fs-2 text-success">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Bugünkü Loglar</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.today_logs }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-warning">
+                <i class="ki-duotone ki-time fs-2 text-warning">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Durum Değişiklikleri</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.status_changes }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-info">
+                <i class="ki-duotone ki-abstract-10 fs-2 text-info">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Form Oluşturma</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.form_creates }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-danger">
+                <i class="ki-duotone ki-pencil fs-2 text-danger">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Form Güncelleme</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.form_updates }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-xxl-2">
+        <div class="card h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="symbol symbol-40px me-4">
+              <span class="symbol-label bg-light-dark">
+                <i class="ki-duotone ki-trash fs-2 text-dark">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold fs-7 text-muted">Form Silme</div>
+              <div class="fs-1 fw-bolder text-gray-800">{{ stats.form_deletes }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="card mb-5">
+      <div class="card-header border-0 pt-6">
+        <div class="card-title">
+          <div class="d-flex align-items-center position-relative my-1">
+            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
+              <span class="path1"></span><span class="path2"></span>
+            </i>
+            <input type="text" id="searchInput" class="form-control form-control-solid w-250px ps-13" placeholder="Log ara..." value="{{ current_filters.search }}">
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body pt-0">
+        <form method="get" id="filterForm" class="row g-3 align-items-end">
+          <!-- Temel Filtreler -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Aksiyon Tipi</label>
+            <select name="action_type" class="form-select auto-filter">
+              <option value="">Tümü</option>
+              {% for value, label in action_types %}
+                <option value="{{ value }}" {% if current_filters.action_type == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Kullanıcı</label>
+            <select name="user_id" class="form-select auto-filter">
+              <option value="">Tümü</option>
+              {% for user in users %}
+                <option value="{{ user.id }}" {% if current_filters.user_id == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Son N Gün</label>
+            <select name="last_days" class="form-select auto-filter">
+              <option value="">Tümü</option>
+              <option value="1" {% if current_filters.last_days == "1" %}selected{% endif %}>Son 1 Gün</option>
+              <option value="7" {% if current_filters.last_days == "7" %}selected{% endif %}>Son 7 Gün</option>
+              <option value="30" {% if current_filters.last_days == "30" %}selected{% endif %}>Son 30 Gün</option>
+              <option value="90" {% if current_filters.last_days == "90" %}selected{% endif %}>Son 90 Gün</option>
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <div class="d-flex gap-4 align-items-center">
+              <button type="button" class="btn btn-success d-flex flex-column align-items-center px-4 py-3" onclick="exportLogs()">
+                <i class="ki-duotone ki-file-down fs-4 mb-3">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+                <span class="fs-6 fw-bold">Dışa Aktar</span>
+              </button>
+              <button type="button" class="btn btn-info d-flex flex-column align-items-center px-4 py-3" onclick="toggleAdvancedFilters()">
+                <i class="ki-duotone ki-setting-2 fs-4 mb-3">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+                <span class="fs-6 fw-bold" id="advancedToggleText">Gelişmiş</span>
+              </button>
+              <a href="{% url 'logs' %}" class="btn btn-secondary d-flex flex-column align-items-center px-4 py-3">
+                <i class="ki-duotone ki-cross fs-4 mb-3">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+                <span class="fs-6 fw-bold">Temizle</span>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Gelişmiş Filtreler (Gizli) -->
+          <div id="advancedFilters" class="mt-3" style="display: none;">
+            <div class="separator border-gray-300 mb-3"></div>
+            <h6 class="text-gray-700 fw-bold mb-3">Gelişmiş Filtreler</h6>
+            
+            <div class="row g-3">
+              <!-- İlk Satır -->
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Önem Derecesi</label>
+                <select name="severity" class="form-select auto-filter">
+                  <option value="">Tümü</option>
+                  {% for value, label in severity_levels %}
+                    <option value="{{ value }}" {% if current_filters.severity == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">IP Adresi</label>
+                <input type="text" name="ip_address" class="form-control auto-filter" placeholder="192.168.1.1" value="{{ current_filters.ip_address }}">
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Müşteri Adı</label>
+                <input type="text" name="customer_name" class="form-control auto-filter" placeholder="Müşteri ara..." value="{{ current_filters.customer_name }}">
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Firma Adı</label>
+                <input type="text" name="company_name" class="form-control auto-filter" placeholder="Firma ara..." value="{{ current_filters.company_name }}">
+              </div>
+              
+              <!-- İkinci Satır -->
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Başlangıç Tarihi</label>
+                <input type="date" name="date_from" class="form-control auto-filter" value="{{ current_filters.date_from }}">
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Bitiş Tarihi</label>
+                <input type="date" name="date_to" class="form-control auto-filter" value="{{ current_filters.date_to }}">
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Başlangıç Saati</label>
+                <input type="time" name="time_from" class="form-control auto-filter" value="{{ current_filters.time_from }}">
+              </div>
+              
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Bitiş Saati</label>
+                <input type="time" name="time_to" class="form-control auto-filter" value="{{ current_filters.time_to }}">
+              </div>
+              
+              <!-- Üçüncü Satır -->
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Sadece Değişiklik</label>
+                <select name="has_changes" class="form-select auto-filter">
+                  <option value="">Tümü</option>
+                  <option value="true" {% if current_filters.has_changes == "true" %}selected{% endif %}>Sadece Değişiklik Olanlar</option>
+                  <option value="false" {% if current_filters.has_changes == "false" %}selected{% endif %}>Değişiklik Olmayanlar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Log Listesi -->
+    <div class="card">
+      <div class="card-header border-0 pt-6">
+        <div class="card-title">
+          <h3 class="card-label">Sistem Logları</h3>
+        </div>
+      </div>
+      
+      <div class="card-body py-4">
+        <div class="table-responsive">
+          <table class="table align-middle table-row-dashed fs-6 gy-5">
+            <thead>
+              <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                <th class="min-w-120px">Zaman</th>
+                <th class="min-w-150px">Kullanıcı</th>
+                <th class="min-w-120px">Aksiyon</th>
+                <th class="min-w-200px">Başlık</th>
+                <th class="min-w-100px">Önem</th>
+                <th class="min-w-250px">Açıklama</th>
+                <th class="min-w-120px">IP Adresi</th>
+                <th class="min-w-150px">İlgili Form</th>
+                <th class="min-w-100px">Detay</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in page_obj %}
+              <tr>
+                <td class="align-middle">
+                  <span class="text-gray-800 fw-bold fs-7">{{ log.get_formatted_timestamp }}</span>
+                </td>
+                
+                <td class="align-middle">
+                  {% if log.kullanici %}
+                    <div class="d-flex align-items-center">
+                      <div class="symbol symbol-35px symbol-circle me-3">
+                        <span class=" symbol symbol-label bg-light fw-bold text-gray-600">
+                          <img src="{% if log.kullanici.resim %}{{ log.kullanici.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
+                        </span>
+                      </div>
+                      <div class="d-flex flex-column">
+                        <span class="text-gray-800 fw-bold fs-7">{{ log.kullanici.username }}</span>
+                        {% if log.kullanici.get_full_name %}
+                          <span class="fs-8 text-muted">{{ log.kullanici.get_full_name }}</span>
+                        {% endif %}
+                        {% if log.kullanici.email %}
+                          <span class="fs-8 text-muted">{{ log.kullanici.email }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% else %}
+                    <span class="text-muted fs-7">Sistem</span>
+                  {% endif %}
+                </td>
+                
+                <td class="align-middle">
+                  <span class="badge badge-light-info fs-8">{{ log.get_action_type_display }}</span>
+                </td>
+                
+                <td class="align-middle">
+                  <span class="text-gray-800 fw-bold fs-7">{{ log.title }}</span>
+                </td>
+                
+                <td class="align-middle">
+                  {% if log.severity == 'ERROR' %}
+                    <span class="badge badge-light-danger fs-8">Hata</span>
+                  {% elif log.severity == 'WARNING' %}
+                    <span class="badge badge-light-warning fs-8">Uyarı</span>
+                  {% elif log.severity == 'SUCCESS' %}
+                    <span class="badge badge-light-success fs-8">Başarılı</span>
+                  {% else %}
+                    <span class="badge badge-light-primary fs-8">Bilgi</span>
+                  {% endif %}
+                </td>
+                
+                <td class="align-middle">
+                  <span class="text-gray-600 fs-7">{{ log.get_short_description }}</span>
+                </td>
+                
+                <td class="align-middle">
+                  {% if log.ip_address %}
+                    <span class="text-gray-800 fs-7 fw-bold">{{ log.ip_address }}</span>
+                  {% else %}
+                    <span class="text-muted fs-7">—</span>
+                  {% endif %}
+                </td>
+                
+                <td class="align-middle">
+                  {% if log.related_form %}
+                    <a href="#" class="text-primary fw-bold fs-7 js-form-preview" data-form-id="{{ log.related_form.id }}" title="Form önizleme">
+                      {{ log.related_form.musteri_isim }} {{ log.related_form.musteri_soyisim }}
+                    </a>
+                  {% else %}
+                    <span class="text-muted fs-7">—</span>
+                  {% endif %}
+                </td>
+                
+                <td class="align-middle">
+                  <button type="button" class="btn btn-sm btn-light btn-icon" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#logDetailModal"
+                          data-log-id="{{ log.id }}"
+                          data-log-title="{{ log.title }}"
+                          data-log-description="{{ log.description }}"
+                          data-log-user="{% if log.kullanici %}{{ log.kullanici.username }}{% else %}Sistem{% endif %}"
+                          data-log-user-email="{% if log.kullanici and log.kullanici.email %}{{ log.kullanici.email }}{% else %}—{% endif %}"
+                          data-log-ip="{{ log.ip_address|default:'—' }}"
+                          data-log-user-agent="{{ log.user_agent|default:'—' }}"
+                          data-log-details='{% if log.details %}{{ log.details|safe }}{% else %}{}{% endif %}'
+                          data-log-old-values='{% if log.old_values %}{{ log.old_values|escapejs }}{% else %}{}{% endif %}'
+                          data-log-new-values='{% if log.new_values %}{{ log.new_values|escapejs }}{% else %}{}{% endif %}'
+                          title="Detayları Görüntüle">
+                    <i class="ki-duotone ki-information fs-5">
+                      <span class="path1"></span>
+                      <span class="path2"></span>
+                      <span class="path3"></span>
+                    </i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="text-center py-10">
+                  <div class="text-muted">Henüz log kaydı bulunmuyor.</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Sayfalama -->
+        {% if page_obj.has_other_pages %}
+        <div class="d-flex flex-stack flex-wrap pt-10">
+          <div class="fs-6 fw-semibold text-gray-700">
+            Toplam {{ page_obj.paginator.count }} logdan {{ page_obj.start_index }}-{{ page_obj.end_index }} arası gösteriliyor
+          </div>
+          
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item previous">
+                <a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">
+                  <i class="previous"></i>
+                </a>
+              </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">
+                  <i class="next"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    
+  </div>
+</div>
+<!--end::Container-->
+
+<!-- İlgili Form Önizleme Modal -->
+<div class="modal fade" id="formPreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Form Önizleme</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="form-preview-loader" class="text-center py-10" style="display:none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Yükleniyor...</span>
+          </div>
+        </div>
+        <div id="form-preview-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Log Detay Modal -->
+<div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logDetailModalLabel">Log Detayları</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Başlık:</label>
+            <div class="form-control-plaintext" id="modal-title"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Kullanıcı:</label>
+            <div class="form-control-plaintext" id="modal-user"></div>
+            <div class="form-control-plaintext small text-muted" id="modal-user-email"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">IP Adresi:</label>
+            <div class="form-control-plaintext" id="modal-ip"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Zaman:</label>
+            <div class="form-control-plaintext" id="modal-timestamp"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Açıklama:</label>
+            <div class="form-control-plaintext" id="modal-description"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Tarayıcı Bilgisi:</label>
+            <div class="form-control-plaintext small" id="modal-user-agent"></div>
+          </div>
+          <div class="col-12" id="details-section" style="display: none;">
+            <label class="form-label fw-bold">Detaylar:</label>
+            <pre class="form-control-plaintext bg-light p-3 rounded" id="modal-details"></pre>
+          </div>
+          <div class="col-12" id="comparison-section" style="display: none;">
+            <label class="form-label fw-bold">Alan Değişiklikleri:</label>
+            <div class="form-control-plaintext bg-light p-3 rounded" id="modal-comparison"></div>
+          </div>
+          <div class="col-12" id="changed-fields-section" style="display: none;">
+            <label class="form-label fw-bold">Değişen Alanlar:</label>
+            <div class="form-control-plaintext bg-light p-3 rounded" id="modal-changed-fields"></div>
+          </div>
+          <div class="col-12" id="old-values-section" style="display: none;">
+            <label class="form-label fw-bold">Eski Değerler:</label>
+            <pre class="form-control-plaintext bg-light p-3 rounded" id="modal-old-values"></pre>
+          </div>
+          <div class="col-12" id="new-values-section" style="display: none;">
+            <label class="form-label fw-bold">Yeni Değerler:</label>
+            <pre class="form-control-plaintext bg-light p-3 rounded" id="modal-new-values"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+// Arama fonksiyonu
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+  if (e.key === 'Enter') {
+    const searchValue = this.value;
+    const url = new URL(window.location);
+    if (searchValue) {
+      url.searchParams.set('search', searchValue);
+    } else {
+      url.searchParams.delete('search');
+    }
+    window.location.href = url.toString();
+  }
+});
+
+// Log detay modal
+document.addEventListener('DOMContentLoaded', function() {
+  const logDetailModal = document.getElementById('logDetailModal');
+  if (logDetailModal) {
+    logDetailModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      
+      // Verileri al
+      const logId = button.getAttribute('data-log-id');
+      const logTitle = button.getAttribute('data-log-title');
+      const logDescription = button.getAttribute('data-log-description');
+      const logUser = button.getAttribute('data-log-user');
+      const logUserEmail = button.getAttribute('data-log-user-email');
+      const logIp = button.getAttribute('data-log-ip');
+      const logUserAgent = button.getAttribute('data-log-user-agent');
+      const logDetails = button.getAttribute('data-log-details');
+      const logOldValues = button.getAttribute('data-log-old-values');
+      const logNewValues = button.getAttribute('data-log-new-values');
+      
+      // Debug için console'a yazdır
+      console.log('Log Details:', logDetails);
+      console.log('Log Old Values:', logOldValues);
+      console.log('Log New Values:', logNewValues);
+      console.log('Log Old Values Type:', typeof logOldValues);
+      console.log('Log New Values Type:', typeof logNewValues);
+      
+      // Modal içeriğini güncelle
+      document.getElementById('modal-title').textContent = logTitle;
+      document.getElementById('modal-user').textContent = logUser;
+      document.getElementById('modal-user-email').textContent = logUserEmail;
+      document.getElementById('modal-ip').textContent = logIp;
+      document.getElementById('modal-description').textContent = logDescription;
+      document.getElementById('modal-user-agent').textContent = logUserAgent;
+      
+      // Zaman bilgisini bul (tablodan)
+      const row = button.closest('tr');
+      const timestampCell = row.querySelector('td:first-child span');
+      if (timestampCell) {
+        document.getElementById('modal-timestamp').textContent = timestampCell.textContent;
+      }
+      
+      // Değişkenleri tanımla
+      let oldValuesObj = {};
+      let newValuesObj = {};
+      
+      // JSON verilerini formatla
+      try {
+        let detailsObj = {};
+        if (logDetails && logDetails !== '{}' && logDetails !== '—') {
+          // Python dictionary formatını JSON'a çevir
+          let jsonString = logDetails;
+          console.log('JSON String:', jsonString);
+          
+          // Python dictionary formatını JSON'a çevir
+          // Tek tırnakları çift tırnakla değiştir
+          jsonString = jsonString.replace(/'/g, '"');
+          // Python None değerlerini JSON null ile değiştir
+          jsonString = jsonString.replace(/: None/g, ': null');
+          detailsObj = JSON.parse(jsonString);
+        }
+        
+        console.log('Parsed Details Object:', detailsObj);
+        
+        if (Object.keys(detailsObj).length > 0) {
+          // Backend'den gelen changed_fields verisi eski ve güvenilmez olabilir
+          // Bu yüzden bu section'ı tamamen gizliyoruz ve sadece gerçek zamanlı karşılaştırma kullanıyoruz
+          document.getElementById('changed-fields-section').style.display = 'none';
+          
+          // Diğer detayları göster
+          const otherDetails = {...detailsObj};
+          delete otherDetails.changed_fields;
+          
+          if (Object.keys(otherDetails).length > 0) {
+            // Snapshot varsa görsel gösterim ekle
+            if (otherDetails.snapshot) {
+              const s = otherDetails.snapshot;
+              document.getElementById('modal-details').textContent = JSON.stringify(otherDetails, null, 2);
+            } else {
+              document.getElementById('modal-details').textContent = JSON.stringify(otherDetails, null, 2);
+            }
+            document.getElementById('details-section').style.display = 'block';
+          } else {
+            document.getElementById('details-section').style.display = 'none';
+          }
+        } else {
+          document.getElementById('details-section').style.display = 'none';
+          document.getElementById('changed-fields-section').style.display = 'none';
+        }
+      } catch (e) {
+        console.error('JSON Parse Error:', e);
+        console.error('Raw Details:', logDetails);
+        document.getElementById('details-section').style.display = 'none';
+        document.getElementById('changed-fields-section').style.display = 'none';
+        document.getElementById('comparison-section').style.display = 'none';
+      }
+      
+      try {
+        if (logOldValues && logOldValues !== '{}' && logOldValues !== '—') {
+          console.log('Parsing Old Values:', logOldValues);
+          let jsonString = logOldValues;
+          
+          // Django escapejs filtresi ile gelen veriyi parse et
+          try {
+            oldValuesObj = JSON.parse(jsonString);
+            console.log('Direct JSON parse successful:', oldValuesObj);
+          } catch (e) {
+            console.log('Direct JSON parse failed, trying Python format conversion');
+            // Python dictionary formatını JSON'a çevir
+            jsonString = jsonString.replace(/'/g, '"');
+            jsonString = jsonString.replace(/: None/g, ': null');
+            jsonString = jsonString.replace(/: True/g, ': true');
+            jsonString = jsonString.replace(/: False/g, ': false');
+            oldValuesObj = JSON.parse(jsonString);
+          }
+        }
+        
+        if (Object.keys(oldValuesObj).length > 0) {
+          document.getElementById('modal-old-values').textContent = JSON.stringify(oldValuesObj, null, 2);
+          document.getElementById('old-values-section').style.display = 'block';
+        } else {
+          document.getElementById('old-values-section').style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Old Values Parse Error:', e);
+        document.getElementById('old-values-section').style.display = 'none';
+        document.getElementById('comparison-section').style.display = 'none';
+      }
+      
+      try {
+        if (logNewValues && logNewValues !== '{}' && logNewValues !== '—') {
+          console.log('Parsing New Values:', logNewValues);
+          let jsonString = logNewValues;
+          
+          // Django escapejs filtresi ile gelen veriyi parse et
+          try {
+            newValuesObj = JSON.parse(jsonString);
+            console.log('Direct JSON parse successful:', newValuesObj);
+          } catch (e) {
+            console.log('Direct JSON parse failed, trying Python format conversion');
+            // Python dictionary formatını JSON'a çevir
+            jsonString = jsonString.replace(/'/g, '"');
+            jsonString = jsonString.replace(/: None/g, ': null');
+            jsonString = jsonString.replace(/: True/g, ': true');
+            jsonString = jsonString.replace(/: False/g, ': false');
+            newValuesObj = JSON.parse(jsonString);
+          }
+        }
+        
+        if (Object.keys(newValuesObj).length > 0) {
+          document.getElementById('modal-new-values').textContent = JSON.stringify(newValuesObj, null, 2);
+          document.getElementById('new-values-section').style.display = 'block';
+          console.log('New Values Section Displayed');
+        } else {
+          document.getElementById('new-values-section').style.display = 'none';
+          console.log('New Values Section Hidden - No Data');
+        }
+      } catch (e) {
+        console.error('New Values Parse Error:', e);
+        document.getElementById('new-values-section').style.display = 'none';
+        document.getElementById('comparison-section').style.display = 'none';
+      }
+      
+      // Eski ve yeni değerleri karşılaştır
+      try {
+        console.log('Comparison - Old Values:', oldValuesObj);
+        console.log('Comparison - New Values:', newValuesObj);
+        
+        if (Object.keys(oldValuesObj).length > 0 && Object.keys(newValuesObj).length > 0) {
+          let comparisonHtml = '';
+          const fieldNames = {
+            // Müşteri form alanları
+            'musteri_isim': 'Müşteri Adı',
+            'musteri_soyisim': 'Müşteri Soyadı',
+            'musteri_dogum_tarihi': 'Doğum Tarihi',
+            'musteri_cinsiyet': 'Cinsiyet',
+            'telefon': 'Telefon',
+            'sabit_telefon': 'Sabit Telefon',
+            'email': 'E-posta',
+            'randevu_tarihi': 'Randevu Tarihi',
+            'firma_adi': 'Firma Adı',
+            'adres': 'Adres',
+            'sehir': 'Şehir',
+            'posta_kodu': 'Posta Kodu',
+            'medeni_durum': 'Medeni Durum',
+            'calisma_durumu': 'Çalışma Durumu',
+            'aile_cocuk_sayisi': 'Aile Çocuk Sayısı',
+            'sigorta': 'Sigorta',
+            'sigorta_ek_yazi': 'Sigorta Ek Yazı',
+            'sigorta_katki_payi': 'Sigorta Katkı Payı',
+            'sigorta_sirket': 'Sigorta Şirketi',
+            'sigorta_baslangic_tarihi': 'Sigorta Başlangıç Tarihi',
+            'sigorta_tarife_vadesi': 'Sigorta Tarife Vadesi',
+            'sigorta_katilim_payi': 'Sigorta Katılım Payı',
+            'es_cocuk_sigorta': 'Eş Çocuk Sigorta',
+            'es_yasi': 'Eş Yaşı',
+            'durum': 'Durum',
+            // Kullanıcı alanları
+            'first_name': 'Ad',
+            'last_name': 'Soyad',
+            'username': 'Kullanıcı Adı',
+            'rol': 'Rol',
+            'aktif': 'Aktif Durumu'
+          };
+          // Firma & SMTP alan adları
+          fieldNames['isim'] = fieldNames['isim'] || 'Firma İsmi';
+          fieldNames['slogan'] = fieldNames['slogan'] || 'Firma Sloganı';
+          fieldNames['telefon'] = fieldNames['telefon'] || 'Telefon';
+          fieldNames['adres'] = fieldNames['adres'] || 'Adres';
+          fieldNames['sms_yazisi'] = fieldNames['sms_yazisi'] || 'SMS Yazısı';
+          fieldNames['logo'] = fieldNames['logo'] || 'Logo';
+          fieldNames['icon'] = fieldNames['icon'] || 'İkon';
+          fieldNames['logo_changed'] = 'Logo Değişti mi?';
+          fieldNames['icon_changed'] = 'İkon Değişti mi?';
+          fieldNames['host'] = fieldNames['host'] || 'SMTP Host';
+          fieldNames['port'] = fieldNames['port'] || 'SMTP Port';
+          fieldNames['username'] = fieldNames['username'] || 'SMTP Kullanıcı Adı';
+          fieldNames['use_tls'] = fieldNames['use_tls'] || 'TLS';
+          fieldNames['use_ssl'] = fieldNames['use_ssl'] || 'SSL';
+          fieldNames['password_changed'] = 'Şifre Değişti mi?';
+          fieldNames['resim'] = fieldNames['resim'] || 'Profil Resmi';
+          fieldNames['resim_changed'] = 'Profil Resmi Değişti mi?';
+          
+          // Tüm alanları karşılaştır
+          const allFields = new Set([...Object.keys(oldValuesObj), ...Object.keys(newValuesObj)]);
+          let hasChanges = false;
+          
+          console.log('All Fields to Compare:', Array.from(allFields));
+          
+          for (const fieldKey of allFields) {
+            const oldValue = oldValuesObj[fieldKey] || '—';
+            const newValue = newValuesObj[fieldKey] || '—';
+            const fieldName = fieldNames[fieldKey] || fieldKey;
+            
+            console.log(`Comparing ${fieldKey}: "${oldValue}" vs "${newValue}"`);
+            
+            // Değerleri normalize et (boş string, null, undefined'ı aynı kabul et)
+            const normalizeValue = (value, fieldKey) => {
+              if (value === null || value === undefined || value === '' || value === 'null' || value === 'undefined') {
+                return '—';
+              }
+              // String'e çevir ve trim yap
+              let strValue = String(value).trim();
+              if (strValue === '' || strValue === 'null' || strValue === 'undefined') {
+                return '—';
+              }
+              
+              // Aktif durumu için özel gösterim
+              if (fieldKey === 'aktif') {
+                if (strValue === 'true' || strValue === 'True' || strValue === '1') {
+                  return 'Aktif';
+                } else if (strValue === 'false' || strValue === 'False' || strValue === '0') {
+                  return 'Pasif';
+                }
+              }
+              
+              // Boolean alanları için okunur dönüşüm
+              if (['use_tls','use_ssl','aktif','logo_changed','icon_changed','password_changed','resim_changed'].includes(fieldKey)) {
+                if (strValue === 'true' || strValue === 'True' || strValue === '1') return 'Evet';
+                if (strValue === 'false' || strValue === 'False' || strValue === '0') return 'Hayır';
+              }
+
+              // Tarih alanları için özel normalizasyon
+              if (fieldKey && (fieldKey.includes('tarihi') || fieldKey.includes('_tarihi'))) {
+                try {
+                  // ISO tarih formatını normalize et
+                  const date = new Date(strValue);
+                  if (!isNaN(date.getTime())) {
+                    // Tarihi tutarlı formatta döndür (mikrosaniye olmadan)
+                    strValue = date.toISOString().split('.')[0];
+                  }
+                } catch (e) {
+                  // Hata durumunda orijinal değeri kullan
+                }
+              }
+              
+              return strValue;
+            };
+            
+            const normalizedOldValue = normalizeValue(oldValue, fieldKey);
+            const normalizedNewValue = normalizeValue(newValue, fieldKey);
+            
+            console.log(`Normalized ${fieldKey}: "${normalizedOldValue}" vs "${normalizedNewValue}"`);
+            
+            if (normalizedOldValue !== normalizedNewValue) {
+              hasChanges = true;
+              console.log(`CHANGE DETECTED in ${fieldKey}: "${normalizedOldValue}" → "${normalizedNewValue}"`);
+              comparisonHtml += `
+                <div class="mb-3 p-3 border border-warning rounded bg-light-warning">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="ki-duotone ki-arrow-right fs-3 text-warning me-2">
+                      <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <strong class="text-warning">${fieldName}</strong>
+                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <small class="text-muted">Eski Değer:</small><br>
+                      <span class="text-danger fw-bold">${normalizedOldValue}</span>
+                    </div>
+                    <div class="col-6">
+                      <small class="text-muted">Yeni Değer:</small><br>
+                      <span class="text-success fw-bold">${normalizedNewValue}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            } else {
+              comparisonHtml += `
+                <div class="mb-2 p-2 border border-light rounded">
+                  <div class="d-flex align-items-center">
+                    <i class="ki-duotone ki-check fs-4 text-success me-2">
+                      <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <strong class="text-muted">${fieldName}:</strong>
+                    <span class="text-muted ms-2">${normalizedNewValue}</span>
+                  </div>
+                </div>
+              `;
+            }
+          }
+          
+          if (hasChanges) {
+            comparisonHtml = `
+              <div class="alert alert-warning mb-3">
+                <i class="ki-duotone ki-information fs-2 me-2">
+                  <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                </i>
+                <strong>Değişiklik Tespit Edildi!</strong> Aşağıda değişen alanlar sarı renkte gösterilmiştir.
+              </div>
+            ` + comparisonHtml;
+          } else {
+            comparisonHtml = `
+              <div class="alert alert-info mb-3">
+                <i class="ki-duotone ki-check fs-2 me-2">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+                <strong>Değişiklik Bulunamadı</strong> Tüm alanlar aynı değerlerde.
+              </div>
+            ` + comparisonHtml;
+          }
+          
+          document.getElementById('modal-comparison').innerHTML = comparisonHtml;
+          document.getElementById('comparison-section').style.display = 'block';
+        } else {
+          document.getElementById('comparison-section').style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Comparison Error:', e);
+        document.getElementById('comparison-section').style.display = 'none';
+      }
+    });
+  }
+  
+  // İlgili form önizleme
+  document.body.addEventListener('click', async function(e) {
+    const link = e.target.closest('.js-form-preview');
+    if (!link) return;
+    e.preventDefault();
+    const formId = link.getAttribute('data-form-id');
+    const modalEl = document.getElementById('formPreviewModal');
+    const loader = document.getElementById('form-preview-loader');
+    const content = document.getElementById('form-preview-content');
+    content.innerHTML = '';
+    loader.style.display = 'block';
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+    try {
+      const resp = await fetch(`/forms/${formId}/detail/`);
+      const data = await resp.json();
+      loader.style.display = 'none';
+      // Basit görsel kart
+      content.innerHTML = `
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3">Müşteri Bilgileri</h5>
+                <div class="mb-2"><strong>Ad Soyad:</strong> ${data.musteri_isim} ${data.musteri_soyisim}</div>
+                <div class="mb-2"><strong>Doğum Tarihi:</strong> ${data.musteri_dogum_tarihi || '—'}</div>
+                <div class="mb-2"><strong>Telefon:</strong> ${data.telefon || '—'}</div>
+                <div class="mb-2"><strong>E-posta:</strong> ${data.email || '—'}</div>
+                <div class="mb-2"><strong>Adres:</strong> ${data.adres || '—'}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3">Form Bilgileri</h5>
+                <div class="mb-2"><strong>Randevu Tarihi:</strong> ${data.randevu_tarihi || '—'}</div>
+                <div class="mb-2"><strong>Randevu Tipi:</strong> ${data.randevu_tipi || '—'}</div>
+                <div class="mb-2"><strong>Firma:</strong> ${data.firma_adi || '—'}</div>
+                <div class="mb-2"><strong>Şehir:</strong> ${data.sehir || '—'}</div>
+                <div class="mb-2"><strong>Posta Kodu:</strong> ${data.posta_kodu || '—'}</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    } catch (err) {
+      loader.style.display = 'none';
+      content.innerHTML = '<div class="alert alert-danger">Önizleme yüklenemedi.</div>';
+    }
+  });
+});
+
+// Dışa aktarma fonksiyonu
+function exportLogs() {
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    formData.set('export', 'csv');
+    
+    const params = new URLSearchParams();
+    for (let [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+    }
+    
+    window.open(`{% url 'logs' %}?${params.toString()}`, '_blank');
+}
+
+// Gelişmiş filtreler toggle
+function toggleAdvancedFilters() {
+    const advancedFilters = document.getElementById('advancedFilters');
+    const toggleText = document.getElementById('advancedToggleText');
+    
+    if (advancedFilters.style.display === 'none') {
+        advancedFilters.style.display = 'block';
+        toggleText.textContent = 'Gizle';
+    } else {
+        advancedFilters.style.display = 'none';
+        toggleText.textContent = 'Gelişmiş';
+    }
+}
+
+// Otomatik filtreleme
+let filterTimeout;
+document.addEventListener('DOMContentLoaded', function() {
+    const autoFilters = document.querySelectorAll('.auto-filter');
+    
+    autoFilters.forEach(filter => {
+        filter.addEventListener('change', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500); // 500ms gecikme
+        });
+        
+        // Text input'lar için
+        if (filter.type === 'text') {
+            filter.addEventListener('input', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(() => {
+                    document.getElementById('filterForm').submit();
+                }, 1000); // 1 saniye gecikme
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

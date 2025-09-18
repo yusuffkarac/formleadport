@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+	<!--begin::Head-->
+	<head>
+		<title>{% block title %}{% endblock %}</title>
+		<meta name="description" content="{% block description %}{% endblock %}" />
+		{% include 'widgets/author.html' %}
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+		<link href="{% static 'assets/plugins/global/plugins.bundle.css' %}" rel="stylesheet" type="text/css" />
+		<link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="{% static 'assets/icons/icon.css' %}">
+        {% block head %}{% endblock %}
+	</head>
+	<!--end::Head-->
+	<!--begin::Body-->
+	<body id="kt_body" style="background-image: url({% static 'assets/media/patterns/header-bg.png' %})" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled">
+		<!--begin::Main-->
+		<!--begin::Root-->
+		<div class="d-flex flex-column flex-root">
+			<!--begin::Page-->
+			<div class="page d-flex flex-row flex-column-fluid">
+
+                <!--begin::Wrapper-->
+				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+
+                    {% include 'header.html' %}
+
+
+                    {% block content %}
+
+                    {% endblock %}
+
+                    {% include 'footer.html' %}
+
+
+                </div>
+
+			</div>
+			<!--end::Page-->
+		</div>
+		<!--end::Root-->
+
+
+
+		<!--begin::Scrolltop-->
+		<div id="kt_scrolltop" class="scrolltop" data-kt-scrolltop="true">
+			<!--begin::Svg Icon | path: icons/duotune/arrows/arr066.svg-->
+			<span class="svg-icon">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+					<rect opacity="0.5" x="13" y="6" width="13" height="2" rx="1" transform="rotate(90 13 6)" fill="black" />
+					<path d="M12.5657 8.56569L16.75 12.75C17.1642 13.1642 17.8358 13.1642 18.25 12.75C18.6642 12.3358 18.6642 11.6642 18.25 11.25L12.7071 5.70711C12.3166 5.31658 11.6834 5.31658 11.2929 5.70711L5.75 11.25C5.33579 11.6642 5.33579 12.3358 5.75 12.75C6.16421 13.1642 6.83579 13.1642 7.25 12.75L11.4343 8.56569C11.7467 8.25327 12.2533 8.25327 12.5657 8.56569Z" fill="black" />
+				</svg>
+			</span>
+			<!--end::Svg Icon-->
+		</div>
+		<!--end::Scrolltop-->
+
+		<!--begin::Genel Silme Onay Modal-->
+		<div class="modal fade" id="modal_delete_confirm" tabindex="-1" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-centered">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="deleteModalTitle">
+		          <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+		          Element löschen
+		        </h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+		      </div>
+		      <div class="modal-body">
+		        <p id="deleteModalMessage">Sind Sie sicher, dass Sie dieses Element löschen möchten?</p>
+		        <div class="alert alert-warning">
+		          <i class="fa-solid fa-info-circle me-2"></i>
+		          Diese Aktion kann nicht rückgängig gemacht werden.
+		        </div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+		        <button type="button" class="btn btn-danger" id="deleteConfirmBtn">
+		          <i class="fa-solid fa-trash me-2"></i>Löschen
+		        </button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<!--end::Genel Silme Onay Modal-->
+
+		<script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
+		<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+		<script src="{% static 'assets/js/widgets.bundle.js' %}"></script>
+		<script src="{% static 'assets/js/custom/widgets.js' %}"></script>
+		
+		<!--begin::Genel Silme Onay JavaScript-->
+		<script>
+		// Genel silme onay modal'ı
+		let globalDeleteCallback = null;
+		const globalDeleteModal = new bootstrap.Modal(document.getElementById('modal_delete_confirm'));
+
+		// Genel silme onay fonksiyonu
+		function showDeleteConfirm(title, message, callback) {
+			document.getElementById('deleteModalTitle').innerHTML = 
+				`<i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>${title}`;
+			document.getElementById('deleteModalMessage').textContent = message;
+			globalDeleteCallback = callback;
+			globalDeleteModal.show();
+		}
+
+		// Genel silme onay butonu
+		document.getElementById('deleteConfirmBtn')?.addEventListener('click', function() {
+			if (globalDeleteCallback) {
+				globalDeleteCallback();
+				globalDeleteCallback = null;
+				globalDeleteModal.hide();
+			}
+		});
+		</script>
+		<!--end::Genel Silme Onay JavaScript-->
+		
+        {% block script %}{% endblock %}
+	</body>
+	<!--end::Body-->
+</html>

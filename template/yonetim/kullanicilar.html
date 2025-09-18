@@ -1,0 +1,880 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block title %}Benutzer verwalten | Einstellungen{% endblock %}
+{% block description %}Benutzerliste mit Suche, Sortierung und nummerierter Seitennavigation.{% endblock %}
+{% block head %}
+<style>
+  .symbol .img-circle {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* Resmi orantılı kırp */
+    border-radius: 50%;  /* Daima yuvarlak olsun */
+    display: block;
+  }
+  /* Genel: hücreler orta hizada kalsın */
+  #dt_users td { vertical-align: middle; }
+
+  /* Mobil hizalama (≤ 576px) – DataTables Responsive child row stilleri */
+  @media (max-width: 576px) {
+    /* Child detay listesi iki kolon gibi davransın */
+    table.dataTable .dtr-details {
+      width: 100%;
+    }
+    table.dataTable .dtr-details li {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      padding: .25rem 0;
+      border: 0; /* varsayılan noktalı çizgileri kaldıralım */
+    }
+    table.dataTable .dtr-title {
+      flex: 0 0 42%;          /* etiket sütunu sabit/genişlik */
+      max-width: 46%;
+      font-size: 1rem;
+      color: var(--bs-gray-600);
+      text-align: left;
+      line-height: 1.25rem;
+      white-space: nowrap;     /* çok uzarsa aşağıdaki wrap devreye girer */
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    table.dataTable .dtr-data {
+      flex: 1;                 /* değer sütunu */
+      text-align: left;
+      line-height: 1.25rem;
+      word-break: break-word;  /* uzun mail/isimler taşmasın */
+    }
+
+    /* Avatar + ad bloğu child'a düştüğünde taşma olmasın */
+    #dt_users .symbol { flex: 0 0 auto; }
+
+    /* Aksiyon butonları tek satırda kalmaya çalışsın; sararsa da soldan hizalı */
+    #dt_users td.text-end.text-nowrap .d-inline-flex {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+  }
+
+  /* Child row başındaki ok/ikon hizaları daha net olsun (isteğe bağlı) */
+  table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+  table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    line-height: 1.4;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar_company_view">
+  <div id="kt_toolbar_container_company_view" class="container-xxl d-flex flex-stack flex-wrap">
+    <h3 class="text-white fw-bolder fs-2qx me-5">Benutzer anzeigen</h3>
+  </div>
+</div>
+<!--end::Toolbar-->
+
+<!--begin::Container-->
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+  <div class="content flex-row-fluid" id="kt_content">
+    {% include 'widgets/messages.html' %}
+    <div class="card">
+      <!-- Header -->
+      <div class="card-header border-0 pt-6">
+        <div class="card-title">
+          <div class="d-flex align-items-center position-relative my-1">
+            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
+                <span class="path1"></span>
+                <span class="path2"></span>
+            </i>
+            <input id="globalSearch" type="text" class="form-control form-control-solid w-250px ps-13" placeholder="Benutzer suchen">
+          </div>
+        </div>
+        <div class="card-toolbar d-flex align-items-center gap-3">
+            <!-- Status Filter -->
+            <form id="userStatusFilterForm" method="get" action="{% url 'kullanicilar' %}">
+                <select id="userStatusSelect" name="status" aria-label="Status wählen" data-control="select2" data-placeholder="Status wählen..." class="form-select form-select-solid form-select-lg w-250px">
+                <option value="active"  {% if selected_status == 'active' %}selected{% endif %}>
+                    Aktive Benutzer
+                </option>
+                <option value="deleted" {% if selected_status == 'deleted' %}selected{% endif %}>
+                    Gelöschte Benutzer
+                </option>
+                </select>
+            </form>
+
+            <!-- Sağdaki “Benutzer hinzufügen” butonu -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user">
+                <i class="ki-duotone ki-abstract-10 fs-2">
+                <span class="path1"></span><span class="path2"></span>
+                </i> Benutzer hinzufügen
+            </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body py-4">
+        <div class="table-responsive">
+          <table class="table align-middle table-row-dashed fs-6 gy-5" id="dt_users" style="width:100%">
+            <thead>
+              <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                <th class="min-w-225px">Name</th>               {# İsim Soyisim #}
+                <th class="min-w-200px">E-Mail</th>             {# Mail #}
+                <th class="min-w-125px">Rolle</th>              {# Rol #}
+                <th class="min-w-170px">Letzte Anmeldung</th>   {# Son giriş tarihi #}
+                <th class="min-w-170px">Beitrittsdatum</th>     {# Katılma tarihi #}
+                <th class="min-w-110px">Status</th>             {# Durum #}
+                <th class="min-w-100px text-end">Aktionen</th>  {# Menü #}
+              </tr>
+            </thead>
+            <tbody class="text-gray-700 fw-semibold">
+              {% for u in kullanicilar %}
+              <tr>
+                <!-- İsim Soyisim -->
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="symbol symbol-35px symbol-circle me-3">
+                      <span class="symbol-label bg-light fw-bold text-gray-600">
+                        <img src="{% if u.resim %}{{u.resim.url}}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" class="img-circle" alt="">
+                      </span>
+                    </div>
+                    <div class="d-flex flex-column">
+                      <span class="text-gray-800 text-hover-primary fw-bold">
+                        {{ u.get_full_name|default:u.username }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Mail -->
+                <td class="text-muted">{{ u.email }}</td>
+
+                <!-- Rol -->
+                <td>
+                  {% if u.rol == 'Admin' %}
+                    <span class="badge badge-light-danger">Administrator</span>
+                  {% elif u.rol == 'Yönetici' %}
+                    <span class="badge badge-light-primary">Manager</span>
+                  {% elif u.rol == 'Personel' %}
+                    <span class="badge badge-light">Mitarbeiter</span>
+                  {% elif u.rol == 'Benutzer' %}
+                    <span class="badge badge-light">Benutzer</span>
+                  {% endif %}
+                </td>
+
+                <!-- Son Giriş -->
+                <td data-order="{{ u.last_login|date:'c' }}">
+                  {% if u.last_login %}
+                    {{ u.last_login|localtime|date:"d. M Y, H:i" }} Uhr
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+
+                <!-- Katılma -->
+                <td data-order="{{ u.date_joined|date:'c' }}">
+                  {{ u.date_joined|localtime|date:"d. M Y, H:i" }} Uhr
+                </td>
+
+                <!-- Durum -->
+                <td>
+                  {% if u.aktif %}
+                    <span class="badge badge-light-success">Aktiv</span>
+                  {% else %}
+                    <span class="badge badge-light-danger">Inaktiv</span>
+                  {% endif %}
+                </td>
+
+                <!-- Aktionen: ikon butonlar (mobil + masaüstü) -->
+                <td class="text-end text-nowrap" data-order="Invalid date">
+                    <div class="d-inline-flex align-items-center gap-2"
+                        role="group" aria-label="Aktionen" data-user-id="{{ u.id }}"
+                        data-username="{{ u.username|escape }}"
+                        data-full-name="{{ u.get_full_name|default:u.username|escape }}"
+                        data-email="{{ u.email|escape }}"
+                        data-rol="{{ u.rol|escape }}"
+                        data-rol-label="{% if u.rol == 'Admin' %}Administrator{% elif u.rol == 'Yönetici' %}Manager{% else %}Mitarbeiter{% endif %}"
+                        data-aktif="{% if u.aktif %}true{% else %}false{% endif %}"
+                        data-last-login-human="{% if u.last_login %}{{ u.last_login|localtime|date:'d. M Y, H:i' }} Uhr{% else %}—{% endif %}"
+                        data-joined-human="{{ u.date_joined|localtime|date:'d. M Y, H:i' }} Uhr"
+                        data-silinme-human="{% if u.silinme_tarihi %}{{ u.silinme_tarihi|localtime|date:'d. M Y, H:i' }} Uhr{% endif %}">
+
+                        <a href="#" class="btn btn-sm btn-light btn-icon" title="Anzeigen" aria-label="Anzeigen"
+                        data-bs-toggle="tooltip" data-bs-placement="top">
+                        <i class="ki-duotone ki-screen fs-5"><span class="path1"></span><span class="path2"></span></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-light btn-icon" title="Bearbeiten" aria-label="Bearbeiten"
+                        data-bs-toggle="tooltip" data-bs-placement="top">
+                        <i class="ki-duotone ki-pencil fs-5"><span class="path1"></span><span class="path2"></span></i>
+                        </a>
+                        {% if u.aktif %}
+                            <a href="#" class="btn btn-sm btn-light-danger btn-icon"
+                                title="Löschen" aria-label="Löschen"
+                                data-bs-toggle="tooltip" data-bs-placement="top">
+                                <i class="ki-duotone ki-trash fs-5"><span class="path1"></span><span class="path2"></span></i>
+                            </a>
+                        {% else %}
+                            <a href="#" class="btn btn-sm btn-light-success btn-icon"
+                                title="Aktivieren" aria-label="Aktivieren"
+                                data-bs-toggle="tooltip" data-bs-placement="top">
+                                <i class="ki-duotone ki-electricity fs-5"><span class="path1"></span><span class="path2"></span></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- /Body -->
+    </div>
+  </div>
+</div>
+
+
+<!--begin::Modal - Kullanıcı Ekle-->
+<div class="modal fade" id="kt_modal_add_user" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered mw-650px">
+    <div class="modal-content">
+      <div class="modal-header" id="kt_modal_add_user_header">
+        <h2 class="fw-bold">Benutzer hinzufügen</h2>
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </div>
+      </div>
+
+      <div class="modal-body px-5 my-7">
+        <form action="{% url 'kullanici_ekle' %}" method="post" class="form">
+          {% csrf_token %}
+
+          <div class="d-flex flex-column px-5 px-lg-10" id="kt_modal_add_user_scroll"
+               data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-max-height="auto"
+               data-kt-scroll-dependencies="#kt_modal_add_user_header"
+               data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
+
+            <div class="row">
+              <div class="col-md-6 fv-row mb-7">
+                <label class="required fw-semibold fs-6 mb-2">Vorname</label>
+                <input type="text" name="first_name" class="form-control form-control-solid"
+                       value="{{ add_user_data.first_name|default_if_none:'' }}" placeholder="Vorname">
+                {% if add_user_errors.first_name %}
+                  <div class="invalid-feedback d-block">{{ add_user_errors.first_name.0.message }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 fv-row mb-7">
+                <label class="required fw-semibold fs-6 mb-2">Nachname</label>
+                <input type="text" name="last_name" class="form-control form-control-solid"
+                       value="{{ add_user_data.last_name|default_if_none:'' }}" placeholder="Nachname">
+                {% if add_user_errors.last_name %}
+                  <div class="invalid-feedback d-block">{{ add_user_errors.last_name.0.message }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="fv-row mb-7">
+              <label class="required fw-semibold fs-6 mb-2">E-Mail</label>
+              <input type="email" name="email" class="form-control form-control-solid"
+                     value="{{ add_user_data.email|default_if_none:'' }}" placeholder="beispiel@domain.com">
+              {% if add_user_errors.email %}
+                <div class="invalid-feedback d-block">{{ add_user_errors.email.0.message }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 fv-row mb-7">
+                <label class="required fw-semibold fs-6 mb-2">Benutzername</label>
+                <input type="text" name="username" class="form-control form-control-solid"
+                       value="{{ add_user_data.username|default_if_none:'' }}" placeholder="benutzername">
+                {% if add_user_errors.username %}
+                  <div class="invalid-feedback d-block">{{ add_user_errors.username.0.message }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 fv-row mb-7">
+                <label class="fw-semibold fs-6 mb-2">Aktiv</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="aktif" id="id_aktif"
+                         {% if add_user_data %}{% if add_user_data.aktif %}checked{% endif %}
+                         {% else %}checked{% endif %}>
+                  <label class="form-check-label" for="id_aktif">Aktiviert</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <label class="required fw-semibold fs-6 mb-3">Rolle</label>
+              <div class="d-flex gap-3">
+                <label class="form-check form-check-custom form-check-solid">
+                  <input class="form-check-input me-3" name="rol" type="radio" value="Yönetici"
+                         {% if add_user_data %}{% if add_user_data.rol == 'Yönetici' %}checked{% endif %}
+                         {% else %}checked{% endif %}>
+                  <span class="form-check-label"><strong>Manager</strong></span>
+                </label>
+                <label class="form-check form-check-custom form-check-solid">
+                  <input class="form-check-input me-3" name="rol" type="radio" value="Personel"
+                         {% if add_user_data.rol == 'Personel' %}checked{% endif %}>
+                  <span class="form-check-label"><strong>Mitarbeiter</strong></span>
+                </label>
+                <label class="form-check form-check-custom form-check-solid">
+                  <input class="form-check-input me-3" name="rol" type="radio" value="Benutzer"
+                         {% if add_user_data.rol == 'Benutzer' %}checked{% endif %}>
+                  <span class="form-check-label"><strong>Benutzer</strong></span>
+                </label>
+              </div>
+              {% if add_user_errors.rol %}
+                <div class="invalid-feedback d-block">{{ add_user_errors.rol.0.message }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 fv-row mb-7">
+                <label class="required fw-semibold fs-6 mb-2">Passwort</label>
+                <div class="position-relative">
+                  <input type="password" name="password1" class="form-control form-control-solid pe-12" placeholder="••••••••"><span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle" data-password-toggle><i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></span>
+                </div>
+                {% if add_user_errors.password1 %}
+                  <div class="invalid-feedback d-block">{{ add_user_errors.password1.0.message }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6 fv-row mb-7">
+                <label class="required fw-semibold fs-6 mb-2">Passwort (Wiederholung)</label>
+                <div class="position-relative">
+                  <input type="password" name="password2" class="form-control form-control-solid pe-12" placeholder="••••••••">
+                  <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle" data-password-toggle><i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></span>
+                </div>
+                {% if add_user_errors.password2 %}
+                  <div class="invalid-feedback d-block">{{ add_user_errors.password2.0.message }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+
+          </div>
+
+          <div class="text-center pt-10">
+            <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Verwerfen</button>
+            <button type="submit" class="btn btn-primary">
+              <span class="indicator-label">Absenden</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--end::Modal-->
+
+<!--begin::Modal - Kullanıcı Görüntüle-->
+<div class="modal fade" id="kt_modal_view_user" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered mw-650px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="fw-bold">Benutzer anzeigen</h2>
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </div>
+      </div>
+
+      <div class="modal-body px-5 my-7">
+        <!-- Header bilgileri -->
+        <div class="d-flex align-items-center mb-7">
+          <div class="symbol symbol-50px symbol-circle me-4">
+            <span id="vuAvatar" class="symbol-label bg-light fw-bold text-gray-600">—</span>
+          </div>
+          <div class="d-flex flex-column">
+            <div id="vuName" class="fs-4 fw-bold text-gray-800">—</div>
+            <div id="vuEmail" class="text-muted">—</div>
+          </div>
+          <div class="ms-auto d-flex gap-2">
+            <span id="vuRoleBadge" class="badge badge-light">—</span>
+            <span id="vuStatusBadge" class="badge badge-light">—</span>
+          </div>
+        </div>
+
+        <!-- Detaylar -->
+        <div class="row g-6">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Benutzername</label>
+            <input id="vuUsername" type="text" class="form-control form-control-solid" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Rolle</label>
+            <input id="vuRole" type="text" class="form-control form-control-solid" disabled>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Letzte Anmeldung</label>
+            <input id="vuLastLogin" type="text" class="form-control form-control-solid" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Beitrittsdatum</label>
+            <input id="vuJoined" type="text" class="form-control form-control-solid" disabled>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Status</label>
+            <input id="vuStatus" type="text" class="form-control form-control-solid" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Gelöscht am</label>
+            <input id="vuDeleted" type="text" class="form-control form-control-solid" disabled placeholder="—">
+          </div>
+        </div>
+
+        <!-- Alt -->
+        <div class="text-end pt-10">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end::Modal-->
+
+
+<!--begin::Modal - Kullanıcı Düzenle-->
+<div class="modal fade" id="kt_modal_edit_user" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered mw-650px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="fw-bold">Benutzer bearbeiten</h2>
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </div>
+      </div>
+
+      <div class="modal-body px-5 my-7">
+        <form action="{% url 'kullanici_duzenle' %}" method="post" class="form">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" id="euUserId" value="{{ edit_user_data.user_id|default_if_none:'' }}"/>
+
+        <div class="d-flex flex-column px-5 px-lg-10">
+
+          <div class="row">
+            <div class="col-md-6 fv-row mb-7">
+              <label class="required fw-semibold fs-6 mb-2">Vorname</label>
+              <input type="text" name="first_name" id="euFirstName" class="form-control form-control-solid"
+                     value="{{ edit_user_data.first_name|default_if_none:'' }}" placeholder="Vorname">
+              {% if edit_user_errors.first_name %}
+                <div class="invalid-feedback d-block">{{ edit_user_errors.first_name.0.message }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 fv-row mb-7">
+              <label class="required fw-semibold fs-6 mb-2">Nachname</label>
+              <input type="text" name="last_name" id="euLastName" class="form-control form-control-solid"
+                     value="{{ edit_user_data.last_name|default_if_none:'' }}" placeholder="Nachname">
+              {% if edit_user_errors.last_name %}
+                <div class="invalid-feedback d-block">{{ edit_user_errors.last_name.0.message }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="fv-row mb-7">
+            <label class="required fw-semibold fs-6 mb-2">E-Mail</label>
+            <input type="email" name="email" id="euEmail" class="form-control form-control-solid"
+                   value="{{ edit_user_data.email|default_if_none:'' }}" placeholder="beispiel@domain.com">
+            {% if edit_user_errors.email %}
+              <div class="invalid-feedback d-block">{{ edit_user_errors.email.0.message }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 fv-row mb-7">
+              <label class="required fw-semibold fs-6 mb-2">Benutzername</label>
+              <input type="text" name="username" id="euUsername" class="form-control form-control-solid"
+                     value="{{ edit_user_data.username|default_if_none:'' }}" placeholder="benutzername">
+              {% if edit_user_errors.username %}
+                <div class="invalid-feedback d-block">{{ edit_user_errors.username.0.message }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6 fv-row mb-7">
+              <label class="fw-semibold fs-6 mb-2">Aktiv</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="aktif" id="euAktif"
+                       {% if edit_user_data %}
+                         {% if edit_user_data.aktif %}checked{% endif %}
+                       {% else %}
+                         checked
+                       {% endif %}>
+                <label class="form-check-label" for="euAktif">Aktiviert</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-5">
+            <label class="required fw-semibold fs-6 mb-3">Rolle</label>
+            <div class="d-flex gap-3" id="euRolGroup">
+              <label class="form-check form-check-custom form-check-solid">
+                <input class="form-check-input me-3" name="rol" type="radio" value="Yönetici" id="euRolYonetici" {% if edit_user_data %}{% if edit_user_data.rol == 'Yönetici' %}checked{% endif %}{% endif %}>
+                <span class="form-check-label"><strong>Manager</strong></span>
+              </label>
+              <label class="form-check form-check-custom form-check-solid">
+                <input class="form-check-input me-3" name="rol" type="radio" value="Personel" id="euRolPersonel" {% if edit_user_data.rol == 'Personel' %}checked{% endif %}>
+                <span class="form-check-label"><strong>Mitarbeiter</strong></span>
+              </label>
+              <label class="form-check form-check-custom form-check-solid">
+                <input class="form-check-input me-3" name="rol" type="radio" value="Benutzer" id="euRolBenutzer" {% if edit_user_data.rol == 'Benutzer' %}checked{% endif %}>
+                <span class="form-check-label"><strong>Benutzer</strong></span>
+              </label>
+            </div>
+            {% if edit_user_errors.rol %}
+              <div class="invalid-feedback d-block">{{ edit_user_errors.rol.0.message }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 fv-row mb-7">
+              <label class="fw-semibold fs-6 mb-2">Neues Passwort (optional)</label>
+              <div class="position-relative">
+                <input type="password" name="password1" id="euPassword1" class="form-control form-control-solid pe-12" placeholder="••••••••">
+                <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle" data-password-toggle><i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></span>
+              </div>
+              {% if edit_user_errors.password1 %}
+                <div class="invalid-feedback d-block">{{ edit_user_errors.password1.0.message }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 fv-row mb-7">
+              <label class="fw-semibold fs-6 mb-2">Passwort (Wiederholung)</label>
+              <div class="position-relative">
+                <input type="password" name="password2" id="euPassword2" class="form-control form-control-solid pe-12" placeholder="••••••••">
+                <span class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle" data-password-toggle> <i class="fa-solid fa-eye"></i> <i class="fa-solid fa-eye-slash d-none"></i></span>
+              </div>
+              {% if edit_user_errors.password2 %}
+                <div class="invalid-feedback d-block">{{ edit_user_errors.password2.0.message }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+
+        </div>
+
+        <div class="text-center pt-10">
+          <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="indicator-label">Speichern</span>
+          </button>
+        </div>
+      </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--end::Modal-->
+
+<!--begin::Modal - Kullanıcı Sil-->
+<div class="modal fade" id="kt_modal_delete_user" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered mw-500px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="fw-bold text-danger">Benutzer löschen</h2>
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </div>
+      </div>
+
+      <div class="modal-body px-5 my-1">
+        <form action="{% url 'kullanici_sil' %}" method="post" class="form">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" id="duUserId" />
+
+          <div class="d-flex align-items-center mb-6">
+            <div class="symbol symbol-45px symbol-circle me-4">
+              <span id="duAvatar" class="symbol-label bg-light fw-bold text-gray-600">—</span>
+            </div>
+            <div>
+              <div id="duName" class="fw-bold text-gray-800">—</div>
+              <div id="duEmail" class="text-muted">—</div>
+            </div>
+          </div>
+
+          <div class="text-end pt-5">
+            <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Abbrechen</button>
+            <button type="submit" class="btn btn-danger">Löschen</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--end::Modal-->
+
+<!--begin::Modal - Kullanıcı Aktif Et-->
+<div class="modal fade" id="kt_modal_activate_user" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered mw-500px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="fw-bold text-success">Benutzer aktivieren</h2>
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal" aria-label="Close">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </div>
+      </div>
+
+      <div class="modal-body px-5 my-1">
+        <form action="{% url 'kullanici_aktif_et' %}" method="post" class="form">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" id="auUserId" />
+          <div class="d-flex align-items-center mb-6">
+            <div class="symbol symbol-45px symbol-circle me-4">
+              <span id="auAvatar" class="symbol-label bg-light fw-bold text-gray-600">—</span>
+            </div>
+            <div>
+              <div id="auName" class="fw-bold text-gray-800">—</div>
+              <div id="auEmail" class="text-muted">—</div>
+            </div>
+          </div>
+
+          <div class="text-end pt-5">
+            <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Abbrechen</button>
+            <button type="submit" class="btn btn-success">Aktivieren</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--end::Modal-->
+{% endblock %}
+{% block script %}
+<link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.6/r-3.0.3/datatables.min.css"/>
+<script src="https://cdn.datatables.net/v/bs5/dt-2.1.6/r-3.0.3/datatables.min.js"></script>
+<script>
+  (function(){
+    const table = new DataTable('#dt_users', {
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [10, 25, 50, 100],
+      pagingType: 'numbers',                 // <<< sadece sayılar
+      order: [[4, 'desc']],                  // Beitrittsdatum (katılma) desc
+      language: {
+        "emptyTable": "Keine Daten in der Tabelle vorhanden",
+        "info": "_START_ bis _END_ von _TOTAL_ Einträgen",
+        "infoEmpty": "0 bis 0 von 0 Einträgen",
+        "infoFiltered": "(gefiltert von _MAX_ Einträgen insgesamt)",
+        "lengthMenu": "_MENU_ Einträge anzeigen",
+        "loadingRecords": "Wird geladen...",
+        "processing": "Bitte warten...",
+        "search": "Suchen:",
+        "zeroRecords": "Keine passenden Einträge gefunden",
+        "paginate": {
+          "first": "",
+          "last": "",
+          "next": "",
+          "previous": ""
+        },
+        "aria": {
+          "sortAscending":  ": aufsteigend sortieren",
+          "sortDescending": ": absteigend sortieren"
+        }
+      },
+      columnDefs: [
+        { targets: [6], orderable: false }    // Aktionen sıralanmasın
+      ],
+      dom: "<'row'<'col-sm-12'tr>>" +
+          "<'row mt-5'<'col-6 d-flex align-items-center'i>" +
+          "<'col-6 d-flex justify-content-end'p>>"
+    });
+    const globalSearch = document.getElementById('globalSearch');
+    if (globalSearch) {
+      globalSearch.addEventListener('keyup', function() {
+        table.search(this.value).draw();
+      });
+    }
+  })();
+</script>
+
+{% if add_user_errors %}
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const m = new bootstrap.Modal(document.getElementById('kt_modal_add_user'));
+    m.show();
+  });
+</script>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      new bootstrap.Tooltip(el);
+    });
+  });
+  function setText(id, val){ const el=document.getElementById(id); if(el) el.textContent = val || '—'; }
+  function setValue(id, val){ const el=document.getElementById(id); if(el) el.value = val || '—'; }
+  function makeInitials(name, username){
+    const n = (name || '').trim();
+    if (n) {
+      const parts = n.split(/\s+/).filter(Boolean);
+      return (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+    }
+    return (username || '–').slice(0,2);
+  }
+  function roleBadgeClass(rol){
+    if (rol === 'Admin') return 'badge badge-light-danger';
+    if (rol === 'Yönetici') return 'badge badge-light-primary';
+    return 'badge badge-light';
+  }
+  document.getElementById('dt_users')?.addEventListener('click', function(e){
+    const btn = e.target.closest('a[aria-label="Anzeigen"]');
+    if (!btn) return;
+    e.preventDefault();
+    const group = btn.closest('[role="group"]');
+    const ds = group?.dataset || {};
+    const name = ds.fullName || '—';
+    const email = ds.email || '—';
+    const username = ds.username || (email.includes('@') ? email.split('@')[0] : '');
+    const rol = ds.rol || '';
+    const rolLabel = ds.rolLabel || rol || '—';
+    const aktif = (ds.aktif === 'true');
+    const lastLogin = ds.lastLoginHuman || '—';
+    const joined = ds.joinedHuman || '—';
+    const deleted = ds.silinmeHuman || '—';
+    document.getElementById('vuAvatar').textContent = makeInitials(name, username).toUpperCase();
+    setText('vuName', name);
+    setText('vuEmail', email);
+    const rb = document.getElementById('vuRoleBadge');
+    rb.className = roleBadgeClass(rol);
+    rb.textContent = rolLabel;
+    const sb = document.getElementById('vuStatusBadge');
+    sb.className = aktif ? 'badge badge-light-success' : 'badge badge-light-danger';
+    sb.textContent = aktif ? 'Aktiv' : 'Inaktiv';
+    setValue('vuUsername', username);
+    setValue('vuRole', rolLabel);
+    setValue('vuLastLogin', lastLogin);
+    setValue('vuJoined', joined);
+    setValue('vuStatus', aktif ? 'Aktiv' : 'Inaktiv');
+    setValue('vuDeleted', deleted);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('kt_modal_view_user')).show();
+  });
+</script>
+
+
+<script>
+  document.getElementById('dt_users')?.addEventListener('click', function (e) {
+    const btn = e.target.closest('a[aria-label="Bearbeiten"]');
+    if (!btn) return;
+    e.preventDefault();
+    const g = btn.closest('[role="group"]');
+    if (!g) return;
+    const ds = g.dataset;
+    const setVal = (id, val = '') => { const el = document.getElementById(id); if (el) el.value = val; };
+    const setChecked = (id, checked = false) => { const el = document.getElementById(id); if (el) el.checked = !!checked; };
+    setVal('euUserId', ds.userId || '');
+    const fullName = (ds.fullName || '').trim();
+    const parts = fullName.split(/\s+/).filter(Boolean);
+    const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] || '');
+    const lastName  = parts.length > 1 ? parts.slice(-1).join(' ')    : '';
+    setVal('euFirstName', firstName);
+    setVal('euLastName',  lastName);
+    setVal('euEmail', ds.email || '');
+    setVal('euUsername', ds.username || (ds.email ? ds.email.split('@')[0] : ''));
+    setChecked('euAktif', ds.aktif === 'true');
+    const rol = (ds.rol || '').trim();
+    document.querySelectorAll('#euRolGroup input[name="rol"]').forEach(el => {
+      el.checked = (el.value === rol);
+    });
+    setVal('euPassword1', '');
+    setVal('euPassword2', '');
+    document.querySelectorAll('#kt_modal_edit_user .invalid-feedback').forEach(el => el.textContent = '');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('kt_modal_edit_user')).show();
+  });
+  {% if edit_user_open %}
+  document.addEventListener('DOMContentLoaded', function () {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('kt_modal_edit_user')).show();
+  });
+  {% endif %}
+</script>
+
+
+<script>
+  function initials(str) {
+    const s = (str || '').trim();
+    if (!s) return '—';
+    const parts = s.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return s.slice(0,2).toUpperCase();
+  }
+  document.getElementById('dt_users')?.addEventListener('click', function(e){
+    const btn = e.target.closest('a[aria-label="Löschen"]');
+    if (!btn) return;
+    e.preventDefault();
+    const g = btn.closest('[role="group"]');
+    const ds = g?.dataset || {};
+    const userId = ds.userId || '';
+    const fullName = ds.fullName || ds.username || '';
+    const email = ds.email || '';
+    document.getElementById('duUserId').value = userId;
+    document.getElementById('duName').textContent = fullName || '—';
+    document.getElementById('duEmail').textContent = email || '—';
+    document.getElementById('duAvatar').textContent = initials(fullName || email);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('kt_modal_delete_user')).show();
+  });
+</script>
+
+<script>
+  function initials(str) {
+    const s = (str || '').trim();
+    if (!s) return '—';
+    const parts = s.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return s.slice(0,2).toUpperCase();
+  }
+  document.getElementById('dt_users')?.addEventListener('click', function(e){
+    const btn = e.target.closest('a[aria-label="Aktivieren"]');
+    if (!btn) return;
+    e.preventDefault();
+    const g = btn.closest('[role="group"]');
+    const ds = g?.dataset || {};
+    document.getElementById('auUserId').value = ds.userId || '';
+    const fullName = ds.fullName || ds.username || '';
+    const email = ds.email || '';
+    document.getElementById('auName').textContent = fullName || '—';
+    document.getElementById('auEmail').textContent = email || '—';
+    document.getElementById('auAvatar').textContent = initials(fullName || email);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('kt_modal_activate_user')).show();
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sel  = document.getElementById('userStatusSelect');
+    const form = document.getElementById('userStatusFilterForm');
+    if (!sel || !form) return;
+    sel.addEventListener('change', function () {
+      form.submit();
+    });
+    if (window.jQuery && typeof jQuery.fn.select2 === 'function') {
+      jQuery(sel).on('select2:select', function () { form.submit(); });
+    }
+  });
+</script>
+
+<!-- Şifre Göz İcon -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest('[data-password-toggle]');
+    if (!btn) return;
+    const wrap = btn.closest(".position-relative");
+    const input = wrap.querySelector('input[type="password"], input[type="text"]');
+    if (!input) return;
+    const eye = btn.querySelector(".fa-eye");
+    const eyeSlash = btn.querySelector(".fa-eye-slash");
+    if (input.type === "password") {
+      input.type = "text";
+      eye.classList.add("d-none");
+      eyeSlash.classList.remove("d-none");
+    } else {
+      input.type = "password";
+      eye.classList.remove("d-none");
+      eyeSlash.classList.add("d-none");
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1477 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Firma bearbeiten | Einstellungen{% endblock %}
+{% block description %}Bearbeiten Sie Ihre Firmendaten (Name, Logo, Icon, Telefonnummer, Adresse) und SMTP-Einstellungen (Server, Port, Benutzername, Passwort, TLS/SSL) an einem Ort.{% endblock %}
+{% block head %}
+<style>
+  .bg-secondary-subtle { background: var(--bs-secondary-bg-subtle, #f1f1f4); }
+</style>
+<style>
+  /* CKEditor içeriği kartla uyumlu gözüksün */
+  .ck-editor-wrap .ck-content {
+    min-height: 160px;
+    border: 0 !important;
+    background: transparent;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .ck.ck-editor__editable:not(.ck-editor__nested-editable) {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Sigorta listesi – mobil iyileştirmeler */
+  #sigorta_liste .sigorta-item .item-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    border-radius: .5rem;
+    padding: 12px;
+    background: #f8f9fa;
+    min-width: 0; /* overflow engeli */
+  }
+
+  #sigorta_liste .symbol {
+    width: 48px;
+    height: 48px;
+  }
+
+  #sigorta_liste .js-preview,
+  #sigorta_liste .js-preview-empty {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: .375rem;
+    background: #fff;
+    padding: 2px;
+  }
+
+  /* İsim input’u satırın gerilimini alsın */
+  #sigorta_liste .name-col {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Aksiyon butonları ve dosya alanı birlikte davransın */
+  #sigorta_liste .ctrl-col {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap; /* dar alanda alta geçsin */
+  }
+
+  /* Küçük ekran: blok blok yerleşim */
+  @media (max-width: 576px) {
+    #sigorta_liste .sigorta-item .item-wrap {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    #sigorta_liste .symbol {
+      width: 56px;
+      height: 56px;
+      align-self: flex-start;
+    }
+
+    #sigorta_liste .name-col input {
+      /* mobilde dokunmatik rahatlığı */
+      height: 42px;
+    }
+
+    #sigorta_liste .file-block {
+      width: 100%;
+    }
+
+    #sigorta_liste .file-block .form-control {
+      width: 100%;
+    }
+
+    #sigorta_liste .actions {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: space-between; /* oklar solda/ortada, sil sağda gibi */
+      flex-wrap: wrap;
+    }
+
+    /* Butonlar kolay tıklansın */
+    #sigorta_liste .actions .btn {
+      flex: 1 1 32%;
+    }
+
+    /* Checkbox etiketi satıra sığsın */
+    #sigorta_liste .del-check {
+      margin-top: 0 !important;
+    }
+  }
+
+  /* Orta ekranlarda da daha esnek davranış */
+  @media (min-width: 577px) and (max-width: 992px) {
+    #sigorta_liste .ctrl-col {
+      flex: 0 0 auto;
+    }
+  }
+
+</style>
+{% endblock %}
+{% block content %}
+<!--begin::Toolbar-->
+<div class="toolbar py-5 py-lg-15" id="kt_toolbar">
+  <div id="kt_toolbar_container" class="container-xxl d-flex flex-stack flex-wrap">
+    <h3 class="text-white fw-bolder fs-2qx me-5">Firma bearbeiten</h3>
+  </div>
+</div>
+<!--end::Toolbar-->
+
+<div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
+  <div class="content flex-row-fluid" id="kt_content">
+    <div class="d-flex flex-column flex-xl-row">
+      <div class="flex-lg-row-fluid">
+        {% include 'widgets/messages.html' %}
+        <!--begin::Firmendaten-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+               data-bs-toggle="collapse" data-bs-target="#kt_company_details"
+               aria-expanded="true" aria-controls="kt_company_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Firmendaten</h3>
+            </div>
+          </div>
+
+          <div id="kt_company_details" class="collapse show">
+            <form class="form fv-plugins-bootstrap5 fv-plugins-framework"
+                  method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="firma">
+              <div class="card-body border-top p-9">
+
+                <!-- Firmenname -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label required fw-semibold fs-6">Firmenname</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ firma_form.isim }}
+                    {% if firma_form.isim.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ firma_form.isim.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Firmen-Slogan -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Slogan</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ firma_form.slogan }}
+                    {% if firma_form.slogan.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ firma_form.slogan.errors|striptags }}
+                      </div>
+                    {% endif %}
+                    <div class="form-text">Kurze Unternehmensbotschaft oder Motto (optional).</div>
+                  </div>
+                </div>
+
+
+                {# --- LOGO --- #}
+                <div class="row mb-6">
+                    <label class="col-lg-4 col-form-label fw-semibold fs-6">Logo</label>
+                    <div class="col-lg-8">
+                        <div class="d-flex align-items-center gap-5">
+                            <!-- Önizleme kutusu -->
+                            <div class="rounded border bg-light d-flex align-items-center justify-content-center shadow-sm p-3" style="width: 140px; height: 100px; overflow: hidden;">
+                                {% if firma and firma.logo %}
+                                <img id="logoPreview" src="{{ firma.logo.url }}" alt="Logo" class="img-fluid" style="max-height: 100px;">
+                                {% else %}
+                                <img id="logoPreview" src="{% static 'media/placeholders/logo-placeholder.png' %}" alt="Logo" class="img-fluid opacity-50" style="max-height: 100px;">
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex flex-column">
+                                {{ firma_form.logo }}
+                                <label for="id_logo" class="btn btn-light btn-active-light-primary w-auto">
+                                Logo ändern
+                                </label>
+                                <small class="text-muted mt-2">
+                                Erlaubte Formate: PNG, JPG, JPEG. Empfohlen: quadratisch (512×512 px).
+                                </small>
+
+                                {% if firma_form.logo.errors %}
+                                <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block mt-2">
+                                    {{ firma_form.logo.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# --- ICON --- #}
+                <div class="row mb-6">
+                    <label class="col-lg-4 col-form-label fw-semibold fs-6">Icon</label>
+                    <div class="col-lg-8">
+                        <div class="d-flex align-items-center gap-5">
+                            <!-- Önizleme kutusu (daha küçük) -->
+                            <div class="rounded border bg-light d-flex align-items-center justify-content-center shadow-sm p-3" style="width: 100px; height: 70px; overflow: hidden;">
+                                {% if firma and firma.icon %}
+                                <!-- <img id="iconPreview" src="{{ firma.icon.url }}" alt="Icon" class="img-fluid" style="max-height: 70px;"> -->
+                                {% else %}
+                                <img id="iconPreview" src="{% static 'media/placeholders/icon-placeholder.png' %}" alt="Icon" class="img-fluid opacity-50" style="max-height: 70px;">
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex flex-column">
+                                <!-- Gizli gerçek input -->
+                                {{ firma_form.icon }}
+
+                                <!-- Tetikleyici buton -->
+                                <label for="id_icon" class="btn btn-light btn-active-light-primary w-auto">
+                                Icon ändern
+                                </label>
+                                <small class="text-muted mt-2">
+                                Erlaubte Formate: PNG, JPG, JPEG. Transparenter Hintergrund empfohlen (PNG).
+                                </small>
+
+                                {% if firma_form.icon.errors %}
+                                <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block mt-2">
+                                    {{ firma_form.icon.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telefonnummer -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Telefonnummer</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ firma_form.telefon }}
+                    {% if firma_form.telefon.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ firma_form.telefon.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Adresse -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Adresse</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ firma_form.adres }}
+                    {% if firma_form.adres.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ firma_form.adres.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- SMS-Schreibweise -->
+                <div class="row mb-0">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">SMS-Schreibweise</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ firma_form.sms_yazisi }}
+                    {% if firma_form.sms_yazisi.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ firma_form.sms_yazisi.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+              </div>
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::Firmendaten-->
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::E-Mail-Benachrichtigungen-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+              data-bs-toggle="collapse" data-bs-target="#kt_email_details"
+              aria-expanded="true" aria-controls="kt_email_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">E-Mail-Benachrichtigungen</h3>
+            </div>
+          </div>
+
+          <div id="kt_email_details" class="collapse show">
+            <form id="email_form" class="form fv-plugins-bootstrap5 fv-plugins-framework" method="post" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="email">
+              <div class="card-body border-top p-9">
+
+                <!-- E-Mail-Bestätigung aktivieren -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">E-Mail-Bestätigung</label>
+                  <div class="col-lg-8 d-flex align-items-center gap-5">
+                    <label class="form-check form-check-solid form-switch form-check-custom fv-row mb-0">
+                      <input type="checkbox" name="email_dogrulama"
+                            class="form-check-input w-45px h-30px"
+                            {% if firma and firma.email_dogrulama %}checked{% endif %}>
+                      <span class="form-check-label ms-3">Bestätigung aktivieren</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Bestätigungstext -->
+                <div class="row mb-0">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Bestätigungstext</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    <textarea id="email_onay_editor" name="email_onay_yazisi" rows="4"
+                      class="form-control form-control-lg form-control-solid"
+                      placeholder="Text für Bestätigungs-E-Mail ...">{% if firma and firma.email_onay_yazisi %}{{ firma.email_onay_yazisi }}{% endif %}</textarea>
+                    <div class="form-text">Dieser Text wird in Bestätigungs-E-Mails angezeigt.</div>
+                  </div>
+                </div>
+
+              </div>
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::E-Mail-Benachrichtigungen-->
+        {% endif %}
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::Berechtigungen-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+               data-bs-toggle="collapse" data-bs-target="#kt_berechtigungen_details"
+               aria-expanded="true" aria-controls="kt_berechtigungen_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Berechtigungen</h3>
+            </div>
+          </div>
+
+          <div id="kt_berechtigungen_details" class="collapse show">
+
+          </div>
+        </div>
+        <!--end::Berechtigungen-->
+        {% endif %}
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::SMTP-Einstellungen-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+               data-bs-toggle="collapse" data-bs-target="#kt_smtp_details"
+               aria-expanded="true" aria-controls="kt_smtp_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">SMTP-Einstellungen</h3>
+            </div>
+          </div>
+
+          <div id="kt_smtp_details" class="collapse show">
+            <form class="form fv-plugins-bootstrap5 fv-plugins-framework" method="post" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="smtp">
+              <div class="card-body border-top p-9">
+
+                <!-- Host -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label required fw-semibold fs-6">SMTP-Server</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ smtp_form.host }}
+                    {% if smtp_form.host.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ smtp_form.host.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Port -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label required fw-semibold fs-6">Port</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ smtp_form.port }}
+                    {% if smtp_form.port.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ smtp_form.port.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Benutzername -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Benutzername</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    {{ smtp_form.username }}
+                    {% if smtp_form.username.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ smtp_form.username.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Passwort -->
+                <div class="row mb-6">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Passwort</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    <div class="position-relative">
+                      {{ smtp_form.password }}
+                      <button type="button" class="btn btn-sm btn-icon position-absolute top-50 translate-middle-y end-0 me-3 password-toggle" data-password-toggle data-target="input[name='password']" style="cursor:pointer;"><i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></button>
+                    </div>
+
+                    {% if smtp_form.password.errors %}
+                      <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback d-block">
+                        {{ smtp_form.password.errors|striptags }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Sicherheit -->
+                <div class="row mb-0">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Sicherheit</label>
+                  <div class="col-lg-8 d-flex align-items-center gap-5">
+                    <label class="form-check form-check-solid form-switch form-check-custom fv-row mb-0">
+                      {{ smtp_form.use_tls }}
+                      <span class="form-check-label ms-3">TLS verwenden</span>
+                    </label>
+                    <label class="form-check form-check-solid form-switch form-check-custom fv-row mb-0">
+                      {{ smtp_form.use_ssl }}
+                      <span class="form-check-label ms-3">SSL verwenden</span>
+                    </label>
+                  </div>
+                </div>
+
+              </div>
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::SMTP-Einstellungen-->
+        {% endif %}
+
+        <!--begin::Formstatus-Einstellungen-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+              data-bs-toggle="collapse" data-bs-target="#kt_formstatus_details"
+              aria-expanded="true" aria-controls="kt_formstatus_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Formstatus verwalten</h3>
+            </div>
+          </div>
+
+          <div id="kt_formstatus_details" class="collapse show">
+            <form class="form" method="post" novalidate id="formstatus_form">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="durum">
+
+              <div class="card-body border-top p-9">
+                <div class="d-flex justify-content-between align-items-center mb-6">
+                  <button type="button" class="btn btn-light-primary" id="btn_status_ekle">
+                    <i class="fa-solid fa-plus me-2"></i>Neuen Status hinzufügen
+                  </button>
+                </div>
+
+                <div class="row g-4" id="status_liste">
+                  {% for d in form_durumlari %}
+                    <div class="col-12 status-item">
+                      <div class="d-flex align-items-center rounded border p-3 bg-light position-relative">
+                        <!-- Gizli ID -->
+                        <input type="hidden" name="durum_id[]" value="{{ d.id }}">
+
+                        <!-- İsim -->
+                        <div class="flex-grow-1">
+                          <input type="text" name="durum_isim[]" value="{{ d.isim }}" class="form-control" required maxlength="50">
+                        </div>
+
+                        <!-- Oklar + Sil -->
+                        <div class="ms-3 d-flex align-items-center gap-2">
+                          <button type="button" class="btn btn-light btn-sm btn-up"   title="Nach oben">
+                            <i class="fa-solid fa-arrow-up"></i>
+                          </button>
+                          <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten">
+                            <i class="fa-solid fa-arrow-down"></i>
+                          </button>
+                          <button type="button" class="btn btn-light-danger btn-sm btn_status_sil" title="Löschen">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  {% empty %}
+                    <div class="col-12 status-item">
+                      <div class="d-flex align-items-center rounded border p-3 bg-light position-relative">
+                        <input type="hidden" name="durum_id[]" value="">
+                        <div class="col-auto pe-3">
+                          <span class="badge bg-secondary-subtle text-secondary fw-semibold status-badge">Status 1</span>
+                        </div>
+                        <div class="flex-grow-1">
+                          <input type="text" name="durum_isim[]" class="form-control" required maxlength="50">
+                        </div>
+                        <div class="ms-3 d-flex align-items-center gap-2">
+                          <button type="button" class="btn btn-light btn-sm btn-up" title="Nach oben">
+                            <i class="fa-solid fa-arrow-up"></i>
+                          </button>
+                          <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten">
+                            <i class="fa-solid fa-arrow-down"></i>
+                          </button>
+                          <button type="button" class="btn btn-light-danger btn-sm btn_status_sil" title="Löschen">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <div class="form-text mt-4">
+                  Doppelte Namen sind nicht erlaubt. Max. 50 Zeichen.
+                </div>
+              </div>
+
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::Formstatus-Einstellungen-->
+
+        <!--begin::Versicherungsgesellschaften-Einstellungen-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+              data-bs-toggle="collapse" data-bs-target="#kt_sigorta_details"
+              aria-expanded="true" aria-controls="kt_sigorta_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Versicherungsgesellschaften verwalten</h3>
+            </div>
+          </div>
+
+          <div id="kt_sigorta_details" class="collapse show">
+            <form class="form" method="post" enctype="multipart/form-data" novalidate id="sigorta_form">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="sigorta">
+
+              <div class="card-body border-top p-9">
+                <div class="d-flex justify-content-between align-items-center mb-6">
+                  <button type="button" class="btn btn-light-primary" id="btn_sigorta_ekle">
+                    <i class="fa-solid fa-plus me-2"></i>Neue Gesellschaft hinzufügen
+                  </button>
+                </div>
+
+                <div class="row g-4" id="sigorta_liste">
+                  {% for s in sigorta_sirketleri %}
+                    <div class="col-12 sigorta-item" data-item-id="{{ s.id }}">
+                      <div class="item-wrap position-relative">
+                        <!-- Gizli ID + Resim Sil Flag + Unique Key -->
+                        <input type="hidden" name="ss_id[]" value="{{ s.id }}">
+                        <input type="hidden" name="ss_resim_sil[]" value="0" class="del-flag">
+                        <input type="hidden" name="ss_key[]" value="existing_{{ s.id }}" data-item-id="{{ s.id }}">
+
+                        <!-- Logo -->
+                        <div class="symbol me-4 flex-shrink-0">
+                          {% if s.resim %}
+                            <img src="{{ s.resim.url }}" alt="{{ s.isim }} Logo" class="rounded-2 logo-preview" loading="lazy">
+                          {% else %}
+                            <div class="d-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small logo-placeholder">
+                              Logo
+                            </div>
+                          {% endif %}
+                        </div>
+
+                        <!-- İsim ve Kapsam -->
+                        <div class="name-col me-3">
+                          <input type="text" name="ss_isim[]" value="{{ s.isim }}" class="form-control mb-2" required maxlength="255" placeholder="Name der Versicherungsgesellschaft">
+                          <select name="ss_kapsam[]" class="form-select form-select-sm">
+                            <option value="Privat" {% if s.kapsam == 'Privat' %}selected{% endif %}>Privat</option>
+                            <option value="Gesetzlich" {% if s.kapsam == 'Gesetzlich' %}selected{% endif %}>Gesetzlich</option>
+                            <option value="Beides" {% if s.kapsam == 'Beides' %}selected{% endif %}>Beides</option>
+                          </select>
+                        </div>
+
+                        <!-- Dosya + Sil checkbox + Oklar/Sil -->
+                        <div class="ctrl-col">
+                          <div class="file-block">
+                            <input type="file" name="ss_resim_{{ s.id }}" accept="image/*" class="form-control form-control-sm logo-file" data-item-id="{{ s.id }}">
+                          </div>
+                          <button type="button" class="btn btn-outline-danger btn-sm del-image-btn" data-item-id="{{ s.id }}" title="Logo entfernen">
+                            <i class="fa-solid fa-image me-1"></i>Logo entfernen
+                          </button>
+
+                          <div class="actions">
+                            <button type="button" class="btn btn-light btn-sm btn-up" title="Nach oben" data-item-id="{{ s.id }}">
+                              <i class="fa-solid fa-arrow-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten" data-item-id="{{ s.id }}">
+                              <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-light-danger btn-sm btn_sigorta_sil" title="Löschen" data-item-id="{{ s.id }}">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm btn-alt" data-sirket-id="{{ s.id }}" data-sirket-isim="{{ s.isim }}" title="Untergesellschaften verwalten">
+                              <i class="fa-solid fa-sitemap"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  {% empty %}
+                    <!-- İlk satır (boş başlangıç) -->
+                    <div class="col-12 sigorta-item" data-item-id="new_0">
+                      <div class="item-wrap position-relative">
+                        <input type="hidden" name="ss_id[]" value="">
+                        <input type="hidden" name="ss_resim_sil[]" value="0" class="del-flag">
+                        <input type="hidden" name="ss_key[]" value="new_0" data-item-id="new_0">
+
+                        <!-- Logo -->
+                        <div class="symbol me-4 flex-shrink-0">
+                          <div class="d-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small logo-placeholder">
+                            Logo
+                          </div>
+                        </div>
+
+                        <!-- İsim ve Kapsam -->
+                        <div class="name-col me-3">
+                          <input type="text" name="ss_isim[]" class="form-control mb-2" required maxlength="255" placeholder="Name der Versicherungsgesellschaft">
+                          <select name="ss_kapsam[]" class="form-select form-select-sm">
+                            <option value="Privat">Privat</option>
+                            <option value="Gesetzlich">Gesetzlich</option>
+                            <option value="Beides" selected>Beides</option>
+                          </select>
+                        </div>
+
+                        <!-- Dosya + Sil checkbox + Oklar/Sil -->
+                        <div class="ctrl-col">
+                          <div class="file-block">
+                            <input type="file" name="ss_resim_new_0" accept="image/*" class="form-control form-control-sm logo-file" data-item-id="new_0">
+                          </div>
+                          <button type="button" class="btn btn-outline-danger btn-sm del-image-btn" data-item-id="new_0" title="Logo entfernen">
+                            <i class="fa-solid fa-image me-1"></i>Logo entfernen
+                          </button>
+
+                          <div class="actions">
+                            <button type="button" class="btn btn-light btn-sm btn-up" title="Nach oben" data-item-id="new_0">
+                              <i class="fa-solid fa-arrow-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten" data-item-id="new_0">
+                              <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-light-danger btn-sm btn_sigorta_sil" title="Löschen" data-item-id="new_0">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <div class="form-text mt-4">
+                  Doppelte Namen sind nicht erlaubt. Max. 255 Zeichen. Logos werden automatisch skaliert.
+                </div>
+              </div>
+
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::Versicherungsgesellschaften-Einstellungen-->
+
+        <!--begin::Untergesellschaften-Modal-->
+        <div class="modal fade" id="modal_alt_sirket" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  Untergesellschaften von: <span id="as_modal_title" class="fw-semibold"></span>
+                </h5>
+                <button type="button" class="btn btn-icon" data-bs-dismiss="modal" aria-label="Schließen">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <form id="as_form" method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="sirket_id" id="as_sirket_id" value="">
+
+                <div class="modal-body">
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button type="button" class="btn btn-light-primary" id="as_btn_ekle">
+                      <i class="fa-solid fa-plus me-2"></i>Neue Untergesellschaft hinzufügen
+                    </button>
+                  </div>
+
+                  <div class="row g-3" id="as_liste"></div>
+
+                  <div class="form-text mt-3">
+                    Leere Liste absenden löscht alle Untergesellschaften. Doppelte Namen sind nicht erlaubt.
+                  </div>
+
+                  <div class="alert alert-danger d-none mt-3" id="as_error"></div>
+                  <div class="alert alert-success d-none mt-3" id="as_success"></div>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+                  <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!--end::Untergesellschaften-Modal-->
+
+
+        {% if request.user.is_superuser or request.user.rol == 'Admin' %}
+        <!--begin::Footer-Bearbeiten (Frontend-Only, CKEditor CDN)-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+              data-bs-toggle="collapse" data-bs-target="#kt_footer_details"
+              aria-expanded="true" aria-controls="kt_footer_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Footer bearbeiten</h3>
+            </div>
+          </div>
+
+          <div id="kt_footer_details" class="collapse show">
+            <form class="form fv-plugins-bootstrap5 fv-plugins-framework" method="post" novalidate id="footer_form">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="footer">
+
+              <!-- Gizli gerçek alanlar (POST bunlarla gider) -->
+              <input type="hidden" name="icerik_sol" id="footer_left_input">
+              <input type="hidden" name="buton_yazi_sag" id="btn_right_label_input">
+              <input type="hidden" name="buton_modal_icerik_sag" id="btn_right_modal_input">
+              <input type="hidden" name="buton_yazi_sag_iki" id="btn_right2_label_input">
+              <input type="hidden" name="buton_modal_icerik_sag_iki" id="btn_right2_modal_input">
+
+              <div class="card-body border-top p-9">
+                <div class="row g-10">
+                  <!-- Linker Inhalt -->
+                  <div class="col-12 col-lg-4">
+                    <label class="form-label fw-semibold fs-6">Linker Inhalt</label>
+                    <div class="border rounded bg-light p-2">
+                      <div id="footer_left_editor" class="ck-editor-wrap" style="min-height: 200px;">
+                        {{ footer.icerik_sol|default_if_none:""|safe }}
+                      </div>
+                    </div>
+                    <div class="form-text">Nutze Absätze, Listen und Links für gute Lesbarkeit.</div>
+                  </div>
+
+                  <!-- Rechter Button + Modal -->
+                  <div class="col-12 col-lg-4">
+                    <label class="form-label fw-semibold fs-6">Rechter Modal-Inhalt</label>
+                    <div class="border rounded bg-light p-2">
+                      <div id="btn_right_modal_editor" class="ck-editor-wrap" style="min-height: 200px;">
+                        {{ footer.buton_modal_icerik_sag|default_if_none:""|safe }}
+                      </div>
+                    </div>
+                    <div class="form-text">Inhalt, der im Modal angezeigt wird.</div>
+                    <label class="form-label fw-semibold fs-6 mt-5">Rechter Button</label>
+                    <input type="text" class="form-control mb-3" id="btn_right_label_editor"
+                          placeholder="Button-Text"
+                          value="{{ footer.buton_yazi_sag|default_if_none:'' }}">
+                    <div class="form-text mb-3">Beschriftung des rechten Buttons.</div>
+                  </div>
+
+                  <!-- Rechter Button (zweite Spalte) + Modal -->
+                  <div class="col-12 col-lg-4">
+                    <label class="form-label fw-semibold fs-6">Zweiter Modal-Inhalt</label>
+                    <div class="border rounded bg-light p-2">
+                      <div id="btn_right2_modal_editor" class="ck-editor-wrap" style="min-height: 200px;">
+                        {{ footer.buton_modal_icerik_sag_iki|default_if_none:""|safe }}
+                      </div>
+                    </div>
+                    <div class="form-text">Inhalt für das zweite Modal (optional).</div>
+                    <label class="form-label fw-semibold fs-6 mt-5">Rechter Button (Spalte 2)</label>
+                    <input type="text" class="form-control mb-3" id="btn_right2_label_editor"
+                          placeholder="Zweiter Button-Text (optional)"
+                          value="{{ footer.buton_yazi_sag_iki|default_if_none:'' }}">
+                    <div class="form-text mb-3">Optionaler zweiter Button rechts.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::Footer-Bearbeiten-->
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+{# --- Canlı önizleme JS --- #}
+<script>
+  (function () {
+    function bindPreview(inputId, imgId) {
+      var input = document.getElementById(inputId);
+      var img = document.getElementById(imgId);
+      if (!input || !img) return;
+
+      input.addEventListener('change', function (e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        img.src = url;
+        img.classList.remove('opacity-50');
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      bindPreview('id_logo', 'logoPreview');
+      bindPreview('id_icon', 'iconPreview');
+    });
+  })();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Input'a sağ padding ekle (ikon çakışmasın)
+  document.querySelectorAll('[data-password-toggle]').forEach(function (btn) {
+    const wrap = btn.closest('.position-relative');
+    const targetSel = btn.getAttribute('data-target');
+    const input = (wrap && targetSel && wrap.querySelector(targetSel)) ||
+                  (wrap && wrap.querySelector('input[type="password"], input[type="text"]'));
+    if (input) input.classList.add('pe-12');
+  });
+
+  // Tıklama ile göster/gizle
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest('[data-password-toggle]');
+    if (!btn) return;
+
+    const wrap = btn.closest('.position-relative');
+    const targetSel = btn.getAttribute('data-target');
+    const input = (wrap && targetSel && wrap.querySelector(targetSel)) ||
+                  (wrap && wrap.querySelector('input[type="password"], input[type="text"]'));
+    if (!input) return;
+
+    const eye = btn.querySelector(".fa-eye");
+    const eyeSlash = btn.querySelector(".fa-eye-slash");
+
+    if (input.type === "password") {
+      input.type = "text";
+      if (eye) eye.classList.add("d-none");
+      if (eyeSlash) eyeSlash.classList.remove("d-none");
+    } else {
+      input.type = "password";
+      if (eye) eye.classList.remove("d-none");
+      if (eyeSlash) eyeSlash.classList.add("d-none");
+    }
+  });
+});
+</script>
+<script>
+(function () {
+  const list   = document.getElementById('status_liste');
+  const addBtn = document.getElementById('btn_status_ekle');
+  const form   = document.getElementById('formstatus_form');
+
+  if (!list) return;
+
+  function relabel() {
+    list.querySelectorAll('.status-item').forEach((wrap, idx) => {
+      const badge = wrap.querySelector('.status-badge');
+      if (badge) badge.textContent = `Status ${idx + 1}`;
+    });
+  }
+
+  function moveUp(item) {
+    const prev = item.previousElementSibling;
+    if (prev && prev.classList.contains('status-item')) {
+      list.insertBefore(item, prev);
+      relabel();
+    }
+  }
+
+  function moveDown(item) {
+    const next = item.nextElementSibling;
+    if (next && next.classList.contains('status-item')) {
+      list.insertBefore(next, item); // swap
+      relabel();
+    }
+  }
+
+  function newRow(nameVal = '', idVal = '') {
+    const col = document.createElement('div');
+    col.className = 'col-12 status-item';
+    col.innerHTML = `
+      <div class="d-flex align-items-center rounded border p-3 bg-light position-relative">
+        <input type="hidden" name="durum_id[]" value="${idVal}">
+        <div class="flex-grow-1">
+          <input type="text" name="durum_isim[]" class="form-control" required maxlength="50" value="${nameVal}">
+        </div>
+        <div class="ms-3 d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-light btn-sm btn-up" title="Nach oben">
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+          <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten">
+            <i class="fa-solid fa-arrow-down"></i>
+          </button>
+          <button type="button" class="btn btn-light-danger btn-sm btn_status_sil" title="Löschen">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    list.appendChild(col);
+    relabel();
+  }
+
+  // Liste içi butonlar (delegation)
+  list.addEventListener('click', (e) => {
+    const upBtn   = e.target.closest('.btn-up');
+    const downBtn = e.target.closest('.btn-down');
+    const delBtn  = e.target.closest('.btn_status_sil');
+    const item    = e.target.closest('.status-item');
+
+    if (!item) return;
+
+    if (upBtn)   return moveUp(item);
+    if (downBtn) return moveDown(item);
+    if (delBtn) {
+      const total = list.querySelectorAll('.status-item').length;
+      if (total <= 1) {
+        item.remove();
+        asRelabel();
+        return;
+      }
+      item.remove();
+      relabel();
+    }
+  });
+
+  // Yeni satır ekle
+  addBtn?.addEventListener('click', () => newRow());
+
+  // Submit validasyonu (boş & tekrar isim)
+  form?.addEventListener('submit', (e) => {
+    const inputs = Array.from(form.querySelectorAll('input[name="durum_isim[]"]'));
+    const names  = inputs.map(i => (i.value || '').trim()).filter(Boolean);
+
+    if (names.length !== inputs.length) {
+      e.preventDefault();
+      alert('Bitte fülle alle Status-Namen aus.');
+      return;
+    }
+    const lower = names.map(n => n.toLowerCase());
+    const hasDup = lower.some((n, i) => lower.indexOf(n) !== i);
+    if (hasDup) {
+      e.preventDefault();
+      alert('Doppelte Status-Namen sind nicht erlaubt.');
+      return;
+    }
+    // DOM sırası backend’de sira=1..N olarak kaydedilecek.
+  });
+
+  relabel();
+})();
+</script>
+{% if request.user.is_superuser or request.user.rol == 'Admin' %}
+<!-- CKEditor 5 Classic (CDN) -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+
+<script>
+/* =================== 1) Mevcut FOOTER CKEditor kodun (AYNEN) =================== */
+(function(){
+  const form = document.getElementById('footer_form');
+
+  // Editor containerları
+  const leftEl   = document.getElementById('footer_left_editor');
+  const brLabel  = document.getElementById('btn_right_label_editor');
+  const brModal  = document.getElementById('btn_right_modal_editor');
+  const br2Label = document.getElementById('btn_right2_label_editor');
+  const br2Modal = document.getElementById('btn_right2_modal_editor');
+
+  let leftEditor, rightModalEditor, right2ModalEditor;
+
+  const editorConfig = {
+    language: 'de',
+    toolbar: {
+      items: [
+        'undo','redo','|',
+        'heading','|',
+        'bold','italic','underline','link','|',
+        'bulletedList','numberedList','outdent','indent','|',
+        'blockQuote','insertTable','horizontalLine','removeFormat'
+      ]
+    },
+    placeholder: 'Inhalt hier eingeben...',
+    table: { contentToolbar: ['tableColumn','tableRow','mergeTableCells'] }
+  };
+
+  if (leftEl)  ClassicEditor.create(leftEl,  editorConfig).then(ed => leftEditor = ed);
+  if (brModal) ClassicEditor.create(brModal, editorConfig).then(ed => rightModalEditor = ed);
+  if (br2Modal)ClassicEditor.create(br2Modal,editorConfig).then(ed => right2ModalEditor = ed);
+
+  if (form) {
+    form.addEventListener('submit', function(e){
+      if (!leftEditor || !rightModalEditor || !right2ModalEditor) {
+        e.preventDefault();
+        alert('Editor wird noch geladen. Bitte versuche es erneut.');
+        return;
+      }
+
+      const leftVal   = leftEditor.getData().trim();
+      const btnRLabel = (brLabel?.value || '').trim();
+      const btnRModal = rightModalEditor.getData().trim();
+      const btnR2Label= (br2Label?.value || '').trim();
+      const btnR2Modal= right2ModalEditor.getData().trim();
+
+      // En azından sol içerik veya ilk buton+modal dolu olsun
+      if (!leftVal && !(btnRLabel && btnRModal)) {
+        e.preventDefault();
+        alert('Bitte gib mindestens den linken Inhalt oder den rechten Button mit Modal-Inhalt ein.');
+        return;
+      }
+
+      document.getElementById('footer_left_input').value        = leftVal;
+      document.getElementById('btn_right_label_input').value    = btnRLabel;
+      document.getElementById('btn_right_modal_input').value    = btnRModal;
+      document.getElementById('btn_right2_label_input').value   = btnR2Label;
+      document.getElementById('btn_right2_modal_input').value   = btnR2Modal;
+    });
+  }
+})();
+
+/* =================== 2) E-Mail (Bestätigungstext) CKEditor ENTEGRASYONU =================== */
+(function(){
+  const emailForm    = document.getElementById('email_form');
+  const emailEditorEl= document.getElementById('email_onay_editor');
+  if (!emailForm || !emailEditorEl || !window.ClassicEditor) return;
+
+  // Footer'daki config'e bire bir uyumlu ayrı bir config
+  const emailEditorConfig = {
+    language: 'de',
+    toolbar: {
+      items: [
+        'undo','redo','|',
+        'heading','|',
+        'bold','italic','underline','link','|',
+        'bulletedList','numberedList','outdent','indent','|',
+        'blockQuote','insertTable','horizontalLine','removeFormat'
+      ]
+    },
+    placeholder: 'Inhalt hier eingeben...',
+    table: { contentToolbar: ['tableColumn','tableRow','mergeTableCells'] }
+  };
+
+  let emailEditor;
+  ClassicEditor.create(emailEditorEl, emailEditorConfig).then(ed => {
+    emailEditor = ed;
+  });
+
+  emailForm.addEventListener('submit', function(e){
+    if (!emailEditor) {
+      e.preventDefault();
+      alert('Editor wird noch geladen. Bitte versuche es erneut.');
+      return;
+    }
+    // CKEditor verisini orijinal textarea'ya geri yaz
+    emailEditorEl.value = emailEditor.getData();
+  });
+})();
+</script>
+{% endif %}
+<script>
+(function () {
+  const list   = document.getElementById('sigorta_liste');
+  const addBtn = document.getElementById('btn_sigorta_ekle');
+  const form   = document.getElementById('sigorta_form');
+
+  if (!list) return;
+
+
+  // Her sigorta şirketi için ayrı event listener'lar oluştur
+  function initializeItem(item) {
+    const itemId = item.getAttribute('data-item-id');
+    
+    // Logo yükleme
+    const fileInput = item.querySelector('.logo-file');
+    if (fileInput) {
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        const symbol = item.querySelector('.symbol');
+        const oldImg = item.querySelector('.logo-preview');
+        const placeholder = item.querySelector('.logo-placeholder');
+        
+        const url = URL.createObjectURL(file);
+        
+        if (placeholder) placeholder.remove();
+        if (oldImg) {
+          oldImg.src = url;
+        } else {
+          const img = document.createElement('img');
+          img.className = 'rounded-2 logo-preview';
+          img.alt = 'Logo';
+          img.loading = 'lazy';
+          img.style.cssText = 'width:100%; height:100%; object-fit:contain; background:#fff; padding:2px;';
+          img.src = url;
+          symbol.appendChild(img);
+        }
+        
+        // Dosya seçilince "Bild entfernen" bayrağını sıfırla
+        const delFlag = item.querySelector('.del-flag');
+        if (delFlag) delFlag.value = '0';
+      });
+    }
+    
+    // Logo silme butonu
+    const delImageBtn = item.querySelector('.del-image-btn');
+    if (delImageBtn) {
+      delImageBtn.addEventListener('click', function() {
+        const companyName = item.querySelector('input[name="ss_isim[]"]').value || 'diese Gesellschaft';
+        showDeleteConfirm(
+          'Logo entfernen',
+          `Sind Sie sicher, dass Sie das Logo von "${companyName}" entfernen möchten?`,
+          function() {
+            const delFlag = item.querySelector('.del-flag');
+            const fileInput = item.querySelector('.logo-file');
+            const img = item.querySelector('.logo-preview');
+            const placeholder = item.querySelector('.logo-placeholder');
+            
+            if (delFlag) delFlag.value = '1';
+            if (fileInput) fileInput.value = '';
+            if (img) img.remove();
+            if (!placeholder) {
+              const symbol = item.querySelector('.symbol');
+              const emp = document.createElement('div');
+              emp.className = 'd-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small logo-placeholder';
+              emp.textContent = 'Logo';
+              symbol.appendChild(emp);
+            }
+          }
+        );
+      });
+    }
+    
+    // Yukarı ok
+    const upBtn = item.querySelector('.btn-up');
+    if (upBtn) {
+      upBtn.addEventListener('click', function() {
+        const prev = item.previousElementSibling;
+        if (prev && prev.classList.contains('sigorta-item')) {
+          list.insertBefore(item, prev);
+        }
+      });
+    }
+    
+    // Aşağı ok
+    const downBtn = item.querySelector('.btn-down');
+    if (downBtn) {
+      downBtn.addEventListener('click', function() {
+        const next = item.nextElementSibling;
+        if (next && next.classList.contains('sigorta-item')) {
+          list.insertBefore(next, item);
+        }
+      });
+    }
+    
+    // Sil butonu
+    const delBtn = item.querySelector('.btn_sigorta_sil');
+    if (delBtn) {
+      delBtn.addEventListener('click', function() {
+        const companyName = item.querySelector('input[name="ss_isim[]"]').value || 'diese Gesellschaft';
+        showDeleteConfirm(
+          'Gesellschaft löschen',
+          `Sind Sie sicher, dass Sie "${companyName}" löschen möchten?`,
+          function() {
+            const total = list.querySelectorAll('.sigorta-item').length;
+            if (total <= 1) {
+              // Son satır: sadece temizle
+              item.querySelector('input[name="ss_id[]"]').value = '';
+              item.querySelector('input[name="ss_isim[]"]').value = '';
+              const fileInput = item.querySelector('input[name*="ss_resim_"]');
+              if (fileInput) fileInput.value = '';
+              const delFlag = item.querySelector('.del-flag');
+              if (delFlag) delFlag.value = '0';
+              item.querySelector('.logo-preview')?.remove();
+              let placeholder = item.querySelector('.logo-placeholder');
+              if (!placeholder) {
+                const symbol = item.querySelector('.symbol');
+                placeholder = document.createElement('div');
+                placeholder.className = 'd-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small logo-placeholder';
+                placeholder.textContent = 'Logo';
+                symbol.appendChild(placeholder);
+              }
+            } else {
+              item.remove();
+            }
+          }
+        );
+      });
+    }
+  }
+
+  // Yeni satır oluştur
+  function createNewRow(nameVal = '', idVal = '') {
+    const timestamp = Date.now();
+    const col = document.createElement('div');
+    col.className = 'col-12 sigorta-item';
+    col.setAttribute('data-item-id', `new_${timestamp}`);
+    col.innerHTML = `
+      <div class="item-wrap position-relative">
+        <input type="hidden" name="ss_id[]" value="${idVal}">
+        <input type="hidden" name="ss_resim_sil[]" value="0" class="del-flag">
+        <input type="hidden" name="ss_key[]" value="new_${timestamp}" data-item-id="new_${timestamp}">
+
+        <!-- Logo -->
+        <div class="symbol me-4 flex-shrink-0">
+          <div class="d-flex align-items-center justify-content-center w-100 h-100 rounded-2 bg-light text-muted small logo-placeholder">
+            Logo
+          </div>
+        </div>
+
+        <!-- İsim ve Kapsam -->
+        <div class="name-col me-3">
+          <input type="text" name="ss_isim[]" class="form-control mb-2" required maxlength="255" placeholder="Name der Versicherungsgesellschaft" value="${nameVal}">
+          <select name="ss_kapsam[]" class="form-select form-select-sm">
+            <option value="Privat">Privat</option>
+            <option value="Gesetzlich">Gesetzlich</option>
+            <option value="Beides" selected>Beides</option>
+          </select>
+        </div>
+
+        <!-- Dosya + Sil checkbox + Oklar/Sil -->
+        <div class="ctrl-col">
+          <div class="file-block">
+            <input type="file" name="ss_resim_new_${timestamp}" accept="image/*" class="form-control form-control-sm logo-file" data-item-id="new_${timestamp}">
+          </div>
+          <button type="button" class="btn btn-outline-danger btn-sm del-image-btn" data-item-id="new_${timestamp}" title="Logo entfernen">
+            <i class="fa-solid fa-image me-1"></i>Logo entfernen
+          </button>
+
+          <div class="actions">
+            <button type="button" class="btn btn-light btn-sm btn-up" title="Nach oben" data-item-id="new_${timestamp}">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button type="button" class="btn btn-light btn-sm btn-down" title="Nach unten" data-item-id="new_${timestamp}">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button type="button" class="btn btn-light-danger btn-sm btn_sigorta_sil" title="Löschen" data-item-id="new_${timestamp}">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    
+    list.appendChild(col);
+    initializeItem(col);
+  }
+
+  // Mevcut tüm item'ları initialize et
+  list.querySelectorAll('.sigorta-item').forEach(initializeItem);
+
+
+  // Yeni satır ekle butonu
+  addBtn?.addEventListener('click', () => createNewRow());
+
+  // Submit validasyonu
+  form?.addEventListener('submit', (e) => {
+    const inputs = Array.from(form.querySelectorAll('input[name="ss_isim[]"]'));
+    const names  = inputs.map(i => (i.value || '').trim()).filter(Boolean);
+
+    if (names.length !== inputs.length) {
+      e.preventDefault();
+      alert('Bitte fülle alle Gesellschaftsnamen aus.');
+      return;
+    }
+    const lower = names.map(n => n.toLowerCase());
+    const hasDup = lower.some((n, i) => lower.indexOf(n) !== i);
+    if (hasDup) {
+      e.preventDefault();
+      alert('Doppelte Namen sind nicht erlaubt.');
+      return;
+    }
+  });
+})();
+</script>
+<script>
+(function () {
+  const asModalEl   = document.getElementById('modal_alt_sirket');
+  if (!asModalEl) return;
+
+  const asModal     = new bootstrap.Modal(asModalEl);
+  const asTitle     = document.getElementById('as_modal_title');
+  const asForm      = document.getElementById('as_form');
+  const asListe     = document.getElementById('as_liste');
+  const asSirketId  = document.getElementById('as_sirket_id');
+  const asBtnEkle   = document.getElementById('as_btn_ekle');
+  const asErr       = document.getElementById('as_error');
+  const asOk        = document.getElementById('as_success');
+
+  function asHideMsgs() {
+    asErr.classList.add('d-none');
+    asOk.classList.add('d-none');
+    asErr.textContent = '';
+    asOk.textContent  = '';
+  }
+
+  function asRelabel() {
+    // DOM-Reihenfolge → Backend sira = 1..N (bereits in View umgesetzt)
+  }
+
+  function asMoveUp(item) {
+    const prev = item.previousElementSibling;
+    if (prev && prev.classList.contains('as-item')) {
+      asListe.insertBefore(item, prev);
+      asRelabel();
+    }
+  }
+
+  function asMoveDown(item) {
+    const next = item.nextElementSibling;
+    if (next && next.classList.contains('as-item')) {
+      asListe.insertBefore(next, item); // swap
+      asRelabel();
+    }
+  }
+
+  function asNewRow(nameVal = '', idVal = '') {
+    const col = document.createElement('div');
+    col.className = 'col-12 as-item';
+    col.innerHTML = `
+      <div class="d-flex align-items-center rounded border p-3 bg-light position-relative">
+        <input type="hidden" name="as_id[]" value="${idVal}">
+        <div class="flex-grow-1 me-3">
+          <input type="text" name="as_isim[]" class="form-control" maxlength="255"
+                 placeholder="Name der Untergesellschaft" value="${nameVal}">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-light btn-sm as-up" title="Nach oben">
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+          <button type="button" class="btn btn-light btn-sm as-down" title="Nach unten">
+            <i class="fa-solid fa-arrow-down"></i>
+          </button>
+          <button type="button" class="btn btn-light-danger btn-sm as-del" title="Löschen">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    asListe.appendChild(col);
+    asRelabel();
+  }
+
+  // Delegation: Pfeile & Löschen
+  asListe.addEventListener('click', (e) => {
+    const item = e.target.closest('.as-item');
+    if (!item) return;
+
+    if (e.target.closest('.as-up'))   return asMoveUp(item);
+    if (e.target.closest('.as-down')) return asMoveDown(item);
+    if (e.target.closest('.as-del'))  {
+      item.remove(); // letzte Zeile darf jetzt auch entfernt werden (Liste kann leer sein)
+      asRelabel();
+    }
+  });
+
+  // Neue Untergesellschaft
+  asBtnEkle?.addEventListener('click', () => asNewRow());
+
+  // Öffnen: Button in der Gesellschaftszeile
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-alt');
+    if (!btn) return;
+
+    asHideMsgs();
+
+    const sid  = btn.getAttribute('data-sirket-id');
+    const name = btn.getAttribute('data-sirket-isim') || 'Gesellschaft';
+
+    asSirketId.value = sid;
+    asTitle.textContent = name;
+
+    asListe.innerHTML = `<div class="col-12"><div class="text-muted">Wird geladen…</div></div>`;
+
+    try {
+      const url = `{% url 'sigorta_alt_list' %}?sirket_id=${encodeURIComponent(sid)}`;
+      const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!resp.ok) throw new Error();
+      const data = await resp.json();
+
+      asListe.innerHTML = '';
+      if (data.ok && Array.isArray(data.items) && data.items.length) {
+        data.items.forEach(it => asNewRow(it.isim, it.id));
+      } else {
+        // Keine Untergesellschaft vorhanden → leere Liste anzeigen (Nutzer kann hinzufügen)
+        asListe.innerHTML = '';
+      }
+      asModal.show();
+    } catch (err) {
+      asListe.innerHTML = '';
+      asErr.textContent = 'Beim Laden der Untergesellschaften ist ein Fehler aufgetreten.';
+      asErr.classList.remove('d-none');
+      asModal.show();
+    }
+  });
+
+  // Speichern
+  asForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    asHideMsgs();
+
+    const inputs = Array.from(asForm.querySelectorAll('input[name="as_isim[]"]'));
+    const names  = inputs.map(i => (i.value || '').trim()).filter(Boolean);
+
+    // Nur in nicht-leeren Namen Duplikate verbieten
+    const lower = names.map(n => n.toLowerCase());
+    const hasDup = lower.some((n, i) => lower.indexOf(n) !== i);
+    if (hasDup) {
+      asErr.textContent = 'Doppelte Namen sind nicht erlaubt.';
+      asErr.classList.remove('d-none');
+      return;
+    }
+
+    // Leere Liste absenden = alles löschen (Server-seitig umgesetzt)
+    const fd = new FormData(asForm);
+    try {
+      const resp = await fetch(`{% url 'sigorta_alt_save' %}`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) {
+        asErr.textContent = (data && data.msg) ? data.msg : 'Beim Speichern ist ein Fehler aufgetreten.';
+        asErr.classList.remove('d-none');
+        return;
+      }
+      asOk.textContent = data.msg || 'Erfolgreich gespeichert.';
+      asOk.classList.remove('d-none');
+    } catch (err) {
+      asErr.textContent = 'Beim Speichern ist ein Fehler aufgetreten.';
+      asErr.classList.remove('d-none');
+    }
+  });
+})();
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'auth/base.html' %}
+{% load static %}
+
+{% block title %}Neues Passwort festlegen – {{ firma.isim|default:"" }}{% endblock %}
+{% block description %}Legen Sie ein neues Passwort für Ihr Konto fest.{% endblock %}
+
+{% block content %}
+<div class="w-lg-550px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
+  <form class="form w-100 fv-plugins-bootstrap5 fv-plugins-framework" novalidate id="kt_new_password_form" method="post" action="">
+    {% csrf_token %}
+    <div class="text-center mb-10">
+      <h1 class="text-dark mb-3">Neues Passwort festlegen</h1>
+    </div>
+
+    {% include 'widgets/messages.html' %}
+
+    <!-- Django SetPasswordForm alanları: new_password1, new_password2 -->
+    <div class="mb-10 fv-row">
+      <div class="mb-1">
+        <label class="form-label fw-bold text-dark fs-6">Passwort</label>
+        <div class="position-relative mb-3">
+          <input class="form-control form-control-lg form-control-solid" type="password" name="new_password1" autocomplete="new-password" required>
+          <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" data-kt-password-meter-control="visibility"> <i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></span>
+        </div>
+      </div>
+      {% if form.new_password1.errors %}<div class="invalid-feedback d-block">{% for e in form.new_password1.errors %}{{ e }}{% if not forloop.last %}<br/>{% endif %}{% endfor %}</div>{% endif %}
+    </div>
+
+    <div class="mb-10 fv-row">
+      <div class="mb-1">
+        <label class="form-label fw-bold text-dark fs-6">Passwort bestätigen</label>
+        <div class="position-relative mb-3">
+          <input class="form-control form-control-lg form-control-solid" type="password" name="new_password2" autocomplete="new-password" required>
+          <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" data-kt-password-meter-control="visibility"><i class="fa-solid fa-eye"></i><i class="fa-solid fa-eye-slash d-none"></i></span>
+        </div>
+      </div>
+      {% if form.new_password2.errors %}<div class="invalid-feedback d-block">{% for e in form.new_password2.errors %}{{ e }}{% if not forloop.last %}<br/>{% endif %}{% endfor %}</div>{% endif %}
+    </div>
+
+    <div class="text-center">
+      <button type="submit" id="kt_new_password_submit" class="btn btn-lg btn-primary fw-bold"><span class="indicator-label">Speichern</span><span class="indicator-progress d-none">Bitte warten... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span></button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest('[data-kt-password-meter-control="visibility"]');
+    if (!btn) return;
+
+    const wrapper = btn.closest(".position-relative") || btn.parentElement;
+    const input = wrapper.querySelector('input[type="password"], input[type="text"]');
+    if (!input) return;
+
+    const eye = btn.querySelector(".fa-eye");
+    const eyeSlash = btn.querySelector(".fa-eye-slash");
+
+    if (input.type === "password") {
+      input.type = "text";
+      eye.classList.add("d-none");
+      eyeSlash.classList.remove("d-none");
+    } else {
+      input.type = "password";
+      eye.classList.remove("d-none");
+      eyeSlash.classList.add("d-none");
+    }
+  });
+});
+</script>
+{% endblock %}

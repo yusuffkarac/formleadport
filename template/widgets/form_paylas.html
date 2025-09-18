@@ -1,0 +1,245 @@
+<!-- PAYLAŞIM MODALI -->
+<div class="modal fade" id="modalFormPaylasimlari" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg">
+      <!-- Header: çizgi dahil -->
+      <div class="modal-header">
+        <h5 class="modal-title d-flex align-items-center">
+          <i class="ki-duotone ki-share fs-4 me-2"><span class="path1"></span><span class="path2"></span></i>
+          Freigaben verwalten
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Kullanıcı seçimi -->
+        <div class="mb-3">
+          <label class="form-label small text-muted mb-1">Benutzer auswählen</label>
+          <div class="d-flex gap-2">
+            <select id="shareUserSelect" class="form-select">
+              <option value="" selected disabled>Bitte wählen...</option>
+              {% for u in paylasilabilir_kullanicilar %}
+                <option value="{{ u.id }}">
+                  {{ u.first_name }} {{ u.last_name }}{% if u.first_name or u.last_name %} ({{ u.username }}){% else %}{{ u.username }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+            <button id="btnShareAdd" class="btn btn-primary px-3">
+              Hinzufügen
+            </button>
+          </div>
+        </div>
+
+        <!-- Bilgi/uyarı -->
+        <div id="shareAlert" class="alert d-none" role="alert"></div>
+
+        <!-- Dikey liste -->
+        <div id="shareList" class="list-group list-group-flush rounded-3 border">
+          <!-- JS ile doldurulacak -->
+          <div class="list-group-item py-4 text-center text-muted" id="shareEmpty">
+            Keine Freigaben gefunden.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer: çizgi dahil -->
+      <div class="modal-footer">
+        <button class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SİLME ONAY MODALI (Sade ve net) -->
+<div class="modal fade" id="modalConfirmRemove" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header">
+        <h6 class="modal-title">Freigabe entfernen</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+      <div class="modal-body text-start">
+        <p class="mb-2">Möchten Sie diese Freigabe wirklich entfernen?</p>
+        <small class="text-muted" id="confirmRemoveUserInfo"></small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmRemove">Entfernen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Hangi forma ait çalıştığımız -->
+<input type="hidden" id="shareCurrentFormId">
+
+
+<script>
+(function(){
+  const modalEl = document.getElementById('modalFormPaylasimlari');
+  const confirmModalEl = document.getElementById('modalConfirmRemove');
+
+  const shareList = document.getElementById('shareList');
+  const shareEmpty = document.getElementById('shareEmpty');
+  const shareAlert = document.getElementById('shareAlert');
+  const userSelect = document.getElementById('shareUserSelect');
+  const btnAdd = document.getElementById('btnShareAdd');
+  const currentFormIdInput = document.getElementById('shareCurrentFormId');
+
+  const confirmInfo = document.getElementById('confirmRemoveUserInfo');
+  const btnConfirmRemove = document.getElementById('btnConfirmRemove');
+  let pendingRemove = { id: null, label: "" };
+
+  function getCookie(name) {
+    const v = (`; ${document.cookie}`).split(`; ${name}=`);
+    if (v.length === 2) return v.pop().split(';').shift();
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  function showAlert(type, msg){
+    shareAlert.className = `alert alert-${type}`;
+    shareAlert.textContent = msg;
+    shareAlert.classList.remove('d-none');
+    setTimeout(()=>shareAlert.classList.add('d-none'), 3000);
+  }
+
+  function itemTemplate(it){
+    return `
+      <div class="list-group-item">
+        <div class="user-chip">
+          <i class="ki-duotone ki-user fs-6"></i>
+          <span class="fw-semibold">${it.ad}</span>
+          <span class="handle">@${it.username}</span>
+        </div>
+        <button class="btn btn-sm btn-light btn-icon btnShareRemove" 
+                title="Entfernen" data-id="${it.id}" data-label="${it.ad} (@${it.username})">
+          <i class="ki-duotone ki-trash fs-5"><span class="path1"></span><span class="path2"></span></i>
+        </button>
+      </div>`;
+  }
+
+  function render(items){
+    if (!items || !items.length){
+      shareList.innerHTML = '';
+      shareList.appendChild(shareEmpty);
+      shareEmpty.classList.remove('d-none');
+      return;
+    }
+    shareEmpty.classList.add('d-none');
+    shareList.innerHTML = items.map(itemTemplate).join('');
+  }
+
+  async function loadShares(formId){
+    shareEmpty.classList.add('d-none');
+    shareList.innerHTML = `<div class="list-group-item justify-content-center py-4">Laden...</div>`;
+    try{
+      const res = await fetch(`/api/form-paylasimlari/${formId}/`);
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error || 'Unbekannter Fehler');
+      render(data.items);
+    }catch(err){
+      render([]);
+      showAlert('danger', err.message || 'Fehler beim Laden.');
+    }
+  }
+
+  async function addShare(){
+    const formId = currentFormIdInput.value;
+    const userId = userSelect.value;
+    if(!formId || !userId){
+      return;
+    }
+    btnAdd.disabled = true; userSelect.disabled = true;
+    try{
+      const res = await fetch('/api/form-paylasim-ekle/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        body: new URLSearchParams({form_id: formId, kullanici_id: userId})
+      });
+      const data = await res.json();
+      if(!data.ok){
+        
+      }else{
+        userSelect.value = "";
+        await loadShares(formId); // ekledikten sonra güncel liste
+      }
+    }catch(err){
+      showAlert('danger', err.message || 'Fehler beim Hinzufügen.');
+    }finally{
+      btnAdd.disabled = false; userSelect.disabled = false;
+    }
+  }
+
+  async function removeShare(id){
+    const formId = currentFormIdInput.value;
+    try{
+      const res = await fetch('/api/form-paylasim-sil/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        body: new URLSearchParams({paylasim_id: id})
+      });
+      const data = await res.json();
+      if(!data.ok){
+      }else{
+        await loadShares(formId);
+      }
+    }catch(err){
+      showAlert('danger', err.message || 'Fehler beim Entfernen.');
+    }
+  }
+
+  // Modal açılırken TETİKLEYEN butondan form-id al ve yükle
+  modalEl.addEventListener('show.bs.modal', function(event){
+    const trigger = event.relatedTarget; // << önemli fark
+    const formId = trigger?.getAttribute('data-form-id');
+    currentFormIdInput.value = formId || '';
+    if(formId) loadShares(formId);
+    shareAlert.classList.add('d-none');
+  });
+
+  // Ekle
+  btnAdd.addEventListener('click', function(e){
+    e.preventDefault();
+    addShare();
+  });
+
+  // Silmeye başla: onay modali aç
+  shareList.addEventListener('click', function(e){
+    const btn = e.target.closest('.btnShareRemove');
+    if(btn){
+      pendingRemove.id = btn.getAttribute('data-id');
+      pendingRemove.label = btn.getAttribute('data-label') || '';
+      confirmInfo.textContent = pendingRemove.label;
+      const m = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+      m.show();
+    }
+  });
+
+  // Onayı tamamla
+  btnConfirmRemove.addEventListener('click', async function(){
+    const m = bootstrap.Modal.getInstance(confirmModalEl);
+    btnConfirmRemove.disabled = true;
+    try{
+      await removeShare(pendingRemove.id);
+      m.hide();
+    } finally {
+      btnConfirmRemove.disabled = false;
+      pendingRemove = { id:null, label:"" };
+    }
+  });
+
+})();
+</script>
+
+
+<style>
+  #modalFormPaylasimlari .list-group-item {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .user-chip {
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.4rem .8rem; border-radius:999px; background:var(--bs-light);
+  }
+  .user-chip .handle { color: var(--bs-secondary-color); font-size: .875rem; }
+</style>

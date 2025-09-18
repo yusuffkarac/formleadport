@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Formulardetails</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="Margin:0;padding:0;background:#f6f7f9;color:#1f2937;font-family:Arial,Helvetica,sans-serif;">
+  <center style="width:100%;background:#f6f7f9;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#f6f7f9;">
+      <tr>
+        <td align="center" style="padding:16px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="960" style="max-width:960px;width:100%;">
+
+            <!-- ÜST KART -->
+            <tr>
+              <td style="padding:16px;background:#ffffff;border:1px solid #eef0f2;border-radius:12px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <!-- Sol -->
+                    <td valign="top" style="width:33.33%;padding:8px;">
+                      <div style="color:#6b7280;font-size:13px;line-height:18px;">Erstellt von</div>
+                      <div style="font-weight:700;font-size:16px;line-height:22px;">{{ kullanici_fullname|default:"—" }}</div>
+                      <div style="color:#6b7280;font-size:14px;line-height:20px;">{{ olusturma_human|default:"—" }}</div>
+                    </td>
+
+                    <!-- Orta -->
+                    <td valign="top" style="width:33.33%;padding:8px;text-align:center;">
+                      {% if firma_logo_url %}
+                        <img src="{{ firma_logo_url }}" alt="{{ firma_isim }} Logo" width="60" style="max-width:60px;max-height:40px;height:auto;display:inline-block;margin:0 auto 6px auto;border:0;outline:none;text-decoration:none;">
+                      {% endif %}
+                      <div style="font-weight:700;font-size:16px;line-height:22px;">{{ firma_isim }}</div>
+                    </td>
+
+                    <!-- Sağ -->
+                    <td valign="top" style="width:33.33%;padding:8px;text-align:right;">
+                      <div style="color:#6b7280;font-size:13px;line-height:18px;">Termin Datum</div>
+                      <div style="font-weight:700;font-size:16px;line-height:22px;">{{ randevu_human|default:"—" }}</div>
+                      <div style="color:#6b7280;font-size:13px;line-height:18px;margin-top:4px;">Terminart</div>
+                      <div style="font-weight:700;font-size:16px;line-height:22px;">{{ randevu_tipi|default:"—" }}</div>
+                      <div style="margin-top:8px;">
+                        {% with st=durum_human %}{% if st %}{% with st_l=st|lower %}
+                          {% if 'bestät' in st_l or 'vereinbart' in st_l or 'termin' in st_l %}
+                            <span style="display:inline-block;border-radius:999px;padding:4px 8px;border:1px solid #d5efdf;background:#e9f7ef;color:#198754;font-size:12px;line-height:14px;">{{ st }}</span>
+                          {% elif 'wart' in st_l or 'offen' in st_l or 'ausstehend' in st_l %}
+                            <span style="display:inline-block;border-radius:999px;padding:4px 8px;border:1px solid #f5e8b2;background:#fff6db;color:#b8860b;font-size:12px;line-height:14px;">{{ st }}</span>
+                          {% elif 'abgelehnt' in st_l or 'storniert' in st_l or 'abgesagt' in st_l %}
+                            <span style="display:inline-block;border-radius:999px;padding:4px 8px;border:1px solid #f7caca;background:#fde8e8;color:#b91c1c;font-size:12px;line-height:14px;">{{ st }}</span>
+                          {% else %}
+                            <span style="display:inline-block;border-radius:999px;padding:4px 8px;border:1px solid #eef0f2;background:#ffffff;color:#1f2937;font-size:12px;line-height:14px;">{{ st }}</span>
+                          {% endif %}
+                        {% endwith %}{% else %}
+                          <span style="display:inline-block;border-radius:999px;padding:4px 8px;border:1px solid #eef0f2;background:#ffffff;color:#1f2937;font-size:12px;line-height:14px;">—</span>
+                        {% endif %}{% endwith %}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- 2 sütun -->
+            <tr><td style="height:12px;"></td></tr>
+            <tr>
+              <td>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <!-- SOL -->
+                    <td valign="top" style="width:50%;padding-right:8px;">
+                      <!-- Kundenübersicht -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #eef0f2;border-radius:12px;">
+                        <tr>
+                          <td style="padding:16px;">
+                            <div style="font-weight:700;margin:0 0 8px 0;font-size:15px;">Kundenübersicht</div>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                              <tr>
+                                <td style="width:46%;color:#6b7280;padding:4px 0;font-size:14px;">Firmenname</td>
+                                <td style="width:54%;padding:4px 0;font-size:14px;">{{ firma_adi|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;">Name</td>
+                                <td style="padding:4px 0;font-size:14px;">{{ musteri_cinsiyet }} {{ musteri_tam_ad|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;">Geburtsdatum</td>
+                                <td style="padding:4px 0;font-size:14px;">{{ dogum_human|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;">Handy</td>
+                                <td style="padding:4px 0;font-size:14px;">{{ telefon|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;">Festnetz</td>
+                                <td style="padding:4px 0;font-size:14px;">{{ sabit_telefon|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;">E-Mail</td>
+                                <td style="padding:4px 0;font-size:14px;">{{ email|default:"—" }}</td>
+                              </tr>
+                              <tr>
+                                <td style="color:#6b7280;padding:4px 0;font-size:14px;vertical-align:top;">Adresse</td>
+                                <td style="padding:4px 0;font-size:14px;">
+                                  {% if adres or sehir_ilce or posta_kodu %}
+                                    {% if adres %}{{ adres }}<br>{% endif %}
+                                    {% if posta_kodu %}{{ posta_kodu }}{% endif %}
+                                    {% if sehir_ilce %} {{ sehir_ilce }}{% endif %}
+                                  {% else %}—{% endif %}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- boşluk -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr><td style="height:12px;"></td></tr>
+                      </table>
+
+                    </td>
+
+                    <!-- SAĞ -->
+                    <td valign="top" style="width:50%;padding-left:8px;">
+                      <!-- Familienstand & Versicherung -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #eef0f2;border-radius:12px;">
+                        <tr>
+                          <td style="padding:12px;">
+                            <div style="font-weight:700;margin:0 0 6px 0;font-size:15px;">Versicherung &amp; Partner</div>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:14px;">
+                              <tr>
+                                <td style="width:46%;color:#6b7280;padding:3px 0;vertical-align:top;">Versicherungsgesellschaft</td>
+                                <td style="width:54%;padding:3px 0;">
+                                  <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                      {% if sigorta_sirket_logo %}
+                                        <td style="padding-right:8px;">
+                                          <img src="{{ sigorta_sirket_logo }}" alt="Logo" width="90" style="max-width:90px;max-height:50px;height:auto;display:block;border:0;outline:none;text-decoration:none;">
+                                        </td>
+                                      {% endif %}
+                                      <td style="vertical-align:middle;">{{ sigorta_sirket_ad|default:"—" }}</td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Versicherungsart</td>
+                                <td style="padding:3px 0;">{{ sigorta_human|default:"—" }}</td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Seit wann</td>
+                                <td style="padding:3px 0;">{{ sigorta_baslangic_human|default:"—" }}</td>
+                              </tr>
+
+                              <!-- Beitrag (€, varsa) -->
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Beitrag (für Alle Mit/Versicherten)</td>
+                                <td style="padding:3px 0;">
+                                  {% if sigorta_katki_payi != "—" and sigorta_katki_payi %}
+                                    {{ sigorta_katki_payi }} €
+                                  {% else %}
+                                    —
+                                  {% endif %}
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Tarif</td>
+                                <td style="padding:3px 0;">{{ sigorta_vade_human|default:"—" }}</td>
+                              </tr>
+
+                              <!-- Selbstbeteiligung (€, varsa) -->
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Selbstbeteiligung</td>
+                                <td style="padding:3px 0;">
+                                  {% if sigorta_katilim_payi != "—" and sigorta_katilim_payi %}
+                                    {{ sigorta_katilim_payi }} €
+                                  {% else %}
+                                    —
+                                  {% endif %}
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Mitversicherung (Ehe/Kind)</td>
+                                <td style="padding:3px 0;">{{ es_cocuk_sigorta_human|default:"—" }}</td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Familienstand</td>
+                                <td style="padding:3px 0;">{{ medeni_durum_human|default:"—" }}</td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Anzahl der Kinder</td>
+                                <td style="padding:3px 0;">{{ aile_cocuk_sayisi|default:"—" }}</td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Beschäftigungsstatus</td>
+                                <td style="padding:3px 0;">{{ calisma_durumu|default:"—" }}</td>
+                              </tr>
+
+                              <tr>
+                                <td style="color:#6b7280;padding:3px 0;">Zusatz</td>
+                                <td style="padding:3px 0;word-break:break-word;">{{ sigorta_ek_yazi|default:"—" }}</td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- boşluk -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr><td style="height:12px;"></td></tr>
+                      </table>
+
+                      <!-- Benutzernotiz -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #eef0f2;border-radius:12px;">
+                        <tr>
+                          <td style="padding:12px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                              <tr>
+                                <td style="font-weight:700;font-size:15px;">Benutzernotiz</td>
+                                <td style="text-align:right;color:#6b7280;font-size:12px;">{% if not_tarih_human %}{{ not_tarih_human }}{% else %}—{% endif %}</td>
+                              </tr>
+                            </table>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:6px;">
+                              {% if not_ilk_icerik %}
+                                <tr>
+                                  <td style="border:1px solid #eef0f2;border-radius:8px;padding:8px 10px;background:#fcfcfd;">
+                                    <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">
+                                      {% if not_kullanici_fullname %}{{ not_kullanici_fullname }} · {% endif %}{{ not_tarih_human }}
+                                    </div>
+                                    <div style="font-size:14px;line-height:20px;">{{ not_ilk_icerik|linebreaksbr }}</div>
+                                  </td>
+                                </tr>
+                              {% else %}
+                                <tr>
+                                  <td style="border:1px solid #eef0f2;border-radius:8px;padding:8px 10px;background:#fcfcfd;color:#6b7280;font-size:14px;">
+                                    Kein Datensatz gefunden.
+                                  </td>
+                                </tr>
+                              {% endif %}
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </center>
+</body>
+</html>

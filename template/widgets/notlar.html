@@ -1,0 +1,335 @@
+<!-- Modal -->
+<div class="modal fade" id="modalFormNotlari" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content shadow-lg">
+      <!-- Header çizgili -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="ki-duotone ki-flag fs-5"><span class="path1"></span><span class="path2"></span></i> Form-Notizen
+          <small class="text-muted d-block fs-7" id="mf_subtitle">Formular-ID: <span id="mf_form_id">-</span></small>
+        </h5>
+        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Schließen">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Neue Notiz -->
+        <div class="card border-0 mb-4">
+          <div class="card-body p-3 p-md-4">
+            <label for="mf_yeni_not" class="form-label fw-semibold mb-2">Neue Notiz</label>
+            <textarea id="mf_yeni_not" class="form-control" rows="3" placeholder="Ihre Notiz zum Formular …"></textarea>
+            <div class="d-flex justify-content-end mt-3">
+              <button id="mf_btn_kaydet" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Notiz hinzufügen
+              </button>
+            </div>
+            <div id="mf_inline_error" class="text-danger small mt-2 d-none"></div>
+          </div>
+        </div>
+
+        <!-- Notizliste -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-semibold">Alle Notizen</div>
+          <div class="text-muted small">Neueste zuerst</div>
+        </div>
+        <div id="mf_list" class="vstack gap-3"></div>
+        <div id="mf_empty" class="text-center text-muted py-5 d-none">
+          Noch keine Notizen vorhanden.
+        </div>
+      </div>
+
+      <!-- Footer çizgili -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Löschbestätigung -->
+<div class="modal fade" id="mf_delete_confirm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content shadow">
+      <!-- Header çizgili -->
+      <div class="modal-header">
+        <h6 class="modal-title">
+          <i class="bi bi-trash3 me-2"></i>Notiz löschen
+        </h6>
+        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Schließen">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Diese Notiz wirklich löschen?</p>
+        <div id="mf_delete_error" class="text-danger small mt-2 d-none"></div>
+      </div>
+      <!-- Footer çizgili -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-danger" id="mf_delete_yes">
+          Ja, löschen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script>
+(function() {
+  // CSRF helper
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  }
+  const CSRF_TOKEN = getCookie('csrftoken');
+
+  const modalEl = document.getElementById('modalFormNotlari');
+  const listEl  = document.getElementById('mf_list');
+  const emptyEl = document.getElementById('mf_empty');
+  const formIdSpan = document.getElementById('mf_form_id');
+  const btnKaydet = document.getElementById('mf_btn_kaydet');
+  const yeniNotEl = document.getElementById('mf_yeni_not');
+  const inlineErr = document.getElementById('mf_inline_error');
+
+  let currentFormId = null;
+
+  // --- Silme onay modali elemanları ---
+  const delModalEl = document.getElementById('mf_delete_confirm');
+  const delConfirmBtn = document.getElementById('mf_delete_yes');
+  const delErrorEl = document.getElementById('mf_delete_error');
+  const delModal = delModalEl ? new bootstrap.Modal(delModalEl) : null;
+
+  // Bekleyen silme isteği
+  let pendingDelete = { noteId: null, card: null };
+
+  // Modal açılırken: hangi satıra tıklandıysa oradan form-id çek
+  modalEl.addEventListener('show.bs.modal', function (e) {
+    const btn = e.relatedTarget;
+    currentFormId = btn?.getAttribute('data-form-id');
+    formIdSpan.textContent = currentFormId || '-';
+    yeniNotEl.value = '';
+    inlineErr.classList.add('d-none');
+    inlineErr.textContent = '';
+    loadNotes();
+  });
+
+  async function loadNotes() {
+    if (!currentFormId) return;
+    listEl.innerHTML = '';
+    emptyEl.classList.add('d-none');
+
+    const resp = await fetch(`/ajax/form/${currentFormId}/notlar/`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await resp.json();
+    if (!data.ok) {
+      listEl.innerHTML = '<div class="text-danger">Notizen konnten nicht geladen werden.</div>';
+      return;
+    }
+    if (!data.items.length) {
+      emptyEl.classList.remove('d-none');
+      return;
+    }
+
+    // ID bazlı tekilleştirme
+    const seen = new Set();
+    for (const n of data.items) {
+      if (n && n.id != null && !seen.has(n.id)) {
+        seen.add(n.id);
+        renderNote(n);
+      }
+    }
+  }
+
+  function renderNote(n) {
+    // Aynı ID’li kart zaten varsa yeniden ekleme
+    if (n && n.id != null && listEl.querySelector(`[data-note-id="${n.id}"]`)) {
+      return;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'card border rounded-3';
+    item.dataset.noteId = n.id;
+
+    item.innerHTML = `
+    <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="fw-semibold">${escapeHtml(n.kullanici)}</div>
+          <div class="text-muted small">
+            ${n.olusturma}${n.guncelleme && n.guncelleme !== n.olusturma ? ' · aktualisiert ' + n.guncelleme : ''}
+          </div>
+        </div>
+        <div class="note-content mb-2">${nl2br(escapeHtml(n.icerik))}</div>
+        <div class="d-flex gap-2 justify-content-end">
+          ${n.duzenlenebilir ? `
+            <button class="btn btn-sm btn-light" data-action="edit">Bearbeiten</button>
+            <button class="btn btn-sm btn-light text-danger" data-action="delete">Löschen</button>
+          ` : ''}
+        </div>
+    </div>
+    `;
+    listEl.appendChild(item);
+  }
+
+  // Yeni not ekle
+  btnKaydet.addEventListener('click', async function() {
+    const icerik = (yeniNotEl.value || '').trim();
+    if (!icerik) {
+      inlineErr.textContent = 'Der Notiztext darf nicht leer sein.';
+      inlineErr.classList.remove('d-none');
+      return;
+    }
+    btnKaydet.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('icerik', icerik);
+      const resp = await fetch(`/ajax/form/${currentFormId}/notlar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd
+      });
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'Not eklenemedi.');
+      // Liste boşsa boş mesajını gizle
+      emptyEl.classList.add('d-none');
+      renderNote(data.item);
+      yeniNotEl.value = '';
+    } catch (err) {
+      inlineErr.textContent = err.message;
+      inlineErr.classList.remove('d-none');
+    } finally {
+      btnKaydet.disabled = false;
+    }
+  });
+
+  // Delegasyon: düzenle / sil
+  listEl.addEventListener('click', async function(e) {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const card = btn.closest('.card');
+    const noteId = card?.dataset.noteId;
+
+    if (action === 'edit') {
+      startEdit(card, noteId);
+
+    } else if (action === 'delete') {
+      // confirm yerine Bootstrap onay modali
+      if (!delModal) return;
+      pendingDelete.noteId = noteId;
+      pendingDelete.card = card;
+      delErrorEl.classList.add('d-none');
+      delErrorEl.textContent = '';
+      delConfirmBtn.disabled = false;
+      delModal.show();
+    }
+  });
+
+  function startEdit(card, noteId) {
+    const contentEl = card.querySelector('.note-content');
+    const original = contentEl.textContent;
+    // Edit alanı
+    contentEl.innerHTML = `
+    <textarea class="form-control mb-2" rows="3">${escapeHtml(original)}</textarea>
+    <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-sm btn-primary" data-action="save-edit">Speichern</button>
+        <button class="btn btn-sm btn-light" data-action="cancel-edit">Abbrechen</button>
+    </div>
+    <div class="text-danger small mt-2 d-none" data-edit-error></div>
+    `;
+
+    const btnRow = card.querySelectorAll('button[data-action="edit"], button[data-action="delete"]');
+    btnRow.forEach(b => b.classList.add('d-none'));
+
+    card.addEventListener('click', async function onEditClick(ev) {
+      const b = ev.target.closest('button[data-action]');
+      if (!b) return;
+      const act = b.getAttribute('data-action');
+
+      if (act === 'cancel-edit') {
+        // Eski haline dön
+        contentEl.innerHTML = nl2br(escapeHtml(original));
+        btnRow.forEach(x => x.classList.remove('d-none'));
+        card.removeEventListener('click', onEditClick);
+      }
+      if (act === 'save-edit') {
+        const ta = contentEl.querySelector('textarea');
+        const val = (ta.value || '').trim();
+        const errEl = contentEl.querySelector('[data-edit-error]');
+        if (!val) {
+          errEl.textContent = 'Der Notiztext darf nicht leer sein.';
+          errEl.classList.remove('d-none');
+          return;
+        }
+        b.disabled = true;
+        try {
+          const fd = new FormData();
+          fd.append('icerik', val);
+          const resp = await fetch(`/ajax/not/${noteId}/`, {
+            method: 'POST', // PATCH da olur; FormData ile genelde POST kullanılır
+            headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+          });
+          const data = await resp.json();
+          if (!data.ok) throw new Error(data.error || 'Güncellenemedi.');
+          contentEl.innerHTML = nl2br(escapeHtml(val));
+          btnRow.forEach(x => x.classList.remove('d-none'));
+          card.removeEventListener('click', onEditClick);
+        } catch (err) {
+          errEl.textContent = err.message;
+          errEl.classList.remove('d-none');
+        } finally {
+          b.disabled = false;
+        }
+      }
+    }, { once: false });
+  }
+
+  async function deleteNote(noteId, card) {
+    try {
+      const resp = await fetch(`/ajax/not/${noteId}/`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'Silinemedi.');
+      card.remove();
+      if (!listEl.children.length) emptyEl.classList.remove('d-none');
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  // Onay modali "Evet" butonu dinleyicisi
+  if (delConfirmBtn) {
+    delConfirmBtn.addEventListener('click', async function () {
+      if (!pendingDelete.noteId || !pendingDelete.card) return;
+      delConfirmBtn.disabled = true;
+      delErrorEl.classList.add('d-none');
+      delErrorEl.textContent = '';
+      try {
+        await deleteNote(pendingDelete.noteId, pendingDelete.card);
+        delModal.hide();
+      } catch (err) {
+        delErrorEl.textContent = err.message || 'Fehler beim Löschen.';
+        delErrorEl.classList.remove('d-none');
+      } finally {
+        pendingDelete = { noteId: null, card: null };
+        delConfirmBtn.disabled = false;
+      }
+    });
+  }
+
+  // Yardımcılar
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function(m) {
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m];
+    });
+  }
+  function nl2br(s) { return s.replace(/\n/g, '<br>'); }
+})();
+</script>

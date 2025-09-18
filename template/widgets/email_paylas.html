@@ -1,0 +1,166 @@
+<div class="modal fade" id="modalEmailPaylas" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+      <div class="modal-header" style="border-bottom:1px solid #eef0f2;">
+        <div>
+          <div style="font-weight:700;">Form per E-Mail teilen</div>
+          <div class="text-muted" style="font-size:.9rem;">Empfänger eingeben; unten sehen Sie frühere Sendungen.</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+
+      <div class="modal-body" style="background:#f6f7f9;">
+        <div class="surface" style="background:#fff;border:1px solid #eef0f2;border-radius:12px;padding:16px;margin-bottom:16px;">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Betreff</label>
+            <input type="text" class="form-control" id="ep_subject" placeholder="Formulardetails">
+          </div>
+          <div class="mb-2">
+            <label class="form-label fw-semibold">Empfänger-E-Mail(s)</label>
+            <input type="text" class="form-control" id="ep_to" placeholder="beispiel@mail.com, zweite@mail.com">
+            <div class="form-text">Für mehrere Adressen Komma oder Semikolon verwenden.</div>
+          </div>
+          <div id="ep_error" class="text-danger small mt-2" style="display:none;"></div>
+          <div class="d-flex gap-2 mt-3">
+            <button id="ep_send" type="button" class="btn btn-dark">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display:none;"></span>
+              Senden
+            </button>
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+          </div>
+        </div>
+
+        <div class="surface" style="background:#fff;border:1px solid #eef0f2;border-radius:12px;padding:16px;">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="m-0 fw-semibold">Frühere Sendungen</h6>
+            <span id="ep_count" class="badge bg-light text-muted">0</span>
+          </div>
+          <div id="ep_list" class="list-group list-group-flush" style="max-height:260px;overflow:auto;border:1px solid #eef0f2;border-radius:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let currentFormId = null;
+  const epTo = document.getElementById('ep_to');
+  const epSubject = document.getElementById('ep_subject');
+  const epError = document.getElementById('ep_error');
+  const epList = document.getElementById('ep_list');
+  const epCount = document.getElementById('ep_count');
+  const epSend = document.getElementById('ep_send');
+  const epSpinner = epSend.querySelector('.spinner-border');
+
+  function getCookie(name){let v=null;if(document.cookie){const cs=document.cookie.split(';');for(let c of cs){c=c.trim();if(c.startsWith(name+'=')){v=decodeURIComponent(c.substring(name.length+1));break;}}}return v;}
+  const csrftoken = getCookie('csrftoken');
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-bs-target="#modalEmailPaylas"]');
+    if(!btn) return;
+
+    currentFormId = btn.getAttribute('data-form-id');
+    epTo.value = '';
+    epSubject.value = 'Formulardetails';
+    epError.style.display = 'none';
+    epError.textContent = '';
+    epList.innerHTML = '<div class="text-center p-3 text-muted">Wird geladen…</div>';
+    epCount.textContent = '0';
+
+    fetch(`{% url 'ajax_email_paylasim_gecmis' %}?form_id=${encodeURIComponent(currentFormId)}`, {
+      headers: {"X-Requested-With":"XMLHttpRequest"}
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(!data.ok) throw new Error('Fehler');
+      epList.innerHTML = '';
+      if(data.items.length === 0){
+        epList.innerHTML = '<div class="text-center p-3 text-muted">Noch keine Sendungen.</div>';
+      } else {
+        data.items.forEach(it => {
+          const row = document.createElement('div');
+          row.className = 'list-group-item';
+          row.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+              <div style="max-width:70%;word-break:break-word;"><strong>${it.gonderilen_email}</strong></div>
+              <span class="badge bg-light text-muted">${it.gonderim_tarihi}</span>
+            </div>`;
+          epList.appendChild(row);
+        });
+      }
+      epCount.textContent = data.items.length;
+    })
+    .catch(() => {
+      epList.innerHTML = '<div class="text-center p-3 text-danger">Verlauf konnte nicht geladen werden.</div>';
+    });
+  });
+
+  epSend.addEventListener('click', function(){
+    if(!currentFormId) return;
+    const to = epTo.value.trim();
+    const subject = epSubject.value.trim() || 'Formulardetails';
+
+    epError.style.display = 'none';
+    epError.textContent = '';
+
+    if(!to){
+      epError.textContent = 'Bitte geben Sie mindestens eine E-Mail-Adresse ein.';
+      epError.style.display = 'block';
+      return;
+    }
+
+    epSend.disabled = true;
+    epSpinner.style.display = 'inline-block';
+
+    const formData = new FormData();
+    formData.append('form_id', currentFormId);
+    formData.append('to', to);
+    formData.append('subject', subject);
+
+    fetch(`{% url 'ajax_email_paylasim_gonder' %}`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrftoken,'X-Requested-With':'XMLHttpRequest'},
+      body: formData
+    })
+    .then(r => r.json().then(j => ({ok:r.ok, json:j})))
+    .then(({ok, json}) => {
+      if(!ok || !json.ok) throw new Error(json.error || 'Senden fehlgeschlagen.');
+      epTo.value = '';
+      epError.classList.remove('text-danger'); epError.classList.add('text-success');
+      epError.textContent = 'E-Mail wurde gesendet.';
+      epError.style.display = 'block';
+
+      return fetch(`{% url 'ajax_email_paylasim_gecmis' %}?form_id=${encodeURIComponent(currentFormId)}`)
+        .then(r => r.json())
+        .then(data => {
+          epList.innerHTML = '';
+          if(data.items.length === 0){
+            epList.innerHTML = '<div class="text-center p-3 text-muted">Noch keine Sendungen.</div>';
+          } else {
+            data.items.forEach(it => {
+              const row = document.createElement('div');
+              row.className = 'list-group-item';
+              row.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                  <div style="max-width:70%;word-break:break-word;"><strong>${it.gonderilen_email}</strong></div>
+                  <span class="badge bg-light text-muted">${it.gonderim_tarihi}</span>
+                </div>`;
+              epList.appendChild(row);
+            });
+          }
+          epCount.textContent = data.items.length;
+        });
+    })
+    .catch(err => {
+      epError.classList.remove('text-success'); epError.classList.add('text-danger');
+      epError.textContent = err.message || 'Fehler beim Senden.';
+      epError.style.display = 'block';
+    })
+    .finally(() => {
+      epSend.disabled = false;
+      epSpinner.style.display = 'none';
+    });
+  });
+})();
+</script>

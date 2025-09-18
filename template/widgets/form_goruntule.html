@@ -1,0 +1,610 @@
+<!-- Anzeige-Modal (breit, modern, minimal) -->
+<div class="modal fade" id="modalFormGoruntule" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl modal-wide">
+    <div class="modal-content modern-modal">
+      <div class="modal-header modern-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="ki-duotone ki-screen fs-2"></i>
+          <div class="d-flex flex-column">
+            <h5 class="modal-title m-0">Formulardetails</h5>
+            <small class="text-muted" id="mf-id"></small>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm" data-bs-dismiss="modal" aria-label="Schließen">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </button>
+      </div>
+
+      <div class="modal-body modern-body">
+        <!-- Laden -->
+        <div id="mf-loading" class="d-flex align-items-center justify-content-center py-8">
+          <div class="spinner-border" role="status" aria-label="Wird geladen"></div>
+          <span class="ms-3">Wird geladen…</span>
+        </div>
+
+        <!-- Fehler -->
+        <div id="mf-error" class="alert alert-danger d-none" role="alert"></div>
+
+        <!-- Inhalt -->
+        <div id="mf-content" class="d-none">
+          <!-- Kopfkarte -->
+          <section class="surface mb-4">
+            <div class="row align-items-center g-3">
+              <!-- Links: Erstellt von + erstellt am -->
+              <div class="col-12 col-lg-4">
+                <div class="d-flex flex-column">
+                  <div class="text-muted small">Erstellt von</div>
+                  <div class="fw-semibold" id="mf-created-by">—</div>
+                  <div class="text-muted" id="mf-created-at">—</div>
+                </div>
+              </div>
+
+              <!-- Mitte: Logo + Firma (context: firma) -->
+              <div class="col-12 col-lg-4 text-center">
+                {% if firma and firma.logo %}
+                  <img id="mf-brand-logo" width="50" class="brand-logo d-inline-block mb-1"
+                      src="{{ firma.logo.url }}" alt="{{ firma.isim|default:'Firma' }} Logo" />
+                {% else %}
+                  <img id="mf-brand-logo" class="brand-logo d-inline-block mb-1 d-none"
+                      src="" alt="Logo" />
+                {% endif %}
+                <div class="fw-semibold" id="mf-brand-name">
+                  {{ firma.isim|default:"Leadport" }}
+                </div>
+              </div>
+
+              <!-- Rechts: Rendezvous + Status -->
+              <div class="col-12 col-lg-4 text-lg-end">
+                <div class="text-muted small">Termin Datum</div>
+                <div id="mf-appt" class="fw-semibold">—</div>
+                <div class="text-muted small mt-2">Terminart</div>
+                <div id="mf-terminart-top" class="small fw-semibold text-dark">—</div>
+                <div class="mt-2">
+                  <span id="mf-status-top" class="badge bg-light text-dark">—</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Zweispaltiges Grid (neu) -->
+          <div class="row g-4">
+            <!-- LINKE SPALTE -->
+            <div class="col-lg-6">
+              <!-- Kundenübersicht -->
+              <section class="surface">
+                <h6 class="section-title">Kundenübersicht</h6>
+                <dl class="kv">
+                  <dt>Firmenname</dt><dd id="mf-firma">—</dd>
+                  <dt>Name</dt><dd id="mf-adsoyad">—</dd>
+                  <dt>Geburtsdatum</dt><dd id="mf-dogum">—</dd>
+                  <dt>Handy</dt><dd><span id="mf-telefon">—</span><i id="mf-telefon-ok" class="ki-duotone ki-flash-circle text-success d-none ms-1" title="Verifiziert" aria-label="Verifiziert"></i></dd>
+                  <dt>Festnetz</dt><dd><span id="mf-sabit-telefon">—</span></dd>
+                  <dt>E-Mail</dt><dd><span id="mf-email">—</span><i id="mf-email-ok" class="ki-duotone ki-flash-circle text-success d-none ms-1" title="Verifiziert" aria-label="Verifiziert"></i></dd>
+                  <dt>Adresse</dt>
+                  <dd id="mf-adres">—</dd>
+                </dl>
+              </section>
+
+              <!-- Paylaşım Geçmişi (Kundenübersicht'in ALTINDA) -->
+              <section class="surface mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="section-title m-0">Freigabeverlauf</h6>
+                  <div class="text-muted small" id="mf-paylasimlar-meta">—</div>
+                </div>
+                <ul id="mf-paylasimlar" class="mini-list"><li class="text-muted">—</li></ul>
+              </section>
+
+              <!-- Notizen (Freigabeverlauf'in ALTINDA) -->
+              <section class="surface mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="section-title m-0">Notizen</h6>
+                  <div class="text-muted small" id="mf-notlar-meta">—</div>
+                </div>
+                <ul id="mf-notlar" class="mini-list"><li class="text-muted">—</li></ul>
+              </section>
+
+            </div>
+
+            <!-- RECHTE SPALTE -->
+            <div class="col-lg-6">
+              <!-- Familienstand & Versicherung -->
+              <section class="surface">
+                <h6 class="section-title">Familienstand & Versicherung</h6>
+                <dl class="kv">
+                  <dt>Versicherungsgesellschaft</dt><dd><div class="insurer d-flex align-items-center gap-2"><img id="mf-sigorta-sirket-logo" class="insurer-logo d-none" alt="Logo" width="80" height="50"><span id="mf-sigorta-sirket">—</span></div></dd>
+                  <dt>Versicherungsart</dt><dd id="mf-sigorta">—</dd>
+                  <dt>Seit wann</dt><dd id="mf-sigorta-baslangic">—</dd>
+                  <dt>Beitrag (für Alle Mit/Versicherten)</dt><dd id="mf-sigorta-katki">—</dd>
+                  <dt class="text-nowrap">Tarif</dt><dd id="mf-sigorta-vade">—</dd>
+                  <dt>Selbstbeteiligung</dt><dd id="mf-sigorta-katilim">—</dd>
+                  <dt>Mitversicherung (Ehe/Kind)</dt><dd id="mf-es-cocuk-sigorta">—</dd>
+                  <dt>Familienstand</dt><dd id="mf-medeni">—</dd>
+                  <dt>Anzahl Kinder</dt><dd id="mf-cocuk-sayisi">—</dd>
+                  <dt>Beschäftigungsstatus</dt><dd id="mf-calisma">—</dd>
+                  <dt class="ehepartner-info d-none">Partner &amp; Versicherung</dt><dd class="ehepartner-info d-none" id="mf-es-cocuk-sigorta">—</dd>
+                  <dt class="ehepartner-info d-none">Alter des Ehepartners</dt><dd class="ehepartner-info d-none" id="mf-es-yasi">—</dd>
+                  <dt class="ehepartner-info d-none">Kinderalter</dt><dd class="ehepartner-info d-none" id="mf-cocuk-yaslari">—</dd>
+                  <dt>Zusatz</dt><dd id="mf-sigorta-ekyazi">—</dd>
+                </dl>
+              </section>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer modern-footer">
+        <button type="button" id="btn-pdf-open" class="btn btn-light me-2">
+          <i class="ki-duotone ki-mouse-square fs-4 me-1"></i> PDF herunterladen
+        </button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Minimal list styling -->
+<style>
+  .mini-list{margin:0;padding:0;list-style:none;}
+  .mini-item{display:flex;gap:.75rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px dashed var(--bs-border-color);}
+  .mini-item:last-child{border-bottom:0;}
+  .mini-bullet{flex:0 0 .5rem;height:.5rem;border-radius:999px;margin-top:.5rem;opacity:.6;}
+  .mini-bullet.primary{background:var(--bs-primary);}
+  .mini-bullet.info{background:var(--bs-info);}
+  .mini-content{flex:1;min-width:0;}
+  .mini-meta{display:flex;gap:.5rem;align-items:center;font-size:.8rem;color:var(--bs-secondary-color);}
+  .mini-user{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50%;}
+  .mini-time{font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .mini-text{margin-top:.125rem;word-break:break-word;}
+</style>
+
+<script>
+(function() {
+  const modalEl = document.getElementById('modalFormGoruntule');
+  if (!modalEl) return;
+
+  const TR_DE_MAP = {
+    "Bekar": "Ledig",
+    "Evli": "Verheiratet",
+    "Boşanmış": "Geschieden",
+    "Dul": "Verwitwet",
+    "Kayıtlı Ortaklık": "Eingetragene Partnerschaft",
+    "Diğer": "Sonstiges",
+    "Özel": "Privat",
+    "Yasal": "Gesetzlich",
+    "Sigorta Yok": "Nicht Versichert",
+    "Özel/Ortak Sigortalı": "Privat/Mitversichert",
+    "Yasal/Ortak Sigortalı": "Gesetzlich/Mitversichert",
+  };
+
+  function trToDe(val){
+    if (!val) return val;
+    return TR_DE_MAP[val] || val;
+  }
+
+  const mf = {
+    // Üst şerit
+    createdBy: document.getElementById('mf-created-by'),
+    createdAt: document.getElementById('mf-created-at'),
+    brandLogo: document.getElementById('mf-brand-logo'),
+    brandName: document.getElementById('mf-brand-name'),
+    appt:      document.getElementById('mf-appt'),
+    terminartTop: document.getElementById('mf-terminart-top'),
+    statusTop: document.getElementById('mf-status-top'),
+    // İçerik
+    id:        document.getElementById('mf-id'),
+    loading:   document.getElementById('mf-loading'),
+    error:     document.getElementById('mf-error'),
+    content:   document.getElementById('mf-content'),
+    // Kişi & iletişim
+    adsoyad:   document.getElementById('mf-adsoyad'),
+    firma:     document.getElementById('mf-firma'),
+    musteriCinsiyet: document.getElementById('mf-musteri-cinsiyet'),
+    dogum:     document.getElementById('mf-dogum'),
+    sabitTelefon:     document.getElementById('mf-sabit-telefon'),
+    telefon:   document.getElementById('mf-telefon'),
+    telefonOk: document.getElementById('mf-telefon-ok'),
+    email:     document.getElementById('mf-email'),
+    emailOk:   document.getElementById('mf-email-ok'),
+    // Adres
+    adres:     document.getElementById('mf-adres'),
+    // Aile & medeni
+    medeni:    document.getElementById('mf-medeni'),
+    cocukSay:  document.getElementById('mf-cocuk-sayisi'),
+    cocukYas:  document.getElementById('mf-cocuk-yaslari'),
+    calisma:   document.getElementById('mf-calisma'),
+    // Sigorta
+    sigorta:   document.getElementById('mf-sigorta'),
+    sigSirket: document.getElementById('mf-sigorta-sirket'),
+    sigSirketLogo: document.getElementById('mf-sigorta-sirket-logo'),
+    sigBas:    document.getElementById('mf-sigorta-baslangic'),
+    sigVade:   document.getElementById('mf-sigorta-vade'),
+    sigKatil:  document.getElementById('mf-sigorta-katilim'),
+    sigKatki:  document.getElementById('mf-sigorta-katki'),
+    sigEk:     document.getElementById('mf-sigorta-ekyazi'),
+    esCocuk:   document.getElementById('mf-es-cocuk-sigorta'),
+    esYasi:    document.getElementById('mf-es-yasi'),
+    // Minimal listeler
+    notlarWrap:      document.getElementById('mf-notlar'),
+    notlarMeta:      document.getElementById('mf-notlar-meta'),
+    paylasimlarWrap: document.getElementById('mf-paylasimlar'),
+    paylasimlarMeta: document.getElementById('mf-paylasimlar-meta'),
+  };
+
+  function showLoading() {
+    mf.loading?.classList.remove('d-none');
+    mf.error?.classList.add('d-none');
+    mf.content?.classList.add('d-none');
+  }
+  function showError(msg) {
+    mf.loading?.classList.add('d-none');
+    if (mf.error) {
+      mf.error.textContent = msg || 'Daten konnten nicht geladen werden.';
+      mf.error.classList.remove('d-none');
+    }
+    mf.content?.classList.add('d-none');
+  }
+  function showContent() {
+    mf.loading?.classList.add('d-none');
+    mf.error?.classList.add('d-none');
+    mf.content?.classList.remove('d-none');
+  }
+
+  function setText(el, val) {
+    if (!el) return;
+    el.textContent = (val ?? '') !== '' ? val : '—';
+  }
+  function setHTML(el, html) {
+    if (!el) return;
+    el.innerHTML = (html && String(html).trim()) ? html : '—';
+  }
+  function escapeHTML(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  // sehir_ilce "İl / İlçe" geliyorsa şehri (İl) çıkar
+  function extractCity(sehir_ilce_raw) {
+    const txt = String(sehir_ilce_raw || '').trim();
+    if (!txt) return '';
+    const parts = txt.split('/').map(p => p.trim()).filter(Boolean);
+    return parts[0] || txt; // İlk bölüm "il"
+  }
+
+  // Adres: 2 satır (adres) + (PLZ + City / Eyalet?)
+  function buildAdresseHTML(data) {
+    const line1 = escapeHTML(data?.adres || '');
+
+    // PLZ: "70188 Stuttgart" geldiyse sadece ilk token'ı (70188) al
+    const plzRaw  = String(data?.posta_kodu ?? '').trim();
+    const plzOnly = plzRaw.split(/\s+/, 1)[0];
+    const plz     = escapeHTML(plzOnly);
+
+    function extractCityFromSehirIlce(v){
+      const parts = String(v || '').split('/').map(t => t.trim()).filter(Boolean);
+      return parts.length ? parts[parts.length - 1] : '';
+    }
+    function firstCityToken(v){
+      const s = String(v || '').trim();
+      if (!s) return '';
+      // ilk kelime: boşluk ya da '-' öncesi
+      const m = s.match(/^[^\s-]+/);
+      return m ? m[0] : s;
+    }
+
+    // Şehir kaynağı: varsa doğrudan ilçe, yoksa sehir_ilce'nin son parçası
+    const citySource = data?.ilce && String(data.ilce).trim()
+      ? String(data.ilce).trim()
+      : extractCityFromSehirIlce(data?.sehir_ilce);
+
+    // ← sadece ilk kelimeyi kullan
+    const city  = escapeHTML(firstCityToken(citySource));
+    const state = escapeHTML(String(data?.il || '').trim()); // eyalet/il
+
+    const line2Left = [plz, city].filter(Boolean).join(' ');
+    const line2Full = [line2Left, state].filter(Boolean).join(' / ');
+    return [line1, line2Full].filter(Boolean).join('<br>');
+  }
+
+  // Duruma göre rozet rengi
+  function paintStatusBadge(el, text) {
+    if (!el) return;
+    const t = (text || '').toLowerCase();
+    el.className = 'badge';
+    if (t.includes('termin') || t.includes('rendezvous') || t.includes('bestät')) {
+      el.classList.add('bg-success-subtle','text-success');
+    } else if (t.includes('wart') || t.includes('offen') || t.includes('bekliyor')) {
+      el.classList.add('bg-warning-subtle','text-warning');
+    } else if (t.includes('abgelehnt') || t.includes('iptal') || t.includes('ret')) {
+      el.classList.add('bg-danger-subtle','text-danger');
+    } else {
+      el.classList.add('bg-light','text-dark');
+    }
+    el.textContent = text || '—';
+  }
+
+  // Minimal liste render
+  function renderMiniList(container, items, colorClass) {
+    if (!container) return;
+    if (!items || !items.length) {
+      container.innerHTML = '<li class="text-muted">Kein Datensatz gefunden.</li>';
+      return;
+    }
+    const html = items.map((it) => {
+      const user = escapeHTML(it.kullanici || '—');
+      const time = escapeHTML(it.tarih_human || it.son_guncelleme_human || '—');
+      const text = escapeHTML(it.icerik || it.not_icerigi || '');
+      return `
+        <li class="mini-item">
+          <span class="mini-bullet ${colorClass}"></span>
+          <div class="mini-content">
+            <div class="mini-meta">
+              <span class="mini-user">${user}</span>
+              <span>•</span>
+              <span class="mini-time">${time}</span>
+            </div>
+            ${text ? `<div class="mini-text">${text}</div>` : ``}
+          </div>
+        </li>`;
+    }).join('');
+    container.innerHTML = html;
+  }
+  modalEl.addEventListener('show.bs.modal', function (ev) {
+    const trigger = ev.relatedTarget;
+    const group = trigger?.closest('[data-form-id]');
+    const formId = group?.dataset.formId;
+    if (!formId) { showError('Formular-ID nicht gefunden.'); return; }
+
+    // JSON URL (şablon varsa ondan, yoksa fallback)
+    const tmpl = group?.dataset.detailUrlTemplate; // {% url 'form_detail_json' 0 %}
+    const url  = tmpl ? tmpl.replace(/0$/, String(formId)) : `/forms/${formId}/detail/`;
+    // Hızlı doldurma (dataset)
+    setText(mf.id, `#${formId}`);
+    setText(mf.adsoyad, group?.dataset.tam_ad || '—');
+    setText(mf.email, group?.dataset.email);
+    setText(mf.telefon, group?.dataset.telefon);
+    setText(mf.createdBy, '—'); // gerçek değer fetch’ten gelecek (created_by)
+    setText(mf.createdAt, group?.dataset.olusturmaHuman || '—');
+    setText(mf.appt,      group?.dataset.randevuHuman || '—');
+    paintStatusBadge(mf.statusTop, group?.dataset.durum || '—');
+
+    // Telefon/E-mail doğrulama ikonlarını resetle
+    mf.telefonOk?.classList.add('d-none');
+    mf.emailOk?.classList.add('d-none');
+
+    showLoading();
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(async r => {
+        if (!r.ok) {
+          let detail = '';
+          try { detail = (await r.json()).error || ''; } catch(_){}
+          const msg = `Anfrage fehlgeschlagen (HTTP ${r.status})${detail ? `: ${detail}` : ''}`;
+          throw new Error(msg);
+        }
+        return r.json();
+      })
+      .then(data => {
+        const GENDER_TR2DE = { Erkek: 'Herr', Kadın: 'Frau' };
+        const genderLabel = GENDER_TR2DE[(data.musteri_cinsiyet || '').trim()] || (data.musteri_cinsiyet || '—');
+        const fullNameFetched = [genderLabel, data.tam_ad || ''].filter(Boolean).join(' ');
+        // İletişim
+        setText(mf.adsoyad, fullNameFetched || '—');
+        setText(mf.telefon, data.telefon);
+        if (data.telefon_onayli_mi) mf.telefonOk?.classList.remove('d-none');
+        setText(mf.email, data.email);
+        if (data.email_onayli_mi) mf.emailOk?.classList.remove('d-none');
+        setText(mf.musteriCinsiyet, data.musteri_cinsiyet || '—');
+        setText(mf.firma, data.firma_adi || '—');
+        setText(mf.dogum, data.dogum_human || '—');
+        setText(mf.sabitTelefon, data.sabit_telefon || '—');
+        // Adres (iki satır)
+        setHTML(mf.adres, buildAdresseHTML(data));
+
+        // Üst şerit
+        setText(mf.createdBy, data.created_by || '—');
+        setText(mf.createdAt, data.olusturma_human || group?.dataset.olusturmaHuman);
+        setText(mf.appt,      data.randevu_human   || group?.dataset.randevuHuman);
+        setText(mf.terminartTop, data.randevu_tipi || '—');
+        paintStatusBadge(mf.statusTop, data.durum_human || group?.dataset.durum || '—');
+
+        // Medeni & aile
+        setText(mf.medeni, trToDe(data.medeni_durum) || '—');
+        setText(mf.calisma, data.calisma_durumu || '—');
+        setText(mf.cocukSay, data.aile_cocuk_sayisi ?? '—');
+        setText(mf.cocukYas, (data.cocuk_yaslari && data.cocuk_yaslari.length) ? data.cocuk_yaslari.join(', ') : '—');
+        setText(mf.esCocuk, trToDe(data.es_cocuk_sigorta) || '—');
+        setText(mf.esYasi,  (data.es_yasi ?? '—'));
+        
+        // Ehepartner bilgilerini sadece familienstand "Bekar" veya "Diğer" ise göster
+        const ehepartnerInfos = document.querySelectorAll('.ehepartner-info');
+        const shouldShowEhepartner = data.medeni_durum === 'Bekar' || data.medeni_durum === 'Diğer';
+        ehepartnerInfos.forEach(element => {
+          if (shouldShowEhepartner) {
+            element.classList.remove('d-none');
+          } else {
+            element.classList.add('d-none');
+          }
+        });
+
+        // Sigorta
+        setText(mf.sigorta, trToDe(data.sigorta) || '—');
+        setText(mf.sigSirket, data.sigorta_sirket_ad || data.sigorta_sirket || '—');
+        setText(mf.sigBas, data.sigorta_baslangic_human || '—');
+        setText(mf.sigVade, data.sigorta_vade_human || '—');
+        setText(mf.sigKatil, (data.sigorta_katilim_payi+" €") ?? '—');
+        setText(mf.sigKatki, (data.sigorta_katki_payi+" €") ?? '—');
+        setText(mf.sigEk, data.sigorta_ek_yazi || '—');
+
+        if (data.sigorta_sirket_logo) {
+          mf.sigSirketLogo.src = data.sigorta_sirket_logo;
+          mf.sigSirketLogo.classList.remove('d-none');
+        } else {
+          mf.sigSirketLogo.classList.add('d-none');
+          mf.sigSirketLogo.removeAttribute('src');
+        }
+
+        // --- NOTLAR (mavi nokta) ---
+        if ('notlar' in data) {
+          setText(mf.notlarMeta, data.not_sayisi ? `${data.not_sayisi} Notiz` : '—');
+          renderMiniList(mf.notlarWrap, data.notlar, 'primary');
+        } else {
+          setText(mf.notlarMeta, '—');
+          mf.notlarWrap.innerHTML = '<li class="text-muted">Keine Einträge gefunden.</li>';
+        }
+
+        // --- PAYLAŞIMLAR (info rengi nokta) ---
+        if ('paylasimlar' in data) {
+          setText(mf.paylasimlarMeta, data.paylasim_sayisi ? `${data.paylasim_sayisi} Eintrag` : '—');
+          renderMiniList(mf.paylasimlarWrap, data.paylasimlar, 'info');
+        } else {
+          setText(mf.paylasimlarMeta, '—');
+          mf.paylasimlarWrap.innerHTML = '<li class="text-muted">Keine Einträge gefunden.</li>';
+        }
+
+        showContent();
+      })
+      .catch(err => { showError(err.message || 'Daten konnten nicht geladen werden.'); });
+
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    setText(mf.id, '');
+    showLoading();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const modalEl = document.getElementById('modalFormGoruntule');
+  const pdfBtn  = document.getElementById('btn-pdf-open');
+
+  if (!modalEl) return;
+
+  modalEl.addEventListener('show.bs.modal', function (ev) {
+    const trigger = ev.relatedTarget;
+    const group   = trigger?.closest('[data-form-id]');
+    const formId  = group?.dataset.formId;
+
+    if (pdfBtn) {
+      pdfBtn.onclick = () => {
+        if (!formId) return;
+        // Django: path("forms/<int:form_id>/pdf/", name="form_detail_pdf")
+        // reverse("{% url 'form_detail_pdf' 0 %}") => "/forms/0/pdf/" ; 0'ı değiştir.
+        const base = "{% url 'form_detail_pdf' 0 %}";
+        const url  = base.replace(/\/0(\/|$)/, `/${formId}$1`);
+        window.open(url, "_blank");
+      };
+    }
+  });
+})();
+</script>
+
+
+<style>
+  /* Geniş modal */
+  .modal-wide { --bs-modal-width: 1100px; }
+  @media (min-width: 992px) {
+    .modal-wide .modal-dialog { max-width: 1100px; }
+  }
+
+  /* Minimal-modern görünüm */
+  .modern-modal { border: 0; border-radius: 1rem; overflow: hidden; }
+  .modern-header, .modern-footer { background: #fff; border: 0; }
+  .modern-body { background: #f6f7f9; } /* yumuşak arka plan */
+
+  .surface {
+    background: #fff;
+    border: 1px solid #eef0f2;
+    border-radius: .9rem;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 0.5px 1px rgba(20,20,31,.06), 0 8px 24px rgba(20,20,31,.03);
+  }
+
+  .section-title { font-weight: 600; color: #1f2937; letter-spacing: .1px; margin-bottom: .5rem; }
+  .divider { height: 1px; background: #f0f1f3; margin: .6rem 0 .8rem; }
+
+  /* Key/Value (dl) – genel iki kolon düzeni */
+  .kv { margin: 0; }
+  .kv dt { width: 46%; float: left; clear: left; color: #6b7280; font-weight: 500; padding: .2rem 0; }
+  .kv dd { margin-left: 66%; padding: .2rem 0; }
+
+  /* SADECE SOL SÜTUN: başlık–değer aralığını daralt (sağ taraf aynı kalsın) */
+  #modalFormGoruntule .row.g-4 > .col-lg-6:first-child .kv dt { width: 38%; }
+  #modalFormGoruntule .row.g-4 > .col-lg-6:first-child .kv dd { margin-left: 42%; }
+
+  /* Not bloğu */
+  .note-block {
+    background: #f8fafc;
+    border: 1px dashed #e6e9ee;
+    border-radius: .75rem;
+    padding: .8rem 1rem;
+    white-space: pre-wrap;
+  }
+
+  .insurer-logo {
+    max-width: 80px;
+    max-height: 50px;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* Key/Value alanında uzun içerikler taşmasın */
+  .kv dd{
+    display:block;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    white-space:normal;
+  }
+
+  /* Adres metni için ek iyileştirme */
+  #mf-adres{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    white-space:normal;   /* buildAdresseHTML <br> ile satır atıyor */
+    line-height:1.35;
+  }
+
+  /* Mobil uyarlamalar */
+  @media (max-width: 576px){
+    /* Genel kv daraltması (global) */
+    .kv dt { width: 50%; }
+    .kv dd { margin-left: 70%; }
+
+    /* SADECE SOL SÜTUN: mobilde de yakın dursun */
+    #modalFormGoruntule .row.g-4 > .col-lg-6:first-child .kv dt { width: 44%; }
+    #modalFormGoruntule .row.g-4 > .col-lg-6:first-child .kv dd { margin-left: 50%; }
+
+    /* Başlık kartındaki sol/sağ blokları ortala (logo zaten ortada) */
+    .surface .col-12 { text-align: center !important; }
+    .surface .col-12 .d-flex { justify-content: center; }
+
+    /* --- SADECE "Familienstand & Versicherung" kutusu için dikey istif (mobil) --- */
+    /* Sağ sütundaki ilk surface içindeki kv'yi hedefle */
+    #modalFormGoruntule .row.g-4 > .col-lg-6:last-child .surface:first-child .kv dt,
+    #modalFormGoruntule .row.g-4 > .col-lg-6:last-child .surface:first-child .kv dd{
+      float:none; width:auto; margin:0; padding:.2rem 0;
+    }
+    /* Başlık üstte, değer altta ve ayrılmış */
+    #modalFormGoruntule .row.g-4 > .col-lg-6:last-child .surface:first-child .kv dt{
+      color:#6b7280; font-weight:600; margin-top:.35rem;
+      white-space:normal !important; /* dt'ye verilen text-nowrap'ı ez */
+    }
+    #modalFormGoruntule .row.g-4 > .col-lg-6:last-child .surface:first-child .kv dd{
+      padding-bottom:.5rem; border-bottom:1px dashed var(--bs-border-color);
+    }
+    #modalFormGoruntule .row.g-4 > .col-lg-6:last-child .surface:first-child .kv dd:last-of-type{
+      border-bottom:0;
+    }
+    /* Sigorta şirketi satırı (logo + metin) rahat sarsın */
+    #modalFormGoruntule .insurer{ flex-wrap:wrap; gap:.4rem; }
+    #modalFormGoruntule .insurer-logo{ max-width:68px; max-height:40px; }
+  }
+</style>

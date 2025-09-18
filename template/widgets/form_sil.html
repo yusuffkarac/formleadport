@@ -1,0 +1,123 @@
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm border-0">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">
+          <i class="ki-duotone ki-trash fs-3 me-2"></i>
+          Formular löschen
+        </h5>
+        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Schließen">
+          <i class="ki-duotone ki-abstract-11 fs-1"><span class="path1"></span><span class="path2"></span></i>
+        </button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="mb-2">Sind Sie sicher, dass Sie dieses Formular löschen möchten?</p>
+        <div class="fw-bold text-gray-800" id="delName">—</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-danger" id="btnDelete">Löschen</button>
+      </div>
+      <input type="hidden" id="delId">
+    </div>
+  </div>
+</div>
+<script>
+// --- Helpers ---
+function getCookie(n){
+  const v = `; ${document.cookie}`.split(`; ${n}=`);
+  return v.length === 2 ? v.pop().split(';').shift() : null;
+}
+
+// --- Elemanlar ---
+const modal    = document.getElementById('modalDelete');
+const delId    = document.getElementById('delId');
+const delName  = document.getElementById('delName');
+const btnDelete = document.getElementById('btnDelete');
+
+// Bu sayfada DataTables var mı, varsa instance'ı al
+function getDT() {
+  if (window.jQuery && $.fn.dataTable && $.fn.dataTable.isDataTable && $.fn.dataTable.isDataTable('#dt_forms')) {
+    return $('#dt_forms').DataTable();
+  }
+  return null;
+}
+
+// --- Runtime değişkenleri ---
+let lastTriggerButton = null; // modalı açan buton
+let lastRowSelector   = null; // silinecek satırı bulmak için referans
+
+// Modal açılırken tetikleyiciden bilgileri al
+modal.addEventListener('show.bs.modal', (e) => {
+  const btn = e.relatedTarget;
+  lastTriggerButton = btn || null;
+
+  const id   = btn?.getAttribute('data-form-id') || '';
+  const name = btn?.getAttribute('data-form-name') || '—';
+
+  delId.value = id;
+  delName.textContent = name;
+
+  // İlgili satırı sonra kolay bulmak için bir selector hazırla
+  // (aynı ID’li başka butonlar olsa bile en yakın <tr> üzerinden alacağız)
+  lastRowSelector = `[data-form-id="${id}"]`;
+});
+
+// Modal tamamen kapandığında emniyetli temizlik
+modal.addEventListener('hidden.bs.modal', () => {
+  // Bazı temalar/versiyonlarda body/backdrop kalabiliyor—emniyet şeridi:
+  document.body.classList.remove('modal-open');
+  document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+});
+
+// Sil butonuna basılınca
+btnDelete.addEventListener('click', async () => {
+  const id = delId.value;
+  if (!id) return;
+
+  // İstek
+  try {
+    const res = await fetch(`/forms/${id}/sil/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken') || '',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
+    if (!res.ok) {
+      // JSON bekleniyorsa parse etmeyi deneyebilirsin; şimdilik status ile karar
+      throw new Error('Delete request failed');
+    }
+
+    // Modalı kapat
+    const instance = bootstrap.Modal.getOrCreateInstance(modal);
+    instance.hide();
+
+    // Satırı kaldır (DataTables → API, değilse DOM)
+    // Modal kapanma animasyonundan hemen sonra çalışsın diye kısa gecikme
+    setTimeout(() => {
+      const table = getDT();
+      const triggerEl = lastTriggerButton || document.querySelector(lastRowSelector);
+      const tr = triggerEl ? triggerEl.closest('tr') : document.querySelector(lastRowSelector)?.closest('tr');
+
+      if (table && tr) {
+        // DataTables üzerinden kaldır
+        table.row(tr).remove().draw(false); // aynı sayfada kal
+      } else if (tr) {
+        // Fallback: vanilla DOM
+        tr.remove();
+      }
+
+      // Referansları sıfırla
+      lastTriggerButton = null;
+      lastRowSelector = null;
+    }, 0);
+
+  } catch (err) {
+    console.error(err);
+    alert("Löschen fehlgeschlagen!");
+  }
+});
+</script>
+
