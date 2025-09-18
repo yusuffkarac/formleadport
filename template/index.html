@@ -243,13 +243,12 @@
             <thead>
               <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
                 <th style="width: 15%;">Erstellt von</th> {# kullanici (altında müşteri adı-soyadı) #}
-                <th class="d-none" style="width: 10%;">Kunde</th> {# musteri_isim + musteri_soyisim #}
-                <th style="width: 12%;">Festnetz</th> {# sabit_telefon #}
+                <th style="width: 18%;">Kunde</th> {# musteri_isim + musteri_soyisim #}
                 <th style="width: 12%;">Handy</th> {# telefon (+ verifiziert ikon) #}
                 <th style="width: 18%;">E-Mail</th> {# email (+ verifiziert ikon) #}
                 <th style="width: 15%;">Termin</th> {# randevu_tarihi #}
                 <th style="width: 10%;">Status</th> {# durum #}
-                <th style="width: 8%;" class="text-end">Aktionen</th> {# Menü #}
+                <th style="width: 8%;">Aktionen</th> {# Menü #}
               </tr>
             </thead>
 
@@ -280,36 +279,39 @@
                 </td>
 
                 <!-- Kunde -->
-                <td class="d-none">
+                <td style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.musteri_isim or f.musteri_soyisim %}
                     {{ f.musteri_isim }} {{ f.musteri_soyisim }}
                   {% else %}
                     <span>—</span>
                   {% endif %}
                 </td>
-
-                <!-- Festnetz -->
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                  {% if f.sabit_telefon %}{{ f.sabit_telefon }}{% else %}<span>—</span>{% endif %}
-                </td>
                 <!-- Telefon -->
-                <td class="text-start" style="word-wrap: break-word; overflow-wrap: break-word;">
-                  {% if f.telefon %}{{ f.telefon }}{% else %}<span>—</span>{% endif %}
-                  {% if f.telefon_onayli_mi %}
-                    <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
-                      <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                <td class="text-start" style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
+                  <div class="d-flex align-items-center">
+                    <span class="text-truncate" style="max-width: calc(100% - 20px);">
+                      {% if f.telefon %}{{ f.telefon }}{% else %}—{% endif %}
                     </span>
-                  {% endif %}
+                    {% if f.telefon_onayli_mi %}
+                      <span class="ms-1 flex-shrink-0" title="Verifiziert" aria-label="Verifiziert">
+                        <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                      </span>
+                    {% endif %}
+                  </div>
                 </td>
 
                 <!-- E-Mail -->
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                  {% if f.email %}{{ f.email }}{% else %}<span>—</span>{% endif %}
-                  {% if f.email_onayli_mi %}
-                    <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
-                      <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                <td style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
+                  <div class="d-flex align-items-center">
+                    <span class="text-truncate" style="max-width: calc(100% - 20px);">
+                      {% if f.email %}{{ f.email }}{% else %}—{% endif %}
                     </span>
-                  {% endif %}
+                    {% if f.email_onayli_mi %}
+                      <span class="ms-1 flex-shrink-0" title="Verifiziert" aria-label="Verifiziert">
+                        <i class="ki-duotone ki-flash-circle text-success fs-6"></i>
+                      </span>
+                    {% endif %}
+                  </div>
                 </td>
 
                 <!-- Termin -->
@@ -338,7 +340,7 @@
                 </td>
 
                 <!-- Aktionen -->
-                <td class="text-end" style="white-space: nowrap;" data-order="Invalid date">
+                <td class="text-start" style="white-space: nowrap;" data-order="Invalid date">
                   <div class="d-inline-flex align-items-center gap-2" role="group" aria-label="Aktionen"
                       data-form-id="{{ f.id }}"
                       data-full-name="{{ f.musteri_isim|default:'' }} {{ f.musteri_soyisim|default:'' }}"

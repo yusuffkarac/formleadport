@@ -184,10 +184,14 @@
 
         <!-- Sağ: Termin + Durum -->
         <div class="text-right">
-          <div class="muted small">Termin Datum</div>
-          <div class="fw-600">{{ randevu_human|default:"—" }}</div>
-          <div class="muted small" style="margin-top:4px;">Terminart</div>
-          <div class="fw-600">{{ randevu_tipi|default:"—" }}</div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:4px;">
+            <div class="muted small">Termin Datum</div>
+            <div class="fw-600">{{ randevu_human|default:"—" }}</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="muted small">Terminart</div>
+            <div class="fw-600">{{ randevu_tipi|default:"—" }}</div>
+          </div>
           <div class="mt-12">
             {% with st=durum_human %}
               {% if st %}
