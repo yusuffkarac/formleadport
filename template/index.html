@@ -12,6 +12,40 @@
     border-radius: 50%;  /* Daima yuvarlak olsun */
     display: block;
   }
+  
+  /* Tablo düzeni düzeltmeleri */
+  #dt_forms {
+    border: none !important;
+  }
+  
+  #dt_forms thead th {
+    border-bottom: 1px solid #e4e6ea !important;
+    border-top: none !important;
+  }
+  
+  #dt_forms tbody tr {
+    border-bottom: 1px solid #f1f3f6 !important;
+  }
+  
+  #dt_forms tbody tr:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* Sağdaki boşluğu kaldır */
+  .dataTables_wrapper {
+    width: 100% !important;
+  }
+  
+  .dataTables_scrollBody {
+    width: 100% !important;
+  }
+  
+  /* Sadece en dıştaki container boşluklarını azalt */
+  .container-xxl {
+    max-width: 85% !important;
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+  }
 </style>
 {% endblock %}
 {% block content %}
@@ -204,18 +238,18 @@
 
       <!-- Body -->
       <div class="card-body py-4">
-        <div class="table-responsive">
-          <table class="table align-middle table-row-dashed fs-6 gy-5" id="dt_forms" style="width:100%">
+        <div class="table-responsive" style="overflow-x: auto; margin: 0 -0.25rem;">
+          <table class="table align-middle table-row-dashed fs-6 gy-5" id="dt_forms" style="width:100%;  border-collapse: separate; border-spacing: 0;">
             <thead>
               <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
-                <th class="min-w-150px">Erstellt von</th> {# kullanici (altında müşteri adı-soyadı) #}
-                <th class="min-w-100px d-none">Kunde</th> {# musteri_isim + musteri_soyisim #}
-                <th class="min-w-125px text-start">Festnetz</th> {# sabit_telefon #}
-                <th class="min-w-125px text-start">Handy</th> {# telefon (+ verifiziert ikon) #}
-                <th class="min-w-200px">E-Mail</th> {# email (+ verifiziert ikon) #}
-                <th class="min-w-200px">Termin</th> {# randevu_tarihi #}
-                <th class="min-w-110px">Status</th> {# durum #}
-                <th class="min-w-150px text-end">Aktionen</th> {# Menü #}
+                <th style="width: 15%;">Erstellt von</th> {# kullanici (altında müşteri adı-soyadı) #}
+                <th class="d-none" style="width: 10%;">Kunde</th> {# musteri_isim + musteri_soyisim #}
+                <th style="width: 12%;">Festnetz</th> {# sabit_telefon #}
+                <th style="width: 12%;">Handy</th> {# telefon (+ verifiziert ikon) #}
+                <th style="width: 18%;">E-Mail</th> {# email (+ verifiziert ikon) #}
+                <th style="width: 15%;">Termin</th> {# randevu_tarihi #}
+                <th style="width: 10%;">Status</th> {# durum #}
+                <th style="width: 8%;" class="text-end">Aktionen</th> {# Menü #}
               </tr>
             </thead>
 
@@ -255,11 +289,11 @@
                 </td>
 
                 <!-- Festnetz -->
-                <td>
+                <td style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.sabit_telefon %}{{ f.sabit_telefon }}{% else %}<span>—</span>{% endif %}
                 </td>
                 <!-- Telefon -->
-                <td class="text-start">
+                <td class="text-start" style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.telefon %}{{ f.telefon }}{% else %}<span>—</span>{% endif %}
                   {% if f.telefon_onayli_mi %}
                     <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
@@ -269,7 +303,7 @@
                 </td>
 
                 <!-- E-Mail -->
-                <td>
+                <td style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.email %}{{ f.email }}{% else %}<span>—</span>{% endif %}
                   {% if f.email_onayli_mi %}
                     <span class="ms-1" title="Verifiziert" aria-label="Verifiziert">
@@ -279,7 +313,7 @@
                 </td>
 
                 <!-- Termin -->
-                <td data-order="{{ f.randevu_tarihi|date:'c' }}">
+                <td data-order="{{ f.randevu_tarihi|date:'c' }}" style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.randevu_tarihi %}
                     {{ f.randevu_tarihi|localtime|date:"d.m.Y, H:i" }} Uhr
                   {% else %}
@@ -304,7 +338,7 @@
                 </td>
 
                 <!-- Aktionen -->
-                <td class="text-end text-nowrap" data-order="Invalid date">
+                <td class="text-end" style="white-space: nowrap;" data-order="Invalid date">
                   <div class="d-inline-flex align-items-center gap-2" role="group" aria-label="Aktionen"
                       data-form-id="{{ f.id }}"
                       data-full-name="{{ f.musteri_isim|default:'' }} {{ f.musteri_soyisim|default:'' }}"
@@ -375,10 +409,12 @@
 <script>
 (function () {
   const table = new DataTable('#dt_forms', {
-    responsive: true,
+    responsive: false,
+    scrollX: false,
     pageLength: 15,
     lengthMenu: [15, 25, 50, 100],
     pagingType: 'numbers',
+    autoWidth: false,
     language: {
       "emptyTable": "Keine Daten in der Tabelle vorhanden",
       "info": "_START_ bis _END_ von _TOTAL_ Einträgen",
@@ -393,7 +429,8 @@
       "aria": { "sortAscending": ": aufsteigend sortieren", "sortDescending": ": absteigend sortieren" }
     },
     columnDefs: [
-      { targets: [6], orderable: false } // Aktionen sıralanmasın
+      { targets: [6], orderable: false }, // Aktionen sıralanmasın
+      { targets: '_all', className: 'text-nowrap' } // Tüm sütunlarda metin sarma
     ],
     dom: "<'row'<'col-sm-12'tr>>" +
          "<'row mt-5'<'col-6 d-flex align-items-center'i>" +

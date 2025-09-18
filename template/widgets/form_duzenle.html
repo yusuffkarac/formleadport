@@ -97,11 +97,8 @@
                     <label class="required form-label">Adresse</label>
                     <textarea class="form-control form-control-lg form-control-solid" name="adres" id="adres_duzenle" rows="2" required></textarea>
                   </div>
-                  <div class="col-md-4 fv-row">
-                    <label class="form-label d-flex align-items-center">Festnetz</label>
-                    <input type="tel" class="form-control form-control-lg form-control-solid" name="sabit_telefon" id="sabit_telefon_duzenle" placeholder="+49">
-                  </div>
-                  <div class="col-md-4 fv-row">
+                 
+                  <div class="col-md-6 fv-row">
                     <label class="required form-label">PLZ</label>
                     <input type="text" class="form-control form-control-lg form-control-solid" name="posta_kodu" id="posta_kodu_duzenle" placeholder="20354" required>
                     <input type="hidden" name="posta_kodu_id" id="posta_kodu_id_duzenle">
@@ -110,11 +107,15 @@
                     <label class="form-label">Stadt</label>
                     <input type="text" class="form-control form-control-lg form-control-solid" name="sehir" id="sehir_duzenle" readonly>
                   </div>
-                  <div class="col-md-4 fv-row">
+                  <div class="col-md-6 fv-row">
                     <label class="form-label">Stadt</label>
                     <input type="text" class="form-control form-control-lg form-control-solid" name="ilce" id="ilce_duzenle">
                   </div>
-                  <div class="col-md-6 fv-row">
+                  <div class="col-md-4 fv-row" style="display: flex;flex-direction: column;justify-content: flex-end;">
+                    <label class="form-label d-flex align-items-center">Festnetz</label>
+                    <input type="tel" class="form-control form-control-lg form-control-solid" name="sabit_telefon" id="sabit_telefon_duzenle" placeholder="+49">
+                  </div>
+                  <div class="col-md-4 fv-row">
                     <label class="form-label d-flex align-items-center">
                       Handy
                       <button type="button" id="btn_tel_gonder_duzenle" class="btn btn-sm btn-light-primary ms-3">Verifizieren</button>
@@ -130,7 +131,7 @@
                     </div>
                     <input type="hidden" name="telefon_onayli_mi" id="telefon_onayli_mi_duzenle" value="false">
                   </div>
-                  <div class="col-md-6 {% if firma.email_dogrulama == False %}mt-5 pt-6 fv-row{% endif %}">
+                  <div class="col-md-4 {% if firma.email_dogrulama == False %}mt-5 pt-6 fv-row{% endif %}">
                     <label class="form-label d-flex align-items-center">
                       E-Mail
                       <button type="button" id="btn_mail_gonder_duzenle" class="btn btn-sm btn-light-primary ms-3 {% if firma.email_dogrulama == False %}d-none{% endif %}">Verifizieren</button>
@@ -253,6 +254,8 @@
                   <div class="col-md-6 fv-row ehepartner-fields d-none" id="ehepartner_fields_duzenle">
                     <label class="form-label">Versicherungsstatus des Ehepartners</label>
                     <select class="form-select form-select-lg form-select-solid" name="es_cocuk_sigorta" id="es_cocuk_sigorta_duzenle">
+                      <option value="Özel">Privat</option>
+                      <option value="Gesetzlich">Gesetzlich</option>
                       <option value="Özel/Ortak Sigortalı">Privat/mitversichert</option>
                       <option value="Yasal/Ortak Sigortalı">Gesetzlich/mitversichert</option>
                     </select>
@@ -561,7 +564,7 @@
     const sigEkYazi = (fd.get('sigorta_ek_yazi') || '').trim();
 
     // ---------- STEP 3 ----------
-    const esMap        = { 'Özel/Ortak Sigortalı':'Privat/mitversichert', 'Yasal/Ortak Sigortalı':'Gesetzlich/mitversichert' };
+    const esMap        = { 'Özel':'Privat', 'Gesetzlich':'Gesetzlich', 'Özel/Ortak Sigortalı':'Privat/mitversichert', 'Yasal/Ortak Sigortalı':'Gesetzlich/mitversichert' };
     const esSigortaDE  = esMap[fd.get('es_cocuk_sigorta')] || fd.get('es_cocuk_sigorta') || '—';
     const esYasiRaw    = fd.get('es_yasi');
     const esYasi       = (esYasiRaw === null || esYasiRaw === undefined || esYasiRaw === '') ? '—' : String(esYasiRaw);
@@ -593,9 +596,7 @@
         <ul class="mb-0">
           <li><strong>Termin am:</strong> ${escapeHTML(randevu)}</li>
           <li><strong>Firmenname:</strong> ${escapeHTML(firma || '—')}</li>
-          <li><strong>Geschlecht:</strong> ${escapeHTML(cinsiyetLabel)}</li>
-          <li><strong>Name:</strong> ${escapeHTML(isim || '—')}</li>
-          <li><strong>Nachname:</strong> ${escapeHTML(soyisim || '—')}</li>
+          <li><strong>Name:</strong> ${escapeHTML([cinsiyetLabel, isim, soyisim].filter(Boolean).join(' ') || '—')}</li>
           <li><strong>Geburtsdatum:</strong> ${escapeHTML(geburts)}</li>
           <li><strong>Adresse:</strong> ${escapeHTML(adresInline)}</li>
           <li><strong>Handy:</strong> ${escapeHTML(tel || '—')} ${tel ? (telOk==='Ja'?'(Bestätigt)':'(Nicht bestätigt)') : ''}</li>
@@ -612,8 +613,6 @@
           <li><strong>Familienstand:</strong> ${escapeHTML(medeniDE)}</li>
           <li><strong>Anzahl der Kinder:</strong> ${escapeHTML(cocukSayisi)}</li>
           <li><strong>Beschäftigungsstatus:</strong> ${escapeHTML(fd.get('calisma_durumu') || '—')}</li>
-          <li><strong>Status: AN:</strong> ${escapeHTML(aileAktif)}</li>
-          <li><strong>S:</strong> ${escapeHTML(aileS)}</li>
           <li><strong>Versicherungsart:</strong> ${escapeHTML(sigDE)}</li>
           <li><strong>Versicherungsgesellschaft:</strong> ${escapeHTML(sirketText || '—')}</li>
           <li><strong>Seit wann:</strong> ${escapeHTML(sigBas)}</li>
@@ -1122,7 +1121,7 @@ sigortaSelect.addEventListener('change', updatePickerBtnState);
     
     if (medeniSelect) {
       const value = medeniSelect.value;
-      const shouldShow = value === 'Bekar' || value === 'Diğer';
+      const shouldShow = value === 'Evli' || value === 'Kayıtlı Ortaklık';
       
       ehepartnerFields.forEach(field => {
         if (shouldShow) {

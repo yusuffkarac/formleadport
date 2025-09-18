@@ -20,6 +20,9 @@
         <!--begin::Header Logo-->
         <div class="header-logo me-5 me-md-10 flex-grow-1 flex-lg-grow-0 d-flex align-items-center">
             <a href="{% url 'panel' %}" class="d-flex align-items-center text-decoration-none">
+                {% if firma.logo %}
+                <img alt="Logo" src="{{ firma.logo.url }}" class="h-30px me-3" />
+                {% endif %}
                 <div class="d-flex flex-column">
                     <!-- Firma ismi -->
                     <span class="fs-4 fw-bold text-white">{{ firma.isim }}</span>

@@ -130,7 +130,7 @@ class MusteriFormModel(models.Model):
     sigorta_baslangic_tarihi = models.DateField(null=True, blank=True)
     sigorta_tarife_vadesi = models.ForeignKey(SigortaAltSirket, on_delete=models.SET_NULL, null=True, blank=True)
     sigorta_katilim_payi = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    es_cocuk_sigorta = models.CharField(max_length=255, choices=[('Özel/Ortak Sigortalı', 'Privat/Mitversichert'), ('Yasal/Ortak Sigortalı', 'Gesetzlich/Mitversichert')], blank=True, null=True)
+    es_cocuk_sigorta = models.CharField(max_length=255, choices=[('Özel', 'Privat'), ('Gesetzlich', 'Gesetzlich'), ('Özel/Ortak Sigortalı', 'Privat/mitversichert'), ('Yasal/Ortak Sigortalı', 'Gesetzlich/mitversichert')], blank=True, null=True)
     es_yasi = models.IntegerField(null=True, blank=True)
     es_calisma_durumu = models.CharField(max_length=255, choices=[('Çalışan', 'Arbeitnehmer'), ('Kendi İşinin Patronu', 'Selbstständig')], blank=True, null=True)
 

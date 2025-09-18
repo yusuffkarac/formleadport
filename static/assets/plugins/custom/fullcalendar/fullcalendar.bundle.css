@@ -321,7 +321,7 @@
 
 .fc .fc-scrollgrid, .fc .fc-scrollgrid table {
   width: 100%;
-  table-layout: fixed;
+  /* table-layout: fixed; */
 }
 
 .fc .fc-scrollgrid table {
