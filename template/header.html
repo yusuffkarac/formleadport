@@ -1,4 +1,37 @@
 {% load static %}
+<style>
+  /* Küçük ekranlarda üst menü düzenlemeleri */
+  @media (max-width: 480px) {
+    #kt_header .container-xxl {
+      padding-left: 0.5rem; padding-right: 0.5rem;
+    }
+
+    /* Logo ve firma yazısı küçült */
+    .header-logo img.h-30px { height: 22px !important; }
+    .header-logo .fs-4 { font-size: 14px !important; }
+    .header-logo .fs-7 { display: none !important; }
+
+    /* Kullanıcı bloğu daha kompakt */
+    #kt_header_user_menu_toggle .d-flex.flex-column.me-4.text-end {
+      margin-right: .5rem !important;
+    }
+    #kt_header_user_menu_toggle .fw-bold.fs-5 {
+      font-size: 13px !important;
+      max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #kt_header_user_menu_toggle .badge {
+      font-size: 10px !important; padding: 2px 6px !important;
+    }
+    .topbar .symbol-30px, .topbar .symbol-md-40px {
+      width: 28px !important; height: 28px !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    #kt_header_user_menu_toggle .fw-bold.fs-5 { max-width: 90px; }
+    #kt_header_user_menu_toggle .badge { display: none !important; }
+  }
+</style>
 <!--begin::Header-->
 <div id="kt_header" class="header align-items-stretch" data-kt-sticky="false" data-kt-sticky-name="header" data-kt-sticky-offset="{default: '200px', lg: '300px'}">
     <!--begin::Container-->
