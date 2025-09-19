@@ -4,6 +4,117 @@
 {% block title %}Sistem Logları{% endblock %}
 {% block description %}Sistem logları ve aktivite geçmişi{% endblock %}
 
+{% block head %}
+<style>
+  /* Mobilde tabloyu kart görünüme çevir (yatay kaydırma yok) */
+  @media (max-width: 768px) {
+    #logs_table thead { display: none; }
+
+    #logs_table tbody tr {
+      display: block;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      cursor: pointer;
+      transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    #logs_table tbody tr:hover { background: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-color: #e5e7eb; }
+
+    #logs_table tbody td {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.35rem 0;
+      text-align: left;
+    }
+
+    #logs_table tbody td:before {
+      content: attr(data-label) ": ";
+      display: inline-block;
+      min-width: 110px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    /* Detay butonunu satır sonunda sağa hizala */
+    #logs_table tbody td[data-label="Detay"] {
+      justify-content: space-between;
+    }
+    #logs_table tbody td[data-label="Detay"]:before { min-width: auto; }
+
+    /* Açılır/kapanır görünüm: başlangıçta sadece önemli bilgiler görünsün */
+    #logs_table tbody tr .mobile-hidden { display: none; }
+    #logs_table tbody tr.open .mobile-hidden { display: flex; }
+    
+
+    /* Kapalı (open değil) durumda: sadece Zaman, Başlık ve Detay göster; tek satır yap */
+    #logs_table tbody tr { white-space: normal; }
+    #logs_table tbody tr:not(.open) {
+      white-space: nowrap;
+      padding: 0.5rem 0.5rem;
+    }
+    #logs_table tbody tr:not(.open) td { display: none; }
+    /* Kapalı: sadece Zaman (saat), Önem (durum) ve Detay butonu */
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"],
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"],
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.25rem 0.25rem;
+    }
+    /* tek satır hizası */
+    #logs_table tbody tr:not(.open) { display: flex; align-items: center; gap: 12px; }
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"] { order: 1; border: none; }
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] { order: 2; border: none; }
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 3; margin-left: auto; border: none; }
+    /* Zaman ve Aksiyon etiketlerini gizle, sadece değer kalsın */
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"]:before { display: none; }
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"]:before { display: none; }
+    /* Detay butonunu satırın sağına it */
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] { margin-left: auto; }
+    #logs_table tbody tr:not(.open) td[data-label="Detay"]:before { display: none; }
+
+    /* Zaman kapsülü */
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"] span {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    /* Açık görünüm karta geçiş */
+    #logs_table tbody tr.open { 
+     
+      padding: 0px;
+    }
+    #logs_table tbody tr.open td { 
+      padding: 0.5rem 0.5rem; 
+      border-bottom: 1px solid #f3f4f6; 
+      display: flex; 
+      align-items: flex-start;
+      gap: 12px;
+    }
+    #logs_table tbody tr.open td:last-child { border-bottom: none; padding-bottom: 0; }
+    #logs_table tbody tr.open td:before { 
+      min-width: 110px; 
+      color: #374151; 
+      font-weight: 600; 
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+    #logs_table tbody tr.open td > * { flex: 1; }
+    /* Boş değerli satırları gizle */
+    #logs_table tbody tr.open td.is-empty { display: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <!--begin::Toolbar-->
 <div class="toolbar py-5 py-lg-15" id="kt_toolbar">
@@ -276,13 +387,12 @@
       
       <div class="card-body py-4">
         <div class="table-responsive">
-          <table class="table align-middle table-row-dashed fs-6 gy-5">
+          <table class="table align-middle table-row-dashed fs-6 gy-5" id="logs_table">
             <thead>
               <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
                 <th class="min-w-120px">Zaman</th>
                 <th class="min-w-150px">Kullanıcı</th>
                 <th class="min-w-120px">Aksiyon</th>
-                <th class="min-w-200px">Başlık</th>
                 <th class="min-w-100px">Önem</th>
                 <th class="min-w-250px">Açıklama</th>
                 <th class="min-w-120px">IP Adresi</th>
@@ -292,26 +402,26 @@
             </thead>
             <tbody>
               {% for log in page_obj %}
-              <tr>
-                <td class="align-middle">
+              <tr class="js-log-row">
+                <td class="align-middle" data-label="Zaman">
                   <span class="text-gray-800 fw-bold fs-7">{{ log.get_formatted_timestamp }}</span>
                 </td>
                 
-                <td class="align-middle">
+                <td class="align-middle" data-label="Kullanıcı">
                   {% if log.kullanici %}
                     <div class="d-flex align-items-center">
                       <div class="symbol symbol-35px symbol-circle me-3">
-                        <span class=" symbol symbol-label bg-light fw-bold text-gray-600">
+                        <span class=" symbol symbol-label symbol-30px bg-light fw-bold text-gray-600">
                           <img src="{% if log.kullanici.resim %}{{ log.kullanici.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
                         </span>
                       </div>
                       <div class="d-flex flex-column">
                         <span class="text-gray-800 fw-bold fs-7">{{ log.kullanici.username }}</span>
                         {% if log.kullanici.get_full_name %}
-                          <span class="fs-8 text-muted">{{ log.kullanici.get_full_name }}</span>
+                          <span class="fs-8 text-muted mobile-hidden">{{ log.kullanici.get_full_name }}</span>
                         {% endif %}
                         {% if log.kullanici.email %}
-                          <span class="fs-8 text-muted">{{ log.kullanici.email }}</span>
+                          <span class="fs-8 text-muted mobile-hidden">{{ log.kullanici.email }}</span>
                         {% endif %}
                       </div>
                     </div>
@@ -320,49 +430,62 @@
                   {% endif %}
                 </td>
                 
-                <td class="align-middle">
-                  <span class="badge badge-light-info fs-8">{{ log.get_action_type_display }}</span>
-                </td>
-                
-                <td class="align-middle">
-                  <span class="text-gray-800 fw-bold fs-7">{{ log.title }}</span>
-                </td>
-                
-                <td class="align-middle">
-                  {% if log.severity == 'ERROR' %}
-                    <span class="badge badge-light-danger fs-8">Hata</span>
-                  {% elif log.severity == 'WARNING' %}
-                    <span class="badge badge-light-warning fs-8">Uyarı</span>
-                  {% elif log.severity == 'SUCCESS' %}
-                    <span class="badge badge-light-success fs-8">Başarılı</span>
+                <td class="align-middle" data-label="Aksiyon">
+                  {% if log.action_type == 'FORM_CREATE' %}
+                    <span class="badge fs-8" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'FORM_UPDATE' %}
+                    <span class="badge fs-8" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'FORM_DELETE' %}
+                    <span class="badge fs-8" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'STATUS_CHANGE' %}
+                    <span class="badge fs-8" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'USER_LOGIN' %}
+                    <span class="badge fs-8" style="background:#d1fae5; color:#065f46; border:1px solid #a7f3d0;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'USER_LOGOUT' %}
+                    <span class="badge fs-8" style="background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'PROFILE_UPDATE' %}
+                    <span class="badge fs-8" style="background:#fce7f3; color:#be185d; border:1px solid #f9a8d4;">{{ log.get_action_type_display }}</span>
+                  {% elif log.action_type == 'COMPANY_UPDATE' %}
+                    <span class="badge fs-8" style="background:#fef7cd; color:#a16207; border:1px solid #fed7aa;">{{ log.get_action_type_display }}</span>
                   {% else %}
-                    <span class="badge badge-light-primary fs-8">Bilgi</span>
+                    <span class="badge fs-8" style="background:#eef2ff; color:#3730a3; border:1px solid #e0e7ff;">{{ log.get_action_type_display }}</span>
                   {% endif %}
                 </td>
                 
-                <td class="align-middle">
-                  <span class="text-gray-600 fs-7">{{ log.get_short_description }}</span>
+                
+                <td class="align-middle" data-label="Önem">
+                  {% if log.severity == 'ERROR' %}
+                    <span class="badge badge-light-danger fs-8" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">Hata</span>
+                  {% elif log.severity == 'WARNING' %}
+                    <span class="badge badge-light-warning fs-8" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">Uyarı</span>
+                  {% elif log.severity == 'SUCCESS' %}
+                    <span class="badge badge-light-success fs-8" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">Başarılı</span>
+                  {% else %}
+                    <span class="badge badge-light-primary fs-8" style="background:#eef2ff; color:#3730a3; border:1px solid #e0e7ff;">Bilgi</span>
+                  {% endif %}
                 </td>
                 
-                <td class="align-middle">
+                <td class="align-middle mobile-hidden{% if not log.get_short_description %} is-empty{% endif %}" data-label="Açıklama">
+                  {% if log.get_short_description %}
+                  <span class="text-gray-600 fs-7">{{ log.get_short_description }}</span>
+                  {% endif %}
+                </td>
+                
+                <td class="align-middle mobile-hidden{% if not log.ip_address %} is-empty{% endif %}" data-label="IP Adresi">
                   {% if log.ip_address %}
                     <span class="text-gray-800 fs-7 fw-bold">{{ log.ip_address }}</span>
-                  {% else %}
-                    <span class="text-muted fs-7">—</span>
                   {% endif %}
                 </td>
                 
-                <td class="align-middle">
+                <td class="align-middle mobile-hidden{% if not log.related_form %} is-empty{% endif %}" data-label="İlgili Form">
                   {% if log.related_form %}
                     <a href="#" class="text-primary fw-bold fs-7 js-form-preview" data-form-id="{{ log.related_form.id }}" title="Form önizleme">
                       {{ log.related_form.musteri_isim }} {{ log.related_form.musteri_soyisim }}
                     </a>
-                  {% else %}
-                    <span class="text-muted fs-7">—</span>
                   {% endif %}
                 </td>
                 
-                <td class="align-middle">
+                <td class="align-middle " data-label="Detay" style="align-items: center;">
                   <button type="button" class="btn btn-sm btn-light btn-icon" 
                           data-bs-toggle="modal" 
                           data-bs-target="#logDetailModal"
@@ -383,6 +506,7 @@
                       <span class="path3"></span>
                     </i>
                   </button>
+                  
                 </td>
               </tr>
               {% empty %}
@@ -531,6 +655,15 @@
 
 {% block script %}
 <script>
+// Mobil: Açılır/kapanır kart görünümü
+// Satıra tıklayınca aç/kapa (Detay modal butonu hariç)
+document.addEventListener('click', function(e) {
+  const row = e.target.closest('#logs_table tbody tr');
+  if (!row) return;
+  if (e.target.closest('[data-bs-toggle="modal"]')) return; // Detay modal butonu tıklanınca aç/kapa yapma
+  row.classList.toggle('open');
+});
+
 // Arama fonksiyonu
 document.getElementById('searchInput').addEventListener('keyup', function(e) {
   if (e.key === 'Enter') {
