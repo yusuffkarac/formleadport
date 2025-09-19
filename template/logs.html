@@ -55,6 +55,7 @@
     #logs_table tbody tr:not(.open) {
       white-space: nowrap;
       padding: 0.5rem 0.5rem;
+
     }
     #logs_table tbody tr:not(.open) td { display: none; }
     /* Kapalı: sadece Zaman (saat), Önem (durum) ve Detay butonu */
@@ -66,11 +67,14 @@
       gap: 10px;
       padding: 0.25rem 0.25rem;
     }
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"] {order: 1;border: none;min-width: 13rem;}
+
+
     /* tek satır hizası */
     #logs_table tbody tr:not(.open) { 
       display: flex; 
       align-items: center; 
-      gap: 12px; 
+      gap: 0px; 
       overflow: hidden;
       justify-content: space-between;
     }
@@ -443,23 +447,23 @@
                 
                 <td class="align-middle" data-label="Aksiyon">
                   {% if log.action_type == 'FORM_CREATE' %}
-                    <span class="badge fs-8" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'FORM_UPDATE' %}
-                    <span class="badge fs-8" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'FORM_DELETE' %}
-                    <span class="badge fs-8" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'STATUS_CHANGE' %}
-                    <span class="badge fs-8" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'USER_LOGIN' %}
-                    <span class="badge fs-8" style="background:#d1fae5; color:#065f46; border:1px solid #a7f3d0;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'USER_LOGOUT' %}
-                    <span class="badge fs-8" style="background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'PROFILE_UPDATE' %}
-                    <span class="badge fs-8" style="background:#fce7f3; color:#be185d; border:1px solid #f9a8d4;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#fce7f3; color:#be185d; border:1px solid #f9a8d4; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% elif log.action_type == 'COMPANY_UPDATE' %}
-                    <span class="badge fs-8" style="background:#fef7cd; color:#a16207; border:1px solid #fed7aa;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#fef7cd; color:#a16207; border:1px solid #fed7aa; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% else %}
-                    <span class="badge fs-8" style="background:#eef2ff; color:#3730a3; border:1px solid #e0e7ff;">{{ log.get_action_type_display }}</span>
+                    <span class="badge fs-8" style="background:#eef2ff; color:#3730a3; border:1px solid #e0e7ff; padding:6px 12px; min-height:24px; display:inline-flex; align-items:center; white-space:nowrap;">{{ log.get_action_type_display }}</span>
                   {% endif %}
                 </td>
                 

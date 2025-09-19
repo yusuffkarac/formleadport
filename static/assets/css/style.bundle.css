@@ -47185,7 +47185,7 @@ body.page-bg-image-lg {
     padding: 0;
   }
   .content > .card > .card-body {
-    padding: 20px;
+    padding: 10px;
   }
 }
 @media print {
@@ -47242,7 +47242,7 @@ body.page-bg-image-lg {
 .container-xl,
 .container-xxl {
     max-width: none;
-    padding: 0 15px;
+    padding: 0.7rem;
   }
 }
 @media (min-width: 992px) {
