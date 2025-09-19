@@ -67,15 +67,26 @@
       padding: 0.25rem 0.25rem;
     }
     /* tek satır hizası */
-    #logs_table tbody tr:not(.open) { display: flex; align-items: center; gap: 12px; }
+    #logs_table tbody tr:not(.open) { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      overflow: hidden;
+      justify-content: space-between;
+    }
     #logs_table tbody tr:not(.open) td[data-label="Zaman"] { order: 1; border: none; }
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] { order: 2; border: none; }
     #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 3; margin-left: auto; border: none; }
     /* Zaman ve Aksiyon etiketlerini gizle, sadece değer kalsın */
     #logs_table tbody tr:not(.open) td[data-label="Zaman"]:before { display: none; }
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"]:before { display: none; }
-    /* Detay butonunu satırın sağına it */
-    #logs_table tbody tr:not(.open) td[data-label="Detay"] { margin-left: auto; }
+    /* Detay butonunu satırın sağına it - kontrollü */
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] { 
+      margin-left: auto; 
+      margin-right: 0;
+      flex-shrink: 0;
+      max-width: 50px;
+    }
     #logs_table tbody tr:not(.open) td[data-label="Detay"]:before { display: none; }
 
     /* Zaman kapsülü */
