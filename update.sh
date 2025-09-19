@@ -9,7 +9,24 @@ cd /home/django/formleadport
 # Güvenlik için database backup al
 echo "Database backup alınıyor..."
 mkdir -p /home/django/backups
-cp db.sqlite3 /home/django/backups/db_backup_$(date +%Y%m%d_%H%M%S).sqlite3
+if [ -f db.sqlite3 ]; then
+    cp db.sqlite3 /home/django/backups/db_backup_$(date +%Y%m%d_%H%M%S).sqlite3
+    echo "✅ Database backup alındı"
+else
+    echo "⚠️  Database dosyası bulunamadı"
+fi
+
+# Kritik dosyaların yanlışlıkla üzerine yazılmaması için kontrol
+echo "Kritik dosyalar korunuyor..."
+if [ -f db.sqlite3 ]; then
+    # Database dosyasını geçici olarak yedekle
+    cp db.sqlite3 db.sqlite3.temp_backup
+fi
+
+if [ -d media/ ]; then
+    # Media klasörünü geçici olarak yedekle
+    cp -r media/ media_temp_backup/
+fi
 
 # Git durumunu kontrol et ve temizle
 echo "Git durumu kontrol ediliyor..."
@@ -41,6 +58,19 @@ python3 manage.py migrate
 # Migration durumunu kontrol et
 echo "Migration durumu:"
 python3 manage.py showmigrations | grep -E "\[ \]|\[X\]"
+
+# Kritik dosyaları geri yükle
+echo "Kritik dosyalar geri yükleniyor..."
+if [ -f db.sqlite3.temp_backup ]; then
+    mv db.sqlite3.temp_backup db.sqlite3
+    echo "✅ Database geri yüklendi"
+fi
+
+if [ -d media_temp_backup/ ]; then
+    rm -rf media/
+    mv media_temp_backup/ media/
+    echo "✅ Media dosyaları geri yüklendi"
+fi
 
 # Static files topla
 echo "Static dosyalar toplanıyor..."
