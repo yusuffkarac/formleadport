@@ -226,16 +226,97 @@ def ajax_otp_verify_phone(request):
         return JsonResponse({"valid": False, "reason": "wrong_code"})
     
     
-def _send_otp_email(to_email: str, code: str):
+def _send_otp_email(to_email: str, code: str, customer_name: str = "", request=None):
     subject = "Ihr E-Mail-Bestätigungscode"
-    text_body = f"Ihr Bestätigungscode lautet: {code}\nDieser Code ist 5 Minuten gültig."
-    html_body = f"""
-    <div style="font-family:Arial,sans-serif;font-size:14px">
-      <p>Ihr Bestätigungscode lautet:</p>
-      <p style="font-size:24px;font-weight:bold;letter-spacing:3px">{code}</p>
-      <p>Dieser Code ist 5 Minuten gültig.</p>
-    </div>
-    """
+    
+    # Firma ayarlarından özel e-mail metnini al
+    from yonetim.models import Firma
+    from django.conf import settings
+    import os
+    
+    firma = Firma.objects.first()
+    custom_text = ""
+    
+    # Değişken değerlerini hazırla
+    variables = {
+        "{{code}}": code,
+        "{{firma_name}}": getattr(firma, 'isim', 'Leadport') if firma else 'Leadport',
+        "{{firma_phone}}": getattr(firma, 'telefon', '') if firma else '',
+        "{{firma_address}}": getattr(firma, 'adres', '') if firma else '',
+        "{{customer_name}}": customer_name or '',
+    }
+    
+    # Firma logosu için absolute URL
+    firma_logo_html = ""
+    if firma and hasattr(firma, 'logo') and firma.logo:
+        try:
+            # Request'ten domain bilgisini al
+            domain = 'http://localhost:8000'  # Default
+            if request:
+                domain = f"{request.scheme}://{request.get_host()}"
+            elif hasattr(settings, 'SITE_URL'):
+                domain = settings.SITE_URL.rstrip('/')
+            
+            # Absolute URL oluştur
+            logo_url = f"{domain}{settings.MEDIA_URL}{firma.logo}"
+            firma_logo_html = f'<img src="{logo_url}" alt="{variables["{{firma_name}}"]} Logo" style="max-width:200px;height:auto;display:block;margin:10px 0;">'
+        except Exception as e:
+            print(f"Logo URL oluşturma hatası: {e}")
+            firma_logo_html = variables["{{firma_name}}"]
+    else:
+        firma_logo_html = variables["{{firma_name}}"]
+    
+    variables["{{firma_logo}}"] = firma_logo_html
+    
+    if firma and firma.email_onay_yazisi:
+        # Tüm değişkenleri değiştir
+        custom_text = firma.email_onay_yazisi
+        for variable, value in variables.items():
+            custom_text = custom_text.replace(variable, value)
+        print('İşlenmiş e-mail metni:', custom_text)
+    else:
+        # Varsayılan metin
+        custom_text = f"Ihr Bestätigungscode lautet: {code}\nDieser Code ist 5 Minuten gültig."
+    
+    # HTML versiyonu için de aynı işlemi yap
+    if firma and firma.email_onay_yazisi:
+        # HTML için tüm değişkenleri değiştir
+        html_custom_text = firma.email_onay_yazisi
+        
+        # HTML değişkenleri ({{code}} özel stil ile)
+        html_variables = variables.copy()
+        html_variables["{{code}}"] = f'<span style="font-size:24px;font-weight:bold;letter-spacing:3px;color:#1976d2;">{code}</span>'
+        
+        # Tüm değişkenleri HTML versiyonunda değiştir
+        for variable, value in html_variables.items():
+            html_custom_text = html_custom_text.replace(variable, value)
+        
+        # HTML etiketlerini koru, yoksa plain text olarak işle
+        if "<" in html_custom_text and ">" in html_custom_text:
+            # Zaten HTML içeriği var, sadece satır geçişlerini düzelt
+            html_custom_text = html_custom_text.replace('\n', '<br>')
+            html_body = f"""
+            <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;">
+              {html_custom_text}
+            </div>
+            """
+        else:
+            # Plain text ise HTML'e çevir - satır geçişlerini <br> yap
+            html_custom_text = html_custom_text.replace('\n', '<br>')
+            html_body = f"""
+            <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;">
+              {html_custom_text}
+            </div>
+            """
+    else:
+        # Varsayılan HTML metin
+        html_body = f"""
+        <div style="font-family:Arial,sans-serif;font-size:14px">
+          <p>Ihr Bestätigungscode lautet:</p>
+          <p style="font-size:24px;font-weight:bold;letter-spacing:3px">{code}</p>
+          <p>Dieser Code ist 5 Minuten gültig.</p>
+        </div>
+        """
 
     smtp = Smtp.objects.first()
     if not smtp:
@@ -253,7 +334,7 @@ def _send_otp_email(to_email: str, code: str):
 
     msg = EmailMultiAlternatives(
         subject,
-        text_body,
+        custom_text,
         smtp.username,   # Absender
         [to_email],
         connection=connection,
@@ -281,8 +362,10 @@ def ajax_otp_send_email(request):
             return HttpResponseBadRequest("Sende-Limit erreicht. Bitte versuchen Sie es später erneut.")
 
         code = gen_code()
-        # Mail senden
-        _send_otp_email(email, code)
+        # Mail senden (müşteri ismi varsa gönder)
+        customer_name = payload.get("customer_name", "")
+
+        _send_otp_email(email, code, customer_name, request)
 
         # Session schreiben
         request.session[OTP_EMAIL_SESSION_KEY] = {
@@ -588,6 +671,21 @@ def musteri_form_olustur(request):
     from .utils.logger import log_form_create
     log_form_create(form=form, user=request.user, request=request)
 
+    # 10.1) form_type kontrolü ve termin email gönderimi
+    form_type = data.get("form_type")
+    print(f"🔍 Form type kontrolü: '{form_type}'")
+    if form_type == "termin":
+        print("📧 Termin email gönderimi başlatılıyor...")
+        try:
+            # Termin onay email'ini gönder
+            _send_termin_confirmation_email(form, request)
+            print("✅ Termin email gönderimi tamamlandı")
+        except Exception as e:
+            # Email gönderilmezse log'a yaz ama form kaydını iptal etme
+            print(f"❌ Termin email gönderilemedi: {e}")
+    else:
+        print(f"ℹ️ Normal form kaydı (form_type: '{form_type}')")
+
     # 11) Yanıt
     return done(JsonResponse({
         "ok": True,
@@ -598,14 +696,433 @@ def musteri_form_olustur(request):
 def _fmt_dt_human(dt):
     if not dt:
         return None
-    local = timezone.localtime(dt)
-    # "25.09.2025 Donnerstag - 12:45 Uhr"
-    return f"{date_format(local, 'd.m.Y l')} - {date_format(local, 'H:i')} Uhr"
+    try:
+        # Eğer datetime naive ise, timezone-aware yap
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt)
+        local = timezone.localtime(dt)
+        # "25.09.2025 Donnerstag - 12:45 Uhr"
+        return f"{date_format(local, 'd.m.Y l')} - {date_format(local, 'H:i')} Uhr"
+    except Exception as e:
+        print(f"⚠️ _fmt_dt_human hatası: {e}")
+        # Fallback: basit format
+        if hasattr(dt, 'strftime'):
+            return dt.strftime("%d.%m.%Y %H:%M")
+        return str(dt)
 
 def _user_display(u):
     if not u:
         return None
     return (u.get_full_name() or u.username or "").strip() or None
+
+def _send_termin_confirmation_email(form, request):
+    """Termin onay emailini gönderir"""
+    from yonetim.models import Firma, Smtp
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+    
+    print("=== TERMIN EMAIL GÖNDERİMİ BAŞLADI ===")
+    print(f"Form ID: {form.id}")
+    print(f"Form email: {form.email}")
+    
+    # Müşteri email adresi var mı kontrol et
+    if not form.email:
+        print("❌ Müşteri email adresi yok, email gönderilmiyor")
+        return
+        
+    print("✅ Müşteri email adresi mevcut")
+        
+    # Firma bilgilerini al
+    try:
+        firma = Firma.objects.first()
+        print(f"Firma bulundu: {firma.isim if firma else 'YOK'}")
+        if not firma:
+            print("❌ Firma bulunamadı")
+            return
+        if not firma.termin_onay_yazisi:
+            print("❌ Firma termin onay yazısı bulunamadı")
+            print(f"Termin onay yazısı: '{firma.termin_onay_yazisi}'")
+            return
+        print("✅ Firma termin onay yazısı mevcut")
+        print(f"Termin yazısı uzunluğu: {len(firma.termin_onay_yazisi)} karakter")
+    except Exception as e:
+        print(f"❌ Firma bilgileri alınamadı: {e}")
+        return
+    
+    # SMTP ayarlarını al
+    try:
+        smtp = Smtp.objects.first()
+        print(f"SMTP bulundu: {smtp.host if smtp else 'YOK'}")
+        if not smtp:
+            print("❌ SMTP ayarları bulunamadı")
+            return
+        print("✅ SMTP ayarları mevcut")
+        print(f"SMTP Host: {smtp.host}")
+        print(f"SMTP Port: {smtp.port}")
+        print(f"SMTP Username: {smtp.username}")
+        print(f"SMTP TLS: {smtp.use_tls}")
+        print(f"SMTP SSL: {smtp.use_ssl}")
+    except Exception as e:
+        print(f"❌ SMTP ayarları alınamadı: {e}")
+        return
+    
+    # Email içeriğini hazırla
+    try:
+        print("📧 Email içeriği hazırlanıyor...")
+        
+        # Termin tarihini formatla
+        randevu_tarih = form.randevu_tarihi
+        if randevu_tarih:
+            try:
+                randevu_str = _fmt_dt_human(randevu_tarih)
+            except Exception as e:
+                print(f"⚠️ Tarih formatlanamadı: {e}")
+                # Basit format kullan
+                if hasattr(randevu_tarih, 'strftime'):
+                    randevu_str = randevu_tarih.strftime("%d.%m.%Y %H:%M")
+                else:
+                    randevu_str = str(randevu_tarih)
+        else:
+            randevu_str = "—"
+        
+        print(f"Randevu tarihi: {randevu_str}")
+        
+        # Tarih formatlarını hazırla
+        randevu_tarih_obj = form.randevu_tarihi
+        if randevu_tarih_obj:
+            try:
+                if timezone.is_naive(randevu_tarih_obj):
+                    randevu_tarih_obj = timezone.make_aware(randevu_tarih_obj)
+                local_dt = timezone.localtime(randevu_tarih_obj)
+                termin_datum = local_dt.strftime("%d.%m.%Y")  # 21.09.2025
+                termin_uhrzeit = local_dt.strftime("%H:%M")   # 16:20
+            except Exception as e:
+                print(f"⚠️ Tarih formatlanamadı: {e}")
+                termin_datum = randevu_tarih_obj.strftime("%d.%m.%Y") if hasattr(randevu_tarih_obj, 'strftime') else str(randevu_tarih_obj)
+                termin_uhrzeit = randevu_tarih_obj.strftime("%H:%M") if hasattr(randevu_tarih_obj, 'strftime') else "—"
+        else:
+            termin_datum = "—"
+            termin_uhrzeit = "—"
+        
+        # Template değişkenleri
+        context = {
+            'firma': firma,
+            'form': form,
+            'musteri_adi': f"{form.musteri_isim} {form.musteri_soyisim}",
+            'randevu_tarihi': randevu_str,
+            'randevu_tipi': form.randevu_tipi or "—",
+            'firma_adi': form.firma_adi,
+            'termin_mesaji': firma.termin_onay_yazisi,
+            'termin_datum': termin_datum,
+            'termin_uhrzeit': termin_uhrzeit,
+        }
+        
+        print(f"Müşteri adı: {context['musteri_adi']}")
+        print(f"Randevu tipi: {context['randevu_tipi']}")
+        print(f"Firma adı: {context['firma_adi']}")
+        
+        # Email konusu
+        subject = f"Terminbestätigung - {firma.isim}"
+        print(f"Email konusu: {subject}")
+        
+        # Admin panelindeki termin onay yazısını doğrudan kullan
+        # Template değişkenlerini değiştir
+        termin_mesaji = firma.termin_onay_yazisi
+        print(f"Orijinal termin mesajı: {termin_mesaji[:100]}...")
+        print(f"HTML etiketi var mı: {'<' in termin_mesaji and '>' in termin_mesaji}")
+        
+        # Admin panelinde zaten HTML formatında yazılmış, sadece placeholder'ları değiştir
+        # HTML formatlamasını bozma
+        
+        # Placeholder'ları değiştir (hem {{}} hem {} formatlarını destekle)
+        termin_mesaji = termin_mesaji.replace("{{kunde_name}}", context['musteri_adi'])
+        termin_mesaji = termin_mesaji.replace("{{termin_datum}}", context['termin_datum'])
+        termin_mesaji = termin_mesaji.replace("{{termin_uhrzeit}}", context['termin_uhrzeit'])
+        termin_mesaji = termin_mesaji.replace("{{terminart}}", context['randevu_tipi'])
+        termin_mesaji = termin_mesaji.replace("{{berater_name}}", context['musteri_adi'])  # Geçici
+        termin_mesaji = termin_mesaji.replace("{{berater_position}}", "Berater")  # Geçici
+        termin_mesaji = termin_mesaji.replace("{{firma_name}}", firma.isim)
+        termin_mesaji = termin_mesaji.replace("{{firma_phone}}", firma.telefon or "")
+        
+        # Logo placeholder'ını işle
+        if firma.logo:
+            # Logo URL'ini oluştur
+            logo_url = request.build_absolute_uri(firma.logo.url)
+            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 200px; height: auto; display: block; margin: 15px auto;" />'
+            termin_mesaji = termin_mesaji.replace("{{firma_logo}}", logo_html)
+        else:
+            # Logo yoksa boş string ile değiştir
+            termin_mesaji = termin_mesaji.replace("{{firma_logo}}", "")
+        
+        # Eski format placeholder'ları da destekle
+        termin_mesaji = termin_mesaji.replace("{musteri_adi}", context['musteri_adi'])
+        termin_mesaji = termin_mesaji.replace("{randevu_tarihi}", context['randevu_tarihi'])
+        termin_mesaji = termin_mesaji.replace("{randevu_tipi}", context['randevu_tipi'])
+        termin_mesaji = termin_mesaji.replace("{firma_adi}", context['firma_adi'])
+        termin_mesaji = termin_mesaji.replace("{firma_isim}", firma.isim)
+        termin_mesaji = termin_mesaji.replace("{firma_telefon}", firma.telefon or "")
+        termin_mesaji = termin_mesaji.replace("{firma_adres}", firma.adres or "")
+        
+        # Eski format logo placeholder'ı
+        if firma.logo:
+            logo_url = request.build_absolute_uri(firma.logo.url)
+            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 200px; height: auto; display: block; margin: 15px auto;" />'
+            termin_mesaji = termin_mesaji.replace("{firma_logo}", logo_html)
+        else:
+            termin_mesaji = termin_mesaji.replace("{firma_logo}", "")
+        
+        print(f"Değiştirilmiş termin mesajı: {termin_mesaji[:100]}...")
+        
+        # HTML içeriğini hazırla - satır geçişlerini <br> ile değiştir
+        html_termin_mesaji = termin_mesaji.replace('\n', '<br>')
+        
+        # E-posta istemcileriyle uyumlu HTML içeriği
+        html_content = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terminbestätigung</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style type="text/css">
+        /* Reset styles */
+        body, table, td, p, a, li, blockquote {{
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }}
+        table, td {{
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }}
+        img {{
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+            max-width: 100% !important;
+            height: auto !important;
+        }}
+        
+        /* Logo specific styles */
+        .email-logo {{
+            max-width: 200px !important;
+            height: auto !important;
+            display: block !important;
+            margin: 15px auto !important;
+        }}
+        
+        /* Main styles */
+        body {{
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f5f5f5 !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 16px !important;
+            line-height: 1.6 !important;
+            color: #333333 !important;
+        }}
+        
+        .email-container {{
+            max-width: 600px !important;
+            margin: 0 auto !important;
+            background-color: #ffffff !important;
+        }}
+        
+        .header-table {{
+            width: 100% !important;
+            background: #2c3e50 !important;
+            background: -webkit-linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+        }}
+        
+        .header-cell {{
+            padding: 25px 35px !important;
+            text-align: center !important;
+        }}
+        
+        .header-title {{
+            margin: 0 !important;
+            font-size: 24px !important;
+            font-weight: 300 !important;
+            color: #ffffff !important;
+            font-family: Arial, sans-serif !important;
+        }}
+        
+        .content-table {{
+            width: 100% !important;
+            background-color: #ffffff !important;
+        }}
+        
+        .content-cell {{
+            padding: 35px !important;
+            font-size: 16px !important;
+            line-height: 1.8 !important;
+            color: #333333 !important;
+            font-family: Arial, sans-serif !important;
+        }}
+        
+        .content-cell p {{
+            margin: 0 0 15px 0 !important;
+        }}
+        
+        .content-cell strong {{
+            color: #2c3e50 !important;
+            font-weight: bold !important;
+        }}
+        
+        .footer-table {{
+            width: 100% !important;
+            background-color: #ecf0f1 !important;
+        }}
+        
+        .footer-cell {{
+            padding: 20px 35px !important;
+            font-size: 13px !important;
+            color: #7f8c8d !important;
+            text-align: center !important;
+            font-style: italic !important;
+            font-family: Arial, sans-serif !important;
+        }}
+        
+        /* Media queries */
+        @media screen and (max-width: 600px) {{
+            .email-container {{
+                width: 100% !important;
+                max-width: 100% !important;
+            }}
+            .header-cell, .content-cell, .footer-cell {{
+                padding: 20px !important;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0;">
+                <div class="email-container">
+                    <!-- Header -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" class="header-table">
+                        <tr>
+                            <td class="header-cell">
+                                <h1 class="header-title">Terminbestätigung</h1>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <!-- Content -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" class="content-table">
+                        <tr>
+                            <td class="content-cell">
+                                {html_termin_mesaji}
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <!-- Footer -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" class="footer-table">
+                        <tr>
+                            <td class="footer-cell">
+                                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>"""
+        
+        # Text versiyonu (HTML taglarını temizle ve formatla)
+        text_content = strip_tags(termin_mesaji)
+        # Text versiyonunu düzgün formatla
+        text_content = text_content.replace('\n', '\n\n')  # Satır sonlarını çift satır yap
+        text_content = text_content.replace('  ', ' ')     # Çoklu boşlukları temizle
+        text_content = text_content.strip()
+        
+        # SMTP bağlantısı
+        conn = _get_smtp_connection()
+        
+        # Email oluştur ve gönder
+        print("📨 Email mesajı oluşturuluyor...")
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=smtp.username,
+            to=[form.email],
+            connection=conn,
+        )
+        msg.attach_alternative(html_content, "text/html")
+        
+        # Email header'larını ekle (Content-Type'ı EmailMultiAlternatives otomatik ayarlar)
+        msg.extra_headers = {
+            'X-Priority': '3',
+            'X-MSMail-Priority': 'Normal',
+        }
+        print("✅ Email mesajı oluşturuldu")
+        
+        # Gönder
+        result = msg.send()
+        
+        if result:
+            print(f"Termin onay emaili gönderildi: {form.email}")
+            
+            # Email gönderim kaydını oluştur
+            from sayfalar.models import EmailGonderimleri
+            EmailGonderimleri.objects.create(
+                form=form,
+                kullanici=request.user if request.user.is_authenticated else None,
+                gonderilen_email=form.email,
+            )
+            
+        return result
+        
+    except Exception as e:
+        print(f"Termin email gönderilirken hata: {e}")
+        raise e
+
+
+@require_POST
+def termin_email_gonder(request, form_id):
+    """Manuel termin onay emaili gönderme endpoint'i"""
+    try:
+        # Form'u bul
+        form = MusteriFormModel.objects.get(id=form_id)
+        
+        # Kullanıcı yetkisi kontrol et (opsiyonel)
+        if not request.user.is_authenticated:
+            return JsonResponse({'ok': False, 'error': 'Yetki gerekli'})
+        
+        # Email adresi var mı kontrol et
+        if not form.email:
+            return JsonResponse({'ok': False, 'error': 'Bu formda e-mail adresi bulunmuyor'})
+        
+        # Termin onay emailini gönder
+        result = _send_termin_confirmation_email(form, request)
+        
+        if result:
+            return JsonResponse({
+                'ok': True, 
+                'message': f'Termin onay e-postası {form.email} adresine başarıyla gönderildi'
+            })
+        else:
+            return JsonResponse({'ok': False, 'error': 'E-posta gönderilemedi'})
+            
+    except MusteriFormModel.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Form bulunamadı'})
+    except Exception as e:
+        print(f"Manuel termin email gönderme hatası: {e}")
+        return JsonResponse({'ok': False, 'error': f'Hata: {str(e)}'})
 
 
 # ---------------------------
@@ -908,6 +1425,21 @@ def musteri_form_duzenle(request, form_id):
         new_values=new_values,
         details={'changed_fields': changed_fields}
     )
+
+    # form_type kontrolü ve termin email gönderimi
+    form_type = data.get("form_type")
+    print(f"🔍 Form düzenleme - Form type kontrolü: '{form_type}'")
+    if form_type == "termin":
+        print("📧 Form düzenleme - Termin email gönderimi başlatılıyor...")
+        try:
+            # Termin onay email'ini gönder
+            _send_termin_confirmation_email(inst, request)
+            print("✅ Form düzenleme - Termin email gönderimi tamamlandı")
+        except Exception as e:
+            # Email gönderilmezse log'a yaz ama form kaydını iptal etme
+            print(f"❌ Form düzenleme - Termin email gönderilemedi: {e}")
+    else:
+        print(f"ℹ️ Form düzenleme - Normal form kaydı (form_type: '{form_type}')")
 
     return done(JsonResponse({"ok": True, "id": inst.id, "redirect": reverse("panel")}))
 

@@ -52,6 +52,7 @@
           <div class="flex-row-fluid py-lg-5 px-lg-15">
             <form class="form" id="musteri_form" method="post" novalidate data-endpoint="{% url 'musteri_form_olustur' %}">
               {% csrf_token %}
+              <input type="hidden" name="form_type" id="form_type_input" value="">
 
               <!-- STEP 1 -->
               <div class="step-content current" data-step-content="1">
@@ -312,6 +313,9 @@
               <div class="d-flex flex-stack pt-10">
                 <div class="me-2">
                   <button type="button" class="btn btn-lg btn-light-primary me-3" data-stepper-action="previous">Zurück</button>
+                  <!-- <button type="button" id="btn-termin-email-olustur" class="btn btn-lg btn-info me-3 d-none">
+                    <i class="ki-duotone ki-send fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Termin E-Mail senden
+                  </button> -->
                 </div>
                 <div>
                   <button type="submit" class="btn btn-lg btn-primary d-none" data-stepper-action="submit">
@@ -387,8 +391,37 @@
       c.classList.toggle('current', parseInt(c.getAttribute('data-step-content'))===currentStep);
     });
     prevBtn.disabled=(currentStep===1);
-    if(currentStep===totalSteps){ nextBtn.classList.add('d-none'); submitBtn.classList.remove('d-none'); buildSummary(); }
-    else{ nextBtn.classList.remove('d-none'); submitBtn.classList.add('d-none'); }
+    if(currentStep===totalSteps){ 
+      nextBtn.classList.add('d-none'); 
+      submitBtn.classList.remove('d-none'); 
+      buildSummary(); 
+      
+      // Termin ile ilgili butonların görünürlüğünü kontrol et
+      const randevuTarih = document.querySelector('input[name="randevu_tarihi"]')?.value;
+      const email = document.querySelector('input[name="email"]')?.value;
+      const randevuTipi = document.querySelector('select[name="randevu_tipi"]')?.value;
+      
+      // Eğer randevu tarihi varsa termin formu olarak kabul et
+      const isTerminForm = randevuTarih && randevuTarih.trim();
+      
+      if (isTerminForm) {
+        // Email varsa termin email butonunu göster
+        if (email && email.trim() && terminEmailBtn) {
+          terminEmailBtn.classList.remove('d-none');
+        } else if (terminEmailBtn) {
+          terminEmailBtn.classList.add('d-none');
+        }
+      } else {
+        // Normal form ise termin email butonunu gizle
+        if (terminEmailBtn) {
+          terminEmailBtn.classList.add('d-none');
+        }
+      }
+    }
+    else{ 
+      nextBtn.classList.remove('d-none'); 
+      submitBtn.classList.add('d-none'); 
+    }
   }
 
   function validateStep(s){
@@ -433,6 +466,24 @@
 
   nextBtn.addEventListener('click',()=>{ if(!validateStep(currentStep)) return; if(currentStep<totalSteps) setStep(currentStep+1); });
   prevBtn.addEventListener('click',()=>{ if(currentStep>1) setStep(currentStep-1); });
+
+  // Termin email butonu - sadece uyarı göster
+  const terminEmailBtn = document.getElementById('btn-termin-email-olustur');
+  if (terminEmailBtn) {
+    terminEmailBtn.addEventListener('click', function() {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'info',
+          title: 'Information',
+          text: 'Bitte speichern Sie zuerst das Formular. Danach können Sie die Termin-E-Mail über die Formulardetails senden.',
+          confirmButtonText: 'Verstanden'
+        });
+      } else {
+        alert('Bitte speichern Sie zuerst das Formular. Danach können Sie die Termin-E-Mail über die Formulardetails senden.');
+      }
+    });
+  }
+
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -581,10 +632,15 @@
     mailErr.textContent=''; const email=(document.getElementById('email').value||'').trim();
     if(!email){ showErr('Bitte E-Mail eingeben.'); return; }
     try{
+      // Müşteri adı ve soyadını al
+      const musteri_isim = document.querySelector('input[name="musteri_isim"]')?.value || '';
+      const musteri_soyisim = document.querySelector('input[name="musteri_soyisim"]')?.value || '';
+      const customer_name = `${musteri_isim} ${musteri_soyisim}`.trim();
+      
       const r=await fetch('/ajax/otp/send/email/',{
         method:'POST',
         headers:{ 'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken': CSRF_TOKEN },
-        body: JSON.stringify({email})
+        body: JSON.stringify({email, customer_name})
       });
       const txt=await r.text(); let data=null; try{ data=JSON.parse(txt);}catch(_){}
       if(r.ok && (data?.ok===true || txt==='')){ mailWrap.classList.remove('d-none'); showOk('Bestätigungscode wurde gesendet.'); }
@@ -1027,11 +1083,21 @@ document.addEventListener('change', (e) => {
       toggleEhepartnerFields();
     }
     buildSummary();
+    // Termin butonlarının görünürlüğünü yeniden kontrol et
+    if (currentStep === totalSteps) {
+      setStep(currentStep);
+    }
   }
 });
 document.addEventListener('input', (e) => {
   const formEl = document.getElementById('musteri_form');
-  if (formEl && formEl.contains(e.target)) buildSummary();
+  if (formEl && formEl.contains(e.target)) {
+    buildSummary();
+    // Termin butonlarının görünürlüğünü yeniden kontrol et
+    if (currentStep === totalSteps) {
+      setStep(currentStep);
+    }
+  }
 });
 
 // İlk yüklemede çalıştır

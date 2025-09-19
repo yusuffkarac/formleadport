@@ -139,6 +139,9 @@
       </div>
 
       <div class="modal-footer modern-footer">
+        <button type="button" id="btn-termin-email" class="btn btn-primary me-2 d-none">
+          <i class="ki-duotone ki-send fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Termin E-Mail senden
+        </button>
         <button type="button" id="btn-pdf-open" class="btn btn-light me-2">
           <i class="ki-duotone ki-mouse-square fs-4 me-1"></i> PDF herunterladen
         </button>
@@ -472,6 +475,22 @@
           mf.paylasimlarWrap.innerHTML = '<li class="text-muted">Keine Einträge gefunden.</li>';
         }
 
+        // --- TERMIN EMAIL BUTONU - Sadece termin tipindeki formlar için göster ---
+        const terminEmailBtn = document.getElementById('btn-termin-email');
+        if (terminEmailBtn) {
+          // Form tipini kontrol et (randevu_tipi veya form_type alanından)
+          const isTerminForm = data.randevu_tipi || data.form_type === 'termin' || 
+                              (data.randevu_human && data.randevu_human !== '—');
+          
+          if (isTerminForm && data.email && data.email.trim()) {
+            // Termin formu ve email var ise butonu göster
+            terminEmailBtn.classList.remove('d-none');
+          } else {
+            // Termin formu değil veya email yok ise butonu gizle
+            terminEmailBtn.classList.add('d-none');
+          }
+        }
+
         showContent();
       })
       .catch(err => { showError(err.message || 'Daten konnten nicht geladen werden.'); });
@@ -489,13 +508,18 @@
 (function(){
   const modalEl = document.getElementById('modalFormGoruntule');
   const pdfBtn  = document.getElementById('btn-pdf-open');
+  const terminEmailBtn = document.getElementById('btn-termin-email');
 
   if (!modalEl) return;
+
+  let currentFormId = null;
+  let currentFormData = null;
 
   modalEl.addEventListener('show.bs.modal', function (ev) {
     const trigger = ev.relatedTarget;
     const group   = trigger?.closest('[data-form-id]');
     const formId  = group?.dataset.formId;
+    currentFormId = formId;
 
     if (pdfBtn) {
       pdfBtn.onclick = () => {
@@ -507,7 +531,90 @@
         window.open(url, "_blank");
       };
     }
+
   });
+
+  // Termin email butonu için event listener
+  if (terminEmailBtn) {
+    terminEmailBtn.addEventListener('click', async function() {
+      if (!currentFormId) {
+        alert('Form ID bulunamadı!');
+        return;
+      }
+
+      // Butonu disable et ve loading göster
+      const originalText = terminEmailBtn.innerHTML;
+      terminEmailBtn.disabled = true;
+      terminEmailBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Wird gesendet...';
+
+      try {
+        const response = await fetch(`{% url 'termin_email_gonder' 0 %}`.replace('/0/', `/${currentFormId}/`), {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                          document.querySelector('meta[name="csrf-token"]')?.content || '',
+          },
+        });
+
+        const data = await response.json();
+        
+        if (data.ok) {
+          // Başarı mesajı
+          terminEmailBtn.classList.remove('btn-primary');
+          terminEmailBtn.classList.add('btn-success');
+          terminEmailBtn.innerHTML = '<i class="ki-duotone ki-check fs-4 me-1"></i>Gönderildi!';
+          
+          // 3 saniye sonra normal haline dön
+          setTimeout(() => {
+            terminEmailBtn.classList.remove('btn-success');
+            terminEmailBtn.classList.add('btn-primary');
+            terminEmailBtn.innerHTML = originalText;
+            terminEmailBtn.disabled = false;
+          }, 3000);
+          
+          // Başarı bildirimi (opsiyonel)
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Erfolg!',
+              text: 'Termin-Bestätigungs-E-Mail wurde erfolgreich gesendet.',
+              timer: 3000,
+              showConfirmButton: false
+            });
+          }
+        } else {
+          throw new Error(data.error || 'E-Mail konnte nicht gesendet werden.');
+        }
+      } catch (error) {
+        console.error('Termin email gönderme hatası:', error);
+        
+        // Hata durumu
+        terminEmailBtn.classList.remove('btn-primary');
+        terminEmailBtn.classList.add('btn-danger');
+        terminEmailBtn.innerHTML = '<i class="ki-duotone ki-cross fs-4 me-1"></i>Fehler!';
+        
+        // 3 saniye sonra normal haline dön
+        setTimeout(() => {
+          terminEmailBtn.classList.remove('btn-danger');
+          terminEmailBtn.classList.add('btn-primary');
+          terminEmailBtn.innerHTML = originalText;
+          terminEmailBtn.disabled = false;
+        }, 3000);
+        
+        // Hata bildirimi
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Fehler!',
+            text: error.message || 'E-Mail konnte nicht gesendet werden.',
+          });
+        } else {
+          alert('Fehler beim Senden der E-Mail: ' + (error.message || 'Unbekannter Fehler'));
+        }
+      }
+    });
+  }
 })();
 </script>
 

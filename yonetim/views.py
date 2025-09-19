@@ -691,6 +691,28 @@ def firma_duzenle(request):
             except Exception as e:
                 messages.error(request, f"Fehler beim Speichern der E-Mail-Einstellungen: {e}")
                 return redirect("firma_duzenle")
+        
+        elif form_type == "termin":
+            termin_onay_yazisi = (request.POST.get("termin_onay_yazisi") or "").strip()
+
+            try:
+                if not firma:
+                    firma = Firma.objects.create(
+                        isim="Firma", slogan="", logo=None, icon=None,
+                        telefon="", adres="", sms_yazisi="",
+                        email_onay_yazisi="", termin_onay_yazisi=termin_onay_yazisi or None,
+                        email_dogrulama=False
+                    )
+                else:
+                    Firma.objects.filter(pk=firma.pk).update(
+                        termin_onay_yazisi=termin_onay_yazisi or None
+                    )
+                messages.success(request, "Termin-Bestätigungseinstellungen wurden erfolgreich aktualisiert.")
+                return redirect("firma_duzenle")
+            except Exception as e:
+                messages.error(request, f"Fehler beim Speichern der Termin-Einstellungen: {e}")
+                return redirect("firma_duzenle")
+        
         else:
             if any(k in request.POST for k in ["isim", "telefon", "adres"]):
                 firma_form = FirmaForm(request.POST, request.FILES, instance=firma if firma else None)

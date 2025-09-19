@@ -28,6 +28,7 @@ urlpatterns = [
     path('ajax/sigorta-alt-list/', views.ajax_sigorta_alt_list, name='ajax_sigorta_alt_list'),
     path("ajax/email-paylasim/gecmis/", views.ajax_email_paylasim_gecmis, name="ajax_email_paylasim_gecmis"),
     path("ajax/email-paylasim/gonder/", views.ajax_email_paylasim_gonder, name="ajax_email_paylasim_gonder"),
+    path("ajax/termin-email/<int:form_id>/", views.termin_email_gonder, name="termin_email_gonder"),
 
     # Kaydet
     path("forms/musteri/duzenle/<int:form_id>/", views.musteri_form_duzenle, name="musteri_form_duzenle"),

@@ -13,6 +13,7 @@ class Firma(models.Model):
     adres = models.CharField(max_length=255, verbose_name="Adres")
     sms_yazisi = models.CharField(max_length=255, verbose_name="SMS Yazısı", blank=True, null=True)
     email_onay_yazisi = models.TextField(verbose_name="Email Onay Yazısı", blank=True, null=True)
+    termin_onay_yazisi = models.TextField(verbose_name="Termin Bestätigung Yazısı", blank=True, null=True)
     email_dogrulama = models.BooleanField(default=False, verbose_name="Email Doğrulama")
 
     class Meta:

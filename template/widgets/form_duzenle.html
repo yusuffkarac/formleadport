@@ -47,6 +47,7 @@
             <form class="form" id="musteri_form_duzenle" method="post" novalidate data-endpoint="">
               {% csrf_token %}
               <input type="hidden" id="duzenle_form_id" name="duzenle_form_id" value="">
+              <input type="hidden" name="form_type" id="form_type_input_duzenle" value="">
 
               <!-- Step 1 -->
               <div class="step-content current" data-step-content="1">
@@ -300,10 +301,19 @@
               <div class="d-flex flex-stack pt-10">
                 <div class="me-2">
                   <button type="button" class="btn btn-lg btn-light-primary me-3" data-stepper-action="previous">Zurück</button>
+                  <button type="button" id="btn-termin-email-duzenle" class="btn btn-lg btn-info me-3 d-none">
+                    <i class="ki-duotone ki-send fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Termin E-Mail senden
+                  </button>
                 </div>
                 <div>
                   <button type="submit" class="btn btn-lg btn-primary d-none" data-stepper-action="submit">
                     <span class="indicator-label">Aktualisieren</span>
+                    <span class="indicator-progress d-none">Bitte warten...
+                      <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                  </button>
+                  <button type="button" class="btn btn-lg abtn-primary d-none" data-stepper-action="submit-termin" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border-color: #7c3aed;">
+                    <span class="indicator-label">Als Termin aktualisieren</span>
                     <span class="indicator-progress d-none">Bitte warten...
                       <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
                     </span>
@@ -356,8 +366,37 @@
       c.classList.toggle('current', parseInt(c.getAttribute('data-step-content')) === currentStep);
     });
     if(prevBtn) prevBtn.disabled = (currentStep === 1);
-    if(currentStep === totalSteps){ nextBtn?.classList.add('d-none'); submitBtn?.classList.remove('d-none'); buildSummary(); }
-    else { nextBtn?.classList.remove('d-none'); submitBtn?.classList.add('d-none'); }
+    if(currentStep === totalSteps){ 
+      nextBtn?.classList.add('d-none'); 
+      submitBtn?.classList.remove('d-none'); 
+      buildSummary(); 
+      
+      // Termin ile ilgili butonların görünürlüğünü kontrol et
+      const randevuTarih = modal.querySelector('input[name="randevu_tarihi"]')?.value;
+      const email = modal.querySelector('input[name="email"]')?.value;
+      const randevuTipi = modal.querySelector('select[name="randevu_tipi"]')?.value;
+      
+      // Eğer randevu tarihi varsa termin formu olarak kabul et
+      const isTerminForm = randevuTarih && randevuTarih.trim();
+      
+      if (isTerminForm) {
+        // Email varsa termin email butonunu göster
+        if (email && email.trim() && terminEmailBtnDuzenle) {
+          terminEmailBtnDuzenle.classList.remove('d-none');
+        } else if (terminEmailBtnDuzenle) {
+          terminEmailBtnDuzenle.classList.add('d-none');
+        }
+      } else {
+        // Normal form ise termin email butonunu gizle
+        if (terminEmailBtnDuzenle) {
+          terminEmailBtnDuzenle.classList.add('d-none');
+        }
+      }
+    }
+    else { 
+      nextBtn?.classList.remove('d-none'); 
+      submitBtn?.classList.add('d-none'); 
+    }
   }
 
   function validateStep(s){
@@ -405,6 +444,98 @@
 
   nextBtn?.addEventListener('click', ()=>{ if(!validateStep(currentStep)) return; if(currentStep<totalSteps) setStep(currentStep+1); });
   prevBtn?.addEventListener('click', ()=>{ if(currentStep>1) setStep(currentStep-1); });
+
+  // Termin email butonu - form ID'si ile e-posta gönder
+  const terminEmailBtnDuzenle = document.getElementById('btn-termin-email-duzenle');
+  if (terminEmailBtnDuzenle) {
+    terminEmailBtnDuzenle.addEventListener('click', async function() {
+      const formId = form?.getAttribute('data-endpoint')?.match(/\/(\d+)\/?$/)?.[1];
+      if (!formId) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Fehler!',
+            text: 'Form-ID konnte nicht gefunden werden.',
+          });
+        } else {
+          alert('Form-ID konnte nicht gefunden werden.');
+        }
+        return;
+      }
+
+      // Butonu disable et ve loading göster
+      const originalText = terminEmailBtnDuzenle.innerHTML;
+      terminEmailBtnDuzenle.disabled = true;
+      terminEmailBtnDuzenle.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Wird gesendet...';
+
+      try {
+        const response = await fetch(`/ajax/termin-email/${formId}/`, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': CSRF,
+          },
+        });
+
+        const data = await response.json();
+        
+        if (data.ok) {
+          // Başarı mesajı
+          terminEmailBtnDuzenle.classList.remove('btn-info');
+          terminEmailBtnDuzenle.classList.add('btn-success');
+          terminEmailBtnDuzenle.innerHTML = '<i class="ki-duotone ki-check fs-4 me-1"></i>Gönderildi!';
+          
+          // 3 saniye sonra normal haline dön
+          setTimeout(() => {
+            terminEmailBtnDuzenle.classList.remove('btn-success');
+            terminEmailBtnDuzenle.classList.add('btn-info');
+            terminEmailBtnDuzenle.innerHTML = originalText;
+            terminEmailBtnDuzenle.disabled = false;
+          }, 3000);
+          
+          // Başarı bildirimi
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Erfolg!',
+              text: 'Termin-Bestätigungs-E-Mail wurde erfolgreich gesendet.',
+              timer: 3000,
+              showConfirmButton: false
+            });
+          }
+        } else {
+          throw new Error(data.error || 'E-Mail konnte nicht gesendet werden.');
+        }
+      } catch (error) {
+        console.error('Termin email gönderme hatası:', error);
+        
+        // Hata durumu
+        terminEmailBtnDuzenle.classList.remove('btn-info');
+        terminEmailBtnDuzenle.classList.add('btn-danger');
+        terminEmailBtnDuzenle.innerHTML = '<i class="ki-duotone ki-cross fs-4 me-1"></i>Fehler!';
+        
+        // 3 saniye sonra normal haline dön
+        setTimeout(() => {
+          terminEmailBtnDuzenle.classList.remove('btn-danger');
+          terminEmailBtnDuzenle.classList.add('btn-info');
+          terminEmailBtnDuzenle.innerHTML = originalText;
+          terminEmailBtnDuzenle.disabled = false;
+        }, 3000);
+        
+        // Hata bildirimi
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Fehler!',
+            text: error.message || 'E-Mail konnte nicht gesendet werden.',
+          });
+        } else {
+          alert('Fehler beim Senden der E-Mail: ' + (error.message || 'Unbekannter Fehler'));
+        }
+      }
+    });
+  }
+
 
   // -------- Helpers
   function toLocalInput(dtISO){
@@ -653,13 +784,25 @@
     const target = e.target;
     const modal = target.closest('.modal');
     const ozet  = document.getElementById('ozet_alani_duzenle');
-    if (ozet && modal && modal.contains(target)) buildSummaryDuzenle();
+    if (ozet && modal && modal.contains(target)) {
+      buildSummaryDuzenle();
+      // Termin butonlarının görünürlüğünü yeniden kontrol et
+      if (currentStep === totalSteps) {
+        setStep(currentStep);
+      }
+    }
   });
   document.addEventListener('input', (e) => {
     const target = e.target;
     const modal = target.closest('.modal');
     const ozet  = document.getElementById('ozet_alani_duzenle');
-    if (ozet && modal && modal.contains(target)) buildSummaryDuzenle();
+    if (ozet && modal && modal.contains(target)) {
+      buildSummaryDuzenle();
+      // Termin butonlarının görünürlüğünü yeniden kontrol et
+      if (currentStep === totalSteps) {
+        setStep(currentStep);
+      }
+    }
   });
 
   // Modal açıldığında ilk dolum (Bootstrap)
@@ -1294,10 +1437,15 @@ sigortaSelect.addEventListener('change', updatePickerBtnState);
       const email=(mailInput?.value||'').trim();
       if(!email){ showErr('Bitte geben Sie eine E-Mail-Adresse ein.'); return; }
       try{
+        // Müşteri adı ve soyadını al
+        const musteri_isim = $('#musteri_isim_duzenle')?.value || '';
+        const musteri_soyisim = $('#musteri_soyisim_duzenle')?.value || '';
+        const customer_name = `${musteri_isim} ${musteri_soyisim}`.trim();
+        
         const r = await fetch('/ajax/otp/send/email/',{
           method:'POST',
           headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':CSRF},
-          body: JSON.stringify({email})
+          body: JSON.stringify({email, customer_name})
         });
         const txt=await r.text(); let d=null; try{d=JSON.parse(txt)}catch(_){}
         if(r.ok && (d?.ok===true || txt==='')){ mailWrap?.classList.remove('d-none'); showOk('Bestätigungscode wurde gesendet.'); }

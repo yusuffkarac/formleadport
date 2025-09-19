@@ -8,6 +8,12 @@
   .bg-secondary-subtle { background: var(--bs-secondary-bg-subtle, #f1f1f4); }
 </style>
 <style>
+   #email_onay_editor{
+     height: 30rem;
+   }
+   #termin_onay_editor{
+     height: 30rem;
+   }
   /* CKEditor içeriği kartla uyumlu gözüksün */
   .ck-editor-wrap .ck-content {
     min-height: 160px;
@@ -328,12 +334,301 @@
                 <div class="row mb-0">
                   <label class="col-lg-4 col-form-label fw-semibold fs-6">Bestätigungstext</label>
                   <div class="col-lg-8 fv-row fv-plugins-icon-container">
-                    <textarea id="email_onay_editor" name="email_onay_yazisi" rows="4"
+                    <!-- Variable Buttons -->
+                    <div class="mb-3">
+                      <span class="text-muted small me-3 d-block mb-2">Verfügbare Variablen (klicken oder per Drag & Drop einfügen):</span>
+                      
+                      <!-- Doğrulama Kodu -->
+                      <div class="btn btn-sm btn-light-primary me-2 mb-2 email-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{code}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{code}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-code fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Code
+                      </div>
+                      
+                      <!-- Firma İsmi -->
+                      <div class="btn btn-sm btn-light-success me-2 mb-2 email-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_name}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{firma_name}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-office-bag fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Firma
+                      </div>
+                      
+                      <!-- Firma Logosu -->
+                      <div class="btn btn-sm btn-light-info me-2 mb-2 email-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_logo}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{firma_logo}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-picture fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Logo
+                      </div>
+                      
+                      <!-- Firma Telefonu -->
+                      <div class="btn btn-sm btn-light-warning me-2 mb-2 email-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_phone}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{firma_phone}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-phone fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Telefon
+                      </div>
+                      
+                      <!-- Firma Adresi -->
+                      <div class="btn btn-sm btn-light-danger me-2 mb-2 email-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_address}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{firma_address}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-geolocation fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Adresse
+                      </div>
+                      
+                      <!-- Müşteri İsmi -->
+                      <div class="btn btn-sm btn-light-dark me-2 mb-2 email-variable d-none" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{customer_name}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertEmailVariable('{% verbatim %}{{customer_name}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-profile-user fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Kunde
+                      </div>
+                      
+                    </div>
+                    
+                    <!-- Text Formatting -->
+                    <div class="mb-3">
+                      <span class="text-muted small d-block mb-2">Text formatieren (Text auswählen und Button klicken):</span>
+                      <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-light-primary email-format-btn" 
+                                data-format="bold" title="Macht den ausgewählten Text fett">
+                          <strong>Fett</strong>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-primary email-format-btn" 
+                                data-format="italic" title="Macht den ausgewählten Text kursiv">
+                          <em>Kursiv</em>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-primary email-format-btn" 
+                                data-format="underline" title="Unterstreicht den ausgewählten Text">
+                          <u>Unterstrichen</u>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-success email-format-btn" 
+                                data-format="h1" title="Macht eine große Überschrift">
+                          Große Überschrift
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-success email-format-btn" 
+                                data-format="h2" title="Macht eine mittlere Überschrift">
+                          Mittlere Überschrift
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-warning email-format-btn" 
+                                data-format="center" title="Zentriert den Text">
+                          Zentrieren
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-danger email-format-btn" 
+                                data-format="color" title="Ändert die Textfarbe">
+                          Farbe ändern
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Preview Button -->
+                    <div class="mb-3">
+                      <button type="button" id="email_preview_btn" class="btn btn-sm btn-light-info">
+                        <i class="ki-duotone ki-eye fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                          <span class="path3"></span>
+                        </i>
+                        E-Mail Vorschau
+                      </button>
+                    </div>
+                    
+                    <textarea id="email_onay_editor" name="email_onay_yazisi" rows="6"
                       class="form-control form-control-lg form-control-solid"
                       placeholder="Text für Bestätigungs-E-Mail ...">{% if firma and firma.email_onay_yazisi %}{{ firma.email_onay_yazisi }}{% endif %}</textarea>
-                    <div class="form-text">Dieser Text wird in Bestätigungs-E-Mails angezeigt.</div>
+                   
                   </div>
                 </div>
+
+                <!-- Email Preview Modal -->
+                <div class="modal fade" id="emailPreviewModal" tabindex="-1" aria-labelledby="emailPreviewModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="emailPreviewModalLabel">
+                          <i class="ki-duotone ki-sms fs-2 me-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                          </i>
+                          E-Mail Vorschau
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="alert alert-info d-flex align-items-center mb-4">
+                          <i class="ki-duotone ki-information-5 fs-2 me-3">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                          </i>
+                          <div>
+                            <strong>Dies ist eine Vorschau.</strong><br>
+                            Bei der tatsächlichen E-Mail-Versendung werden die Variablen automatisch ausgefüllt.
+                          </div>
+                        </div>
+                        
+                        <!-- Email Preview Container -->
+                        <div class="card">
+                          <div class="card-header bg-light">
+                            <div class="row align-items-center">
+                              <div class="col">
+                                <strong>Von:</strong> {% if firma and firma.email_host_user %}{{ firma.email_host_user }}{% else %}noreply@leadport.de{% endif %}
+                              </div>
+                            </div>
+                            <div class="row mt-2">
+                              <div class="col">
+                                <strong>An:</strong> mustafa.mueller@example.com
+                              </div>
+                            </div>
+                            <div class="row mt-2">
+                              <div class="col">
+                                <strong>Betreff:</strong> Ihr E-Mail-Bestätigungscode
+                              </div>
+                            </div>
+                          </div>
+                          <div class="card-body" id="emailPreviewContent" style="font-family: Arial, sans-serif; line-height: 1.6; background: white;">
+                            <!-- Preview content will be inserted here -->
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Color Picker Modal -->
+                <div class="modal fade" id="colorPickerModal" tabindex="-1" aria-labelledby="colorPickerModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="colorPickerModalLabel">
+                          <i class="ki-duotone ki-color-swatch fs-2 me-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                          </i>
+                          Farbe wählen
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label class="form-label">Ausgewählter Text: <strong id="selectedTextPreview"></strong></label>
+                        </div>
+                        
+                        <!-- Color Palette -->
+                        <div class="mb-4">
+                          <label class="form-label mb-3">Vordefinierte Farben:</label>
+                          <div class="d-flex flex-wrap gap-2" id="colorPalette">
+                            <div class="color-option" data-color="#000000" style="background: #000000;" title="Schwarz"></div>
+                            <div class="color-option" data-color="#dc3545" style="background: #dc3545;" title="Rot"></div>
+                            <div class="color-option" data-color="#198754" style="background: #198754;" title="Grün"></div>
+                            <div class="color-option" data-color="#0d6efd" style="background: #0d6efd;" title="Blau"></div>
+                            <div class="color-option" data-color="#fd7e14" style="background: #fd7e14;" title="Orange"></div>
+                            <div class="color-option" data-color="#6f42c1" style="background: #6f42c1;" title="Lila"></div>
+                            <div class="color-option" data-color="#d63384" style="background: #d63384;" title="Rosa"></div>
+                            <div class="color-option" data-color="#20c997" style="background: #20c997;" title="Türkis"></div>
+                            <div class="color-option" data-color="#ffc107" style="background: #ffc107;" title="Gelb"></div>
+                            <div class="color-option" data-color="#6c757d" style="background: #6c757d;" title="Grau"></div>
+                            <div class="color-option" data-color="#e74c3c" style="background: #e74c3c;" title="Hellrot"></div>
+                            <div class="color-option" data-color="#3498db" style="background: #3498db;" title="Hellblau"></div>
+                            <div class="color-option" data-color="#2ecc71" style="background: #2ecc71;" title="Hellgrün"></div>
+                            <div class="color-option" data-color="#f39c12" style="background: #f39c12;" title="Gold"></div>
+                            <div class="color-option" data-color="#9b59b6" style="background: #9b59b6;" title="Helllila"></div>
+                          </div>
+                        </div>
+                        
+                        <!-- Custom Color Input -->
+                        <div class="mb-3">
+                          <label class="form-label">Oder benutzerdefinierte Farbe:</label>
+                          <div class="d-flex gap-2 align-items-center">
+                            <input type="color" id="customColorInput" class="form-control form-control-color" value="#0d6efd" style="width: 60px;">
+                            <input type="text" id="customColorText" class="form-control" placeholder="#0d6efd" value="#0d6efd">
+                          </div>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div class="alert alert-light">
+                          <strong>Vorschau:</strong> 
+                          <span id="colorPreview" style="color: #0d6efd;">Der ausgewählte Text wird in dieser Farbe angezeigt</span>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                        <button type="button" id="applyColorBtn" class="btn btn-primary">Farbe anwenden</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <style>
+                  .color-option {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    border: 3px solid transparent;
+                    transition: all 0.2s;
+                    position: relative;
+                  }
+                  .color-option:hover {
+                    transform: scale(1.1);
+                    border-color: #dee2e6;
+                  }
+                  .color-option.selected {
+                    border-color: #0d6efd;
+                    transform: scale(1.1);
+                  }
+                  .color-option.selected::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+                  }
+                </style>
 
               </div>
               <div class="card-footer d-flex justify-content-end py-6 px-9">
@@ -344,6 +639,223 @@
           </div>
         </div>
         <!--end::E-Mail-Benachrichtigungen-->
+        
+        <!--begin::Termin-Bestätigung-->
+        <div class="card mb-5 mb-xl-10">
+          <div class="card-header border-0 cursor-pointer" role="button"
+              data-bs-toggle="collapse" data-bs-target="#kt_termin_details"
+              aria-expanded="true" aria-controls="kt_termin_details">
+            <div class="card-title m-0">
+              <h3 class="fw-bold m-0">Termin Bestätigung</h3>
+            </div>
+          </div>
+
+          <div id="kt_termin_details" class="collapse show">
+            <form id="termin_form" class="form fv-plugins-bootstrap5 fv-plugins-framework" method="post" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="termin">
+              <div class="card-body border-top p-9">
+
+                <div class="row mb-0">
+                  <label class="col-lg-4 col-form-label fw-semibold fs-6">Termin Bestätigungstext</label>
+                  <div class="col-lg-8 fv-row fv-plugins-icon-container">
+                    <!-- Termin Variable Buttons -->
+                    <div class="mb-3">
+                      <span class="text-muted small me-3 d-block mb-2">Verfügbare Variablen (klicken oder per Drag & Drop einfügen):</span>
+                      
+                      <!-- Kunde Name -->
+                      <div class="btn btn-sm btn-light-success me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{kunde_name}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{kunde_name}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-profile-user fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Kunde Name
+                      </div>
+                      
+                      <!-- Datum -->
+                      <div class="btn btn-sm btn-light-primary me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{termin_datum}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{termin_datum}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-calendar fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Datum
+                      </div>
+                      
+                      <!-- Uhrzeit -->
+                      <div class="btn btn-sm btn-light-info me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{termin_uhrzeit}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{termin_uhrzeit}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-time fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Uhrzeit
+                      </div>
+                      
+                      <!-- Terminart -->
+                      <div class="btn btn-sm btn-light-warning me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{terminart}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{terminart}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-devices fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                          <span class="path3"></span>
+                          <span class="path4"></span>
+                          <span class="path5"></span>
+                        </i>
+                        Terminart
+                      </div>
+                      
+                      <!-- Berater Name -->
+                      <div class="btn btn-sm btn-light-danger me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{berater_name}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{berater_name}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-user-tick fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                          <span class="path3"></span>
+                        </i>
+                        Berater
+                      </div>
+                      
+                      <!-- Berater Position -->
+                      <div class="btn btn-sm btn-light-dark me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{berater_position}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{berater_position}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-briefcase fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Position
+                      </div>
+                      
+                      <!-- Firma Name -->
+                      <div class="btn btn-sm btn-light-success me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_name}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{firma_name}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-office-bag fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Firma
+                      </div>
+                      
+                      <!-- Firma Telefon -->
+                      <div class="btn btn-sm btn-light-warning me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_phone}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{firma_phone}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-phone fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Telefon
+                      </div>
+                      
+                      <!-- Firma Logo -->
+                      <div class="btn btn-sm btn-light-info me-2 mb-2 termin-variable" 
+                           draggable="true" 
+                           data-variable="{% verbatim %}{{firma_logo}}{% endverbatim %}"
+                           style="cursor: pointer; user-select: none;"
+                           title="Klicken oder per Drag & Drop einfügen"
+                           onclick="insertTerminVariable('{% verbatim %}{{firma_logo}}{% endverbatim %}')">
+                        <i class="ki-duotone ki-picture fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                        </i>
+                        Logo
+                      </div>
+                      
+                    </div>
+                    
+                    <!-- Text Formatting for Termin -->
+                    <div class="mb-3">
+                      <span class="text-muted small d-block mb-2">Text formatieren (Text auswählen und Button klicken):</span>
+                      <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-light-primary termin-format-btn" 
+                                data-format="bold" title="Macht den ausgewählten Text fett">
+                          <strong>Fett</strong>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-primary termin-format-btn" 
+                                data-format="italic" title="Macht den ausgewählten Text kursiv">
+                          <em>Kursiv</em>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-primary termin-format-btn" 
+                                data-format="underline" title="Unterstreicht den ausgewählten Text">
+                          <u>Unterstrichen</u>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-success termin-format-btn" 
+                                data-format="h1" title="Macht eine große Überschrift">
+                          Große Überschrift
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-success termin-format-btn" 
+                                data-format="h2" title="Macht eine mittlere Überschrift">
+                          Mittlere Überschrift
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-warning termin-format-btn" 
+                                data-format="center" title="Zentriert den Text">
+                          Zentrieren
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light-danger termin-format-btn" 
+                                data-format="color" title="Ändert die Textfarbe">
+                          Farbe ändern
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Preview Button for Termin -->
+                    <div class="mb-3">
+                      <button type="button" id="termin_preview_btn" class="btn btn-sm btn-light-info">
+                        <i class="ki-duotone ki-eye fs-6 me-1">
+                          <span class="path1"></span>
+                          <span class="path2"></span>
+                          <span class="path3"></span>
+                        </i>
+                        Termin E-Mail Vorschau
+                      </button>
+                    </div>
+                    
+                    <textarea id="termin_onay_editor" name="termin_onay_yazisi" rows="8"
+                      class="form-control form-control-lg form-control-solid"
+                      placeholder="Text für Termin-Bestätigungs-E-Mail ...">{% if firma and firma.termin_onay_yazisi %}{{ firma.termin_onay_yazisi }}{% endif %}</textarea>
+                </div>
+
+              </div>
+              <div class="card-footer d-flex justify-content-end py-6 px-9">
+                <a href="{% url 'firma_duzenle' %}" class="btn btn-light btn-active-light-primary me-2">Verwerfen</a>
+                <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!--end::Termin-Bestätigung-->
         {% endif %}
 
         {% if request.user.is_superuser or request.user.rol == 'Admin' %}
@@ -991,6 +1503,672 @@ document.addEventListener("DOMContentLoaded", function () {
   relabel();
 })();
 </script>
+
+<!-- E-Mail Editor Script (Herkes için) -->
+<script>
+/* =================== E-Mail (Bestätigungstext) DRAG & DROP ENTEGRASYONU =================== */
+(function(){
+  const emailForm    = document.getElementById('email_form');
+  const emailEditorEl= document.getElementById('email_onay_editor');
+  
+  if (!emailForm || !emailEditorEl) {
+    return;
+  }
+
+  // Global function to insert variables into email editor
+  window.insertEmailVariable = function(variable) {
+    if (!variable || variable.length === 0) {
+      alert('Hata: Variable boş geldi!');
+      return;
+    }
+    
+    try {
+      // Textarea için basit ekleme
+      const currentValue = emailEditorEl.value;
+      const cursorPos = emailEditorEl.selectionStart || 0;
+      
+      const newValue = currentValue.substring(0, cursorPos) + variable + currentValue.substring(cursorPos);
+      emailEditorEl.value = newValue;
+      
+      emailEditorEl.focus();
+      emailEditorEl.setSelectionRange(cursorPos + variable.length, cursorPos + variable.length);
+    } catch (error) {
+      console.error('insertEmailVariable hatası:', error);
+    }
+  };
+
+  // Text formatting functions
+  window.formatEmailText = function(format) {
+    try {
+      const textarea = emailEditorEl;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      
+      if (selectedText.length === 0) {
+        alert('Bitte wählen Sie zuerst Text aus!\n\nSo geht\'s:\n1. Text mit der Maus auswählen\n2. Auf Format-Button klicken');
+        return;
+      }
+      
+      let formattedText = selectedText;
+      
+      switch(format) {
+        case 'bold':
+          formattedText = `<strong>${selectedText}</strong>`;
+          break;
+        case 'italic':
+          formattedText = `<em>${selectedText}</em>`;
+          break;
+        case 'underline':
+          formattedText = `<u>${selectedText}</u>`;
+          break;
+        case 'h1':
+          formattedText = `<h1>${selectedText}</h1>`;
+          break;
+        case 'h2':
+          formattedText = `<h2>${selectedText}</h2>`;
+          break;
+        case 'center':
+          formattedText = `<div style="text-align: center;">${selectedText}</div>`;
+          break;
+        case 'color':
+          showColorPicker(selectedText, start, end);
+          return; // Don't continue with normal formatting
+          break;
+        default:
+          return;
+      }
+      
+      // Replace selected text with formatted text
+      const newValue = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+      textarea.value = newValue;
+      
+      // Set cursor position after formatted text
+      textarea.focus();
+      textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+      
+    } catch (error) {
+      console.error('formatEmailText hatası:', error);
+    }
+  };
+
+  // Drag & Drop functionality
+  function setupDragAndDrop() {
+    console.log('🔧 setupDragAndDrop başladı');
+    const emailVariables = document.querySelectorAll('.email-variable');
+    console.log('📋 Bulunan email-variable elementleri:', emailVariables.length, emailVariables);
+    
+    if (emailVariables.length === 0) {
+      console.error('❌ Hiç .email-variable elementi bulunamadı!');
+      return;
+    }
+    
+    emailVariables.forEach(function(variable, index) {
+      console.log(`📝 Element ${index + 1}:`, variable, 'data-variable:', variable.getAttribute('data-variable'));
+      
+      // Drag start
+      variable.addEventListener('dragstart', function(e) {
+        console.log('🚀 Drag başladı, element:', this);
+        const variableText = this.getAttribute('data-variable');
+        console.log('📦 Sürüklenen değişken:', variableText);
+        e.dataTransfer.setData('text/plain', variableText);
+        e.dataTransfer.effectAllowed = 'copy';
+        this.style.opacity = '0.5';
+        this.style.cursor = 'grabbing';
+      });
+
+      // Drag end
+      variable.addEventListener('dragend', function(e) {
+        console.log('🏁 Drag bitti');
+        this.style.opacity = '1';
+        this.style.cursor = 'grab';
+      });
+    });
+
+    // Make textarea droppable
+    emailEditorEl.addEventListener('dragover', function(e) {
+      console.log('📍 Dragover event');
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.style.borderColor = '#1976d2';
+      this.style.backgroundColor = '#f8f9ff';
+    });
+
+    emailEditorEl.addEventListener('dragleave', function(e) {
+      console.log('📤 Dragleave event');
+      this.style.borderColor = '';
+      this.style.backgroundColor = '';
+    });
+
+    emailEditorEl.addEventListener('drop', function(e) {
+      console.log('🎯 Drop event tetiklendi!');
+      e.preventDefault();
+      const variable = e.dataTransfer.getData('text/plain');
+      console.log('📦 Alınan data:', variable);
+        
+        try {
+          const textarea = this;
+          
+          // Mouse koordinatlarından karakter pozisyonu hesapla
+          const rect = textarea.getBoundingClientRect();
+          const x = e.clientX - rect.left - parseInt(getComputedStyle(textarea).paddingLeft);
+          const y = e.clientY - rect.top - parseInt(getComputedStyle(textarea).paddingTop);
+          
+          // Font ve satır bilgilerini al
+          const style = getComputedStyle(textarea);
+          const fontSize = parseInt(style.fontSize);
+          const lineHeight = parseInt(style.lineHeight) || fontSize * 1.2;
+          
+          // Yaklaşık satır numarasını hesapla
+          const lineNumber = Math.max(0, Math.floor((y + textarea.scrollTop) / lineHeight));
+          
+          // Metni satırlara böl
+          const lines = textarea.value.split('\n');
+          let targetPosition = 0;
+          
+          if (lineNumber >= lines.length) {
+            // Son satırın sonuna git
+            targetPosition = textarea.value.length;
+          } else {
+            // Hedef satıra kadar olan karakterleri say
+            for (let i = 0; i < lineNumber; i++) {
+              targetPosition += lines[i].length + 1; // +1 for \n
+            }
+            
+            // Satır içindeki yaklaşık pozisyonu hesapla
+            const avgCharWidth = fontSize * 0.6; // Ortalama karakter genişliği
+            const charInLine = Math.max(0, Math.floor((x + textarea.scrollLeft) / avgCharWidth));
+            const maxCharInLine = lines[lineNumber] ? lines[lineNumber].length : 0;
+            
+            targetPosition += Math.min(charInLine, maxCharInLine);
+          }
+          
+          // Değişkeni hesaplanan pozisyona ekle
+          const currentValue = textarea.value;
+          const newValue = currentValue.substring(0, targetPosition) + variable + currentValue.substring(targetPosition);
+          textarea.value = newValue;
+          
+          // Cursor'u eklenen değişkenin sonuna getir
+          textarea.focus();
+          textarea.setSelectionRange(targetPosition + variable.length, targetPosition + variable.length);
+          console.log('✅ Drop işlemi başarılı! Pozisyon:', targetPosition);
+        } catch (error) {
+          console.error('❌ Drop hatası:', error);
+          // Fallback: cursor pozisyonuna ekle
+          const currentValue = this.value;
+          const cursorPos = this.selectionStart || 0;
+          this.value = currentValue.substring(0, cursorPos) + variable + currentValue.substring(cursorPos);
+          this.focus();
+          this.setSelectionRange(cursorPos + variable.length, cursorPos + variable.length);
+          console.log('✅ Fallback drop işlemi başarılı! Cursor pozisyon:', cursorPos);
+        }
+        
+        this.style.borderColor = '';
+        this.style.backgroundColor = '';
+      });
+  }
+
+  // Initialize drag & drop
+  setupDragAndDrop();
+  
+  // Setup formatting toolbar
+  function setupFormatting() {
+    const formatButtons = document.querySelectorAll('.email-format-btn');
+    formatButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const format = this.getAttribute('data-format');
+        formatEmailText(format);
+      });
+    });
+  }
+  
+  setupFormatting();
+  
+  // Email Preview functionality
+  function setupEmailPreview() {
+    const previewBtn = document.getElementById('email_preview_btn');
+    const previewModal = document.getElementById('emailPreviewModal');
+    const previewContent = document.getElementById('emailPreviewContent');
+    
+    if (!previewBtn || !previewModal || !previewContent) return;
+    
+    previewBtn.addEventListener('click', function() {
+      // Get current email text
+      let emailText = emailEditorEl.value.trim();
+      
+      if (!emailText) {
+        emailText = 'E-Mail-Inhalt ist leer...';
+      }
+      
+      // Sample data for preview
+      const sampleData = {
+        '{% verbatim %}{{code}}{% endverbatim %}': '<span style="background: #e3f2fd; padding: 8px 16px; border-radius: 4px; font-family: monospace; font-size: 18px; font-weight: bold; color: #1976d2; border: 2px dashed #1976d2;">562797</span>',
+        '{% verbatim %}{{firma_name}}{% endverbatim %}': '{% if firma and firma.isim %}{{ firma.isim }}{% else %}Dogu Merkur{% endif %}',
+        '{% verbatim %}{{firma_phone}}{% endverbatim %}': '{% if firma and firma.telefon %}{{ firma.telefon }}{% else %}+49 123 456 7890{% endif %}',
+        '{% verbatim %}{{firma_address}}{% endverbatim %}': '{% if firma and firma.adres %}{{ firma.adres }}{% else %}Musterstraße 123, 12345 Berlin{% endif %}',
+        '{% verbatim %}{{customer_name}}{% endverbatim %}': 'Mustafa Müller',
+        '{% verbatim %}{{firma_logo}}{% endverbatim %}': '{% if firma and firma.logo %}<img src="{{ firma.logo.url }}" alt="Logo" style="max-width:150px;height:auto;display:block;margin:10px 0;">{% else %}<div style="background: #f5f5f5; border: 2px dashed #ccc; padding: 20px; text-align: center; color: #666; border-radius: 4px; margin: 10px 0;">Logo burada görünecek</div>{% endif %}'
+      };
+      
+      // Replace variables with sample data
+      let previewText = emailText;
+      for (const [variable, value] of Object.entries(sampleData)) {
+        previewText = previewText.replace(new RegExp(variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+      }
+      
+      // Convert newlines to <br> for HTML display
+      previewText = previewText.replace(/\n/g, '<br>');
+      
+      // Set preview content
+      previewContent.innerHTML = previewText;
+      
+      // Show modal
+      const modal = new bootstrap.Modal(previewModal);
+      modal.show();
+    });
+  }
+  
+  setupEmailPreview();
+  
+  // Color picker functionality
+  function showColorPicker(selectedText, start, end) {
+    const colorModal = document.getElementById('colorPickerModal');
+    const selectedTextPreview = document.getElementById('selectedTextPreview');
+    const colorPreview = document.getElementById('colorPreview');
+    const applyColorBtn = document.getElementById('applyColorBtn');
+    const customColorInput = document.getElementById('customColorInput');
+    const customColorText = document.getElementById('customColorText');
+    
+    if (!colorModal) return;
+    
+    // Set selected text preview
+    selectedTextPreview.textContent = selectedText;
+    colorPreview.textContent = selectedText;
+    
+    let selectedColor = '#0d6efd';
+    
+    // Color palette click handlers
+    document.querySelectorAll('.color-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // Remove previous selection
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+        // Add selection to clicked option
+        this.classList.add('selected');
+        
+        selectedColor = this.getAttribute('data-color');
+        colorPreview.style.color = selectedColor;
+        customColorInput.value = selectedColor;
+        customColorText.value = selectedColor;
+      });
+    });
+    
+    // Custom color input handlers
+    customColorInput.addEventListener('input', function() {
+      selectedColor = this.value;
+      colorPreview.style.color = selectedColor;
+      customColorText.value = selectedColor;
+      // Remove palette selections
+      document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+    });
+    
+    customColorText.addEventListener('input', function() {
+      const color = this.value;
+      if (/^#[0-9A-F]{6}$/i.test(color)) {
+        selectedColor = color;
+        colorPreview.style.color = selectedColor;
+        customColorInput.value = selectedColor;
+        // Remove palette selections
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+      }
+    });
+    
+    // Apply color button
+    applyColorBtn.onclick = function() {
+      const formattedText = `<span style="color: ${selectedColor};">${selectedText}</span>`;
+      
+      // Replace selected text with formatted text
+      const newValue = emailEditorEl.value.substring(0, start) + formattedText + emailEditorEl.value.substring(end);
+      emailEditorEl.value = newValue;
+      
+      // Set cursor position after formatted text
+      emailEditorEl.focus();
+      emailEditorEl.setSelectionRange(start + formattedText.length, start + formattedText.length);
+      
+      // Close modal
+      const modal = bootstrap.Modal.getInstance(colorModal);
+      modal.hide();
+    };
+    
+    // Show modal
+    const modal = new bootstrap.Modal(colorModal);
+    modal.show();
+  }
+
+  emailForm.addEventListener('submit', function(e){
+    // Form submit - no special handling needed
+  });
+})();
+
+/* =================== TERMIN (Termin Bestätigung) DRAG & DROP ENTEGRASYONU =================== */
+(function(){
+  const terminForm    = document.getElementById('termin_form');
+  const terminEditorEl= document.getElementById('termin_onay_editor');
+  
+  if (!terminForm || !terminEditorEl) {
+    return;
+  }
+
+  // Global function to insert variables into termin editor
+  window.insertTerminVariable = function(variable) {
+    if (!variable || variable.length === 0) {
+      alert('Hata: Variable boş geldi!');
+      return;
+    }
+    
+    try {
+      // Textarea için basit ekleme
+      const currentValue = terminEditorEl.value;
+      const cursorPos = terminEditorEl.selectionStart || 0;
+      
+      const newValue = currentValue.substring(0, cursorPos) + variable + currentValue.substring(cursorPos);
+      terminEditorEl.value = newValue;
+      
+      terminEditorEl.focus();
+      terminEditorEl.setSelectionRange(cursorPos + variable.length, cursorPos + variable.length);
+    } catch (error) {
+      console.error('insertTerminVariable hatası:', error);
+    }
+  };
+
+  // Text formatting functions for termin
+  window.formatTerminText = function(format) {
+    try {
+      const textarea = terminEditorEl;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      
+      if (selectedText.length === 0) {
+        alert('Bitte wählen Sie zuerst Text aus!\n\nSo geht\'s:\n1. Text mit der Maus auswählen\n2. Auf Format-Button klicken');
+        return;
+      }
+      
+      let formattedText = selectedText;
+      
+      switch(format) {
+        case 'bold':
+          formattedText = `<strong>${selectedText}</strong>`;
+          break;
+        case 'italic':
+          formattedText = `<em>${selectedText}</em>`;
+          break;
+        case 'underline':
+          formattedText = `<u>${selectedText}</u>`;
+          break;
+        case 'h1':
+          formattedText = `<h1>${selectedText}</h1>`;
+          break;
+        case 'h2':
+          formattedText = `<h2>${selectedText}</h2>`;
+          break;
+        case 'center':
+          formattedText = `<div style="text-align: center;">${selectedText}</div>`;
+          break;
+        case 'color':
+          showTerminColorPicker(selectedText, start, end);
+          return; // Don't continue with normal formatting
+          break;
+        default:
+          return;
+      }
+      
+      // Replace selected text with formatted text
+      const newValue = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+      textarea.value = newValue;
+      
+      // Set cursor position after formatted text
+      textarea.focus();
+      textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+      
+    } catch (error) {
+      console.error('formatTerminText hatası:', error);
+    }
+  };
+
+  // Drag & Drop functionality for termin
+  function setupTerminDragAndDrop() {
+    const terminVariables = document.querySelectorAll('.termin-variable');
+    
+    if (terminVariables.length === 0) {
+      return;
+    }
+    
+    terminVariables.forEach(function(variable) {
+      // Drag start
+      variable.addEventListener('dragstart', function(e) {
+        const varText = this.getAttribute('data-variable');
+        e.dataTransfer.setData('text/plain', varText);
+      });
+      
+      // Drag end
+      variable.addEventListener('dragend', function(e) {
+        this.style.backgroundColor = '';
+      });
+    });
+
+    // Drop zone setup
+    terminEditorEl.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.backgroundColor = '#f0f9ff';
+    });
+
+    terminEditorEl.addEventListener('dragleave', function(e) {
+      this.style.backgroundColor = '';
+    });
+
+    terminEditorEl.addEventListener('drop', function(e) {
+      e.preventDefault();
+      const variable = e.dataTransfer.getData('text/plain');
+      this.style.backgroundColor = '';
+      
+      if (!variable) return;
+      
+      try {
+        // Mouse pozisyonuna göre insertion point hesapla
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Tahmini karakter pozisyonu hesapla
+        const computedStyle = window.getComputedStyle(this);
+        const fontSize = parseFloat(computedStyle.fontSize);
+        const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 1.2;
+        
+        const charWidth = fontSize * 0.6; // Tahmini karakter genişliği
+        const lineIndex = Math.floor(y / lineHeight);
+        const charInLine = Math.floor(x / charWidth);
+        
+        // Metin satırlarını al
+        const lines = this.value.split('\n');
+        let targetPosition = 0;
+        
+        for (let i = 0; i < lineIndex && i < lines.length; i++) {
+          targetPosition += lines[i].length + 1; // +1 for \n
+        }
+        
+        if (lineIndex < lines.length) {
+          const maxCharInLine = lines[lineIndex] ? lines[lineIndex].length : 0;
+          targetPosition += Math.min(charInLine, maxCharInLine);
+        }
+        
+        // Değişkeni hesaplanan pozisyona ekle
+        const currentValue = this.value;
+        const newValue = currentValue.substring(0, targetPosition) + variable + currentValue.substring(targetPosition);
+        this.value = newValue;
+        
+        // Cursor'u eklenen değişkenin sonuna getir
+        this.focus();
+        this.setSelectionRange(targetPosition + variable.length, targetPosition + variable.length);
+      } catch (error) {
+        console.error('❌ Drop hatası:', error);
+        // Fallback: cursor pozisyonuna ekle
+        const currentValue = this.value;
+        const cursorPos = this.selectionStart || 0;
+        this.value = currentValue.substring(0, cursorPos) + variable + currentValue.substring(cursorPos);
+        this.focus();
+        this.setSelectionRange(cursorPos + variable.length, cursorPos + variable.length);
+      }
+    });
+  }
+
+  // Setup formatting toolbar for termin
+  function setupTerminFormatting() {
+    const formatButtons = document.querySelectorAll('.termin-format-btn');
+    formatButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const format = this.getAttribute('data-format');
+        formatTerminText(format);
+      });
+    });
+  }
+  
+  // Termin Preview functionality
+  function setupTerminPreview() {
+    const previewBtn = document.getElementById('termin_preview_btn');
+    const previewModal = document.getElementById('emailPreviewModal'); // Reuse email modal
+    const previewContent = document.getElementById('emailPreviewContent');
+    
+    if (!previewBtn || !previewModal || !previewContent) return;
+    
+    previewBtn.addEventListener('click', function() {
+      // Get current termin text
+      let terminText = terminEditorEl.value.trim();
+      
+      if (!terminText) {
+        terminText = 'Termin E-Mail-Inhalt ist leer...';
+      }
+      
+      // Sample data for termin preview
+      const sampleData = {
+        '{% verbatim %}{{kunde_name}}{% endverbatim %}': 'Dogu Akagündüz',
+        '{% verbatim %}{{termin_datum}}{% endverbatim %}': '24.09.2025 Mittwoch',
+        '{% verbatim %}{{termin_uhrzeit}}{% endverbatim %}': '10:00 Uhr',
+        '{% verbatim %}{{terminart}}{% endverbatim %}': 'Video',
+        '{% verbatim %}{{berater_name}}{% endverbatim %}': 'Derya Coskun',
+        '{% verbatim %}{{berater_position}}{% endverbatim %}': 'Vertriebsassistentin',
+        '{% verbatim %}{{firma_name}}{% endverbatim %}': '{% if firma and firma.isim %}{{ firma.isim }}{% else %}Dogu Merkur{% endif %}',
+        '{% verbatim %}{{firma_phone}}{% endverbatim %}': '{% if firma and firma.telefon %}{{ firma.telefon }}{% else %}+49 123 456 7890{% endif %}'
+      };
+      
+      // Replace variables with sample data
+      let previewText = terminText;
+      for (const [variable, value] of Object.entries(sampleData)) {
+        previewText = previewText.replace(new RegExp(variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+      }
+      
+      // Convert newlines to <br> for HTML display
+      previewText = previewText.replace(/\n/g, '<br>');
+      
+      // Update modal title
+      const modalTitle = previewModal.querySelector('.modal-title');
+      modalTitle.innerHTML = `<i class="ki-duotone ki-calendar fs-2 me-2"><span class="path1"></span><span class="path2"></span></i>Termin E-Mail Vorschau`;
+      
+      // Set preview content
+      previewContent.innerHTML = previewText;
+      
+      // Show modal
+      const modal = new bootstrap.Modal(previewModal);
+      modal.show();
+    });
+  }
+
+  // Color picker functionality for termin
+  function showTerminColorPicker(selectedText, start, end) {
+    const colorModal = document.getElementById('colorPickerModal'); // Reuse color modal
+    const selectedTextPreview = document.getElementById('selectedTextPreview');
+    const colorPreview = document.getElementById('colorPreview');
+    const applyColorBtn = document.getElementById('applyColorBtn');
+    const customColorInput = document.getElementById('customColorInput');
+    const customColorText = document.getElementById('customColorText');
+    
+    if (!colorModal) return;
+    
+    // Set selected text preview
+    selectedTextPreview.textContent = selectedText;
+    colorPreview.textContent = selectedText;
+    
+    let selectedColor = '#0d6efd';
+    
+    // Color palette click handlers
+    document.querySelectorAll('.color-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // Remove previous selection
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+        // Add selection to clicked option
+        this.classList.add('selected');
+        
+        selectedColor = this.getAttribute('data-color');
+        colorPreview.style.color = selectedColor;
+        customColorInput.value = selectedColor;
+        customColorText.value = selectedColor;
+      });
+    });
+    
+    // Custom color input handlers
+    customColorInput.addEventListener('input', function() {
+      selectedColor = this.value;
+      colorPreview.style.color = selectedColor;
+      customColorText.value = selectedColor;
+      // Remove palette selections
+      document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+    });
+    
+    customColorText.addEventListener('input', function() {
+      const color = this.value;
+      if (/^#[0-9A-F]{6}$/i.test(color)) {
+        selectedColor = color;
+        colorPreview.style.color = selectedColor;
+        customColorInput.value = selectedColor;
+        // Remove palette selections
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+      }
+    });
+    
+    // Apply color button
+    applyColorBtn.onclick = function() {
+      const formattedText = `<span style="color: ${selectedColor};">${selectedText}</span>`;
+      
+      // Replace selected text with formatted text in TERMIN editor
+      const newValue = terminEditorEl.value.substring(0, start) + formattedText + terminEditorEl.value.substring(end);
+      terminEditorEl.value = newValue;
+      
+      // Set cursor position after formatted text
+      terminEditorEl.focus();
+      terminEditorEl.setSelectionRange(start + formattedText.length, start + formattedText.length);
+      
+      // Close modal
+      const modal = bootstrap.Modal.getInstance(colorModal);
+      modal.hide();
+    };
+    
+    // Show modal
+    const modal = new bootstrap.Modal(colorModal);
+    modal.show();
+  }
+
+  // Initialize termin functionality
+  setupTerminDragAndDrop();
+  setupTerminFormatting();
+  setupTerminPreview();
+
+  terminForm.addEventListener('submit', function(e){
+    // Form submit - no special handling needed
+  });
+})();
+</script>
+
 {% if request.user.is_superuser or request.user.rol == 'Admin' %}
 <!-- CKEditor 5 Classic (CDN) -->
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
@@ -1056,44 +2234,6 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('btn_right2_modal_input').value   = btnR2Modal;
     });
   }
-})();
-
-/* =================== 2) E-Mail (Bestätigungstext) CKEditor ENTEGRASYONU =================== */
-(function(){
-  const emailForm    = document.getElementById('email_form');
-  const emailEditorEl= document.getElementById('email_onay_editor');
-  if (!emailForm || !emailEditorEl || !window.ClassicEditor) return;
-
-  // Footer'daki config'e bire bir uyumlu ayrı bir config
-  const emailEditorConfig = {
-    language: 'de',
-    toolbar: {
-      items: [
-        'undo','redo','|',
-        'heading','|',
-        'bold','italic','underline','link','|',
-        'bulletedList','numberedList','outdent','indent','|',
-        'blockQuote','insertTable','horizontalLine','removeFormat'
-      ]
-    },
-    placeholder: 'Inhalt hier eingeben...',
-    table: { contentToolbar: ['tableColumn','tableRow','mergeTableCells'] }
-  };
-
-  let emailEditor;
-  ClassicEditor.create(emailEditorEl, emailEditorConfig).then(ed => {
-    emailEditor = ed;
-  });
-
-  emailForm.addEventListener('submit', function(e){
-    if (!emailEditor) {
-      e.preventDefault();
-      alert('Editor wird noch geladen. Bitte versuche es erneut.');
-      return;
-    }
-    // CKEditor verisini orijinal textarea'ya geri yaz
-    emailEditorEl.value = emailEditor.getData();
-  });
 })();
 </script>
 {% endif %}
