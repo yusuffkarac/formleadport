@@ -1097,32 +1097,69 @@ def termin_email_gonder(request, form_id):
     """Manuel termin onay emaili gönderme endpoint'i"""
     try:
         # Form'u bul
-        form = MusteriFormModel.objects.get(id=form_id)
-        
+        try:
+            form = MusteriFormModel.objects.get(id=form_id)
+        except MusteriFormModel.DoesNotExist:
+            return JsonResponse({
+                'ok': False,
+                'error': 'Form bulunamadı',
+                'code': 'FORM_NOT_FOUND',
+                'detail': f'form_id={form_id} ile kayıt yok'
+            }, status=404)
+
         # Kullanıcı yetkisi kontrol et (opsiyonel)
         if not request.user.is_authenticated:
-            return JsonResponse({'ok': False, 'error': 'Yetki gerekli'})
-        
+            return JsonResponse({
+                'ok': False,
+                'error': 'Yetki gerekli',
+                'code': 'AUTH_REQUIRED',
+                'detail': 'Kullanıcı oturum açmamış'
+            }, status=401)
+
         # Email adresi var mı kontrol et
         if not form.email:
-            return JsonResponse({'ok': False, 'error': 'Bu formda e-mail adresi bulunmuyor'})
-        
+            return JsonResponse({
+                'ok': False,
+                'error': 'Bu formda e-mail adresi bulunmuyor',
+                'code': 'NO_EMAIL',
+                'detail': f'Form id={form_id} için email alanı boş'
+            }, status=400)
+
         # Termin onay emailini gönder
-        result = _send_termin_confirmation_email(form, request)
-        
+        try:
+            result = _send_termin_confirmation_email(form, request)
+        except Exception as e:
+            print(f"Termin email gönderim fonksiyonunda hata: {e}")
+            return JsonResponse({
+                'ok': False,
+                'error': 'E-posta gönderim fonksiyonunda hata oluştu',
+                'code': 'EMAIL_SEND_EXCEPTION',
+                'detail': str(e)
+            }, status=500)
+
         if result:
             return JsonResponse({
-                'ok': True, 
+                'ok': True,
                 'message': f'Termin onay e-postası {form.email} adresine başarıyla gönderildi'
             })
         else:
-            return JsonResponse({'ok': False, 'error': 'E-posta gönderilemedi'})
-            
-    except MusteriFormModel.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Form bulunamadı'})
+            return JsonResponse({
+                'ok': False,
+                'error': 'E-posta gönderilemedi',
+                'code': 'EMAIL_SEND_FAILED',
+                'detail': f'Email gönderim sonucu: {result}'
+            }, status=500)
+
     except Exception as e:
-        print(f"Manuel termin email gönderme hatası: {e}")
-        return JsonResponse({'ok': False, 'error': f'Hata: {str(e)}'})
+        import traceback
+        tb = traceback.format_exc()
+        print(f"Manuel termin email gönderme hatası: {e}\n{tb}")
+        return JsonResponse({
+            'ok': False,
+            'error': f'Hata: {str(e)}',
+            'code': 'UNEXPECTED_ERROR',
+            'detail': tb
+        }, status=500)
 
 
 # ---------------------------
