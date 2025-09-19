@@ -259,7 +259,7 @@ def _send_otp_email(to_email: str, code: str, customer_name: str = "", request=N
             
             # Absolute URL oluştur
             logo_url = f"{domain}{settings.MEDIA_URL}{firma.logo}"
-            firma_logo_html = f'<img src="{logo_url}" alt="{variables["{{firma_name}}"]} Logo" style="max-width:50px;max-height:50px;width:50px;height:50px;display:block;margin:10px 0;">'
+            firma_logo_html = f'<img src="{logo_url}" alt="{variables["{{firma_name}}"]} Logo" style="max-width:100px;height:auto;display:block;margin:10px 0;">'
         except Exception as e:
             print(f"Logo URL oluşturma hatası: {e}")
             firma_logo_html = variables["{{firma_name}}"]
@@ -849,7 +849,7 @@ def _send_termin_confirmation_email(form, request):
         if firma.logo:
             # Logo URL'ini oluştur
             logo_url = request.build_absolute_uri(firma.logo.url)
-            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 50px; max-height: 50px; width: 50px; height: 50px; display: block; margin: 15px auto;" />'
+            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 100px; height: auto; display: block; margin: 15px auto;" />'
             termin_mesaji = termin_mesaji.replace("{{firma_logo}}", logo_html)
         else:
             # Logo yoksa boş string ile değiştir
@@ -867,7 +867,7 @@ def _send_termin_confirmation_email(form, request):
         # Eski format logo placeholder'ı
         if firma.logo:
             logo_url = request.build_absolute_uri(firma.logo.url)
-            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 50px; max-height: 50px; width: 50px; height: 50px; display: block; margin: 15px auto;" />'
+            logo_html = f'<img src="{logo_url}" alt="{firma.isim} Logo" class="email-logo" style="max-width: 100px; height: auto; display: block; margin: 15px auto;" />'
             termin_mesaji = termin_mesaji.replace("{firma_logo}", logo_html)
         else:
             termin_mesaji = termin_mesaji.replace("{firma_logo}", "")
@@ -914,10 +914,8 @@ def _send_termin_confirmation_email(form, request):
         
         /* Logo specific styles */
         .email-logo {{
-            max-width: 50px !important;
-            max-height: 50px !important;
-            width: 50px !important;
-            height: 50px !important;
+            max-width: 100px !important;
+            height: auto !important;
             display: block !important;
             margin: 15px auto !important;
         }}
