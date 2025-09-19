@@ -2,7 +2,15 @@
 *.pyc
 __pycache__/
 db.sqlite3
+db.sqlite3.backup
 media/
+staticfiles/
+debug.log
+*.log
+*.sock
+
+# Migration dosyaları GİTSİN (migration sorunlarını önlemek için)
+# migrations/ klasörleri ve içindeki .py dosyaları git'e dahil edilecek
 
 # Python
 *.py[cod]
