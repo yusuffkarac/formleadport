@@ -298,14 +298,14 @@
               <!-- inline submit error -->
               <div id="submit_error_duzenle" class="text-danger small mt-4 d-none"></div>
 
-              <div class="d-flex flex-stack pt-10">
-                <div class="me-2">
-                  <button type="button" class="btn btn-lg btn-light-primary me-3" data-stepper-action="previous">Zurück</button>
-                  <button type="button" id="btn-termin-email-duzenle" class="btn btn-lg btn-info me-3 d-none">
+              <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center pt-10">
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-lg btn-light-primary" data-stepper-action="previous">Zurück</button>
+                  <button type="button" id="btn-termin-email-duzenle" class="btn btn-lg btn-info d-none">
                     <i class="ki-duotone ki-send fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Termin E-Mail senden
                   </button>
                 </div>
-                <div>
+                <div class="d-flex flex-wrap gap-2">
                   <button type="submit" class="btn btn-lg btn-primary d-none" data-stepper-action="submit">
                     <span class="indicator-label">Aktualisieren</span>
                     <span class="indicator-progress d-none">Bitte warten...
@@ -1673,5 +1673,32 @@ stepper-item.completed .stepper-check{display:inline-block}
   object-fit: contain;
   object-position: center;
   display: block;
+}
+
+/* Mobil buton düzeni - yan yana küçük */
+@media (max-width: 768px) {
+  .d-flex.flex-wrap.gap-3.justify-content-between {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    justify-content: space-between !important;
+  }
+  
+  .d-flex.flex-wrap.gap-2 {
+    justify-content: flex-start !important;
+    gap: 0.4rem !important;
+  }
+  
+  .d-flex.flex-wrap.gap-2 .btn {
+    font-size: 0.85rem !important;
+    padding: 0.6rem 0.9rem !important;
+    min-width: auto !important;
+    white-space: nowrap !important;
+  }
+  
+  .d-flex.flex-wrap.gap-2 .btn i {
+    font-size: 0.8rem !important;
+    margin-right: 0.3rem !important;
+  }
 }
 </style>

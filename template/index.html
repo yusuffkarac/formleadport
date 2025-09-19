@@ -40,60 +40,7 @@
     width: 100% !important;
   }
   
-  /* Sadece en dıştaki container boşluklarını azalt */
-  .container-xxl {
-    max-width: 85% !important;
-    padding-left: 2.5rem !important;
-    padding-right: 2.5rem !important;
-  }
-  
-  /* Mobilde kenarlardaki boşlukları daha da azalt */
-  @media (max-width: 768px) {
-    .container-xxl {
-      max-width: 95% !important;
-      padding-left: 1rem !important;
-      padding-right: 1rem !important;
-    }
-    
-    /* Kartlar arası boşlukları da azalt */
-    .card {
-      margin-bottom: 1rem !important;
-    }
-    
-    /* İçerik alanındaki padding'i azalt */
-    .card-body {
-      padding: 1rem !important;
-    }
-    
-    /* Toolbar padding'ini azalt */
-    .toolbar {
-      padding: 1rem 0 !important;
-    }
-    
-    #kt_toolbar_container {
-      padding-left: 1rem !important;
-      padding-right: 1rem !important;
-    }
-  }
-  
-  /* Çok küçük ekranlar için daha da sıkıştır */
-  @media (max-width: 576px) {
-    .container-xxl {
-      max-width: 95% !important;
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
-    }
-    
-    .card-body {
-      padding: 0.75rem !important;
-    }
-    
-    #kt_toolbar_container {
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
-    }
-  }
-  
+  /* Dashboard özel stiller - Genel genişlik kuralları artık base.html'de */
   /* DataTable responsive mobil görünümü */
   @media (max-width: 768px) {
     /* Tablo başlıklarını gizle */

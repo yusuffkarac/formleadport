@@ -729,7 +729,7 @@ def _send_termin_confirmation_email(form, request):
     # Müşteri email adresi var mı kontrol et
     if not form.email:
         print("❌ Müşteri email adresi yok, email gönderilmiyor")
-        return
+        return {"success": False, "error": "In diesem Formular ist keine E-Mail-Adresse hinterlegt. Bitte geben Sie zuerst die Kunden-E-Mail-Adresse ein."}
         
     print("✅ Müşteri email adresi mevcut")
         
@@ -739,16 +739,16 @@ def _send_termin_confirmation_email(form, request):
         print(f"Firma bulundu: {firma.isim if firma else 'YOK'}")
         if not firma:
             print("❌ Firma bulunamadı")
-            return
+            return {"success": False, "error": "Firmeninformationen nicht gefunden. Bitte konfigurieren Sie die Firmeneinstellungen im Admin-Panel."}
         if not firma.termin_onay_yazisi:
             print("❌ Firma termin onay yazısı bulunamadı")
             print(f"Termin onay yazısı: '{firma.termin_onay_yazisi}'")
-            return
+            return {"success": False, "error": "Termin-Bestätigungs-E-Mail-Vorlage nicht gefunden. Bitte füllen Sie das Feld 'Termin Bestätigung Yazısı' im Admin-Panel aus."}
         print("✅ Firma termin onay yazısı mevcut")
         print(f"Termin yazısı uzunluğu: {len(firma.termin_onay_yazisi)} karakter")
     except Exception as e:
         print(f"❌ Firma bilgileri alınamadı: {e}")
-        return
+        return {"success": False, "error": f"Firmeninformationen konnten nicht abgerufen werden: {str(e)}"}
     
     # SMTP ayarlarını al
     try:
@@ -756,7 +756,7 @@ def _send_termin_confirmation_email(form, request):
         print(f"SMTP bulundu: {smtp.host if smtp else 'YOK'}")
         if not smtp:
             print("❌ SMTP ayarları bulunamadı")
-            return
+            return {"success": False, "error": "E-Mail-Server-Einstellungen nicht gefunden. Bitte konfigurieren Sie die SMTP-Einstellungen im Admin-Panel."}
         print("✅ SMTP ayarları mevcut")
         print(f"SMTP Host: {smtp.host}")
         print(f"SMTP Port: {smtp.port}")
@@ -765,7 +765,7 @@ def _send_termin_confirmation_email(form, request):
         print(f"SMTP SSL: {smtp.use_ssl}")
     except Exception as e:
         print(f"❌ SMTP ayarları alınamadı: {e}")
-        return
+        return {"success": False, "error": f"E-Mail-Server-Einstellungen konnten nicht abgerufen werden: {str(e)}"}
     
     # Email içeriğini hazırla
     try:
@@ -1085,11 +1085,13 @@ def _send_termin_confirmation_email(form, request):
                 gonderilen_email=form.email,
             )
             
-        return result
+            return {"success": True, "message": f"Termin-Bestätigungs-E-Mail wurde erfolgreich an {form.email} gesendet"}
+        else:
+            return {"success": False, "error": "E-Mail-Versand fehlgeschlagen. Bitte überprüfen Sie die SMTP-Server-Verbindung."}
         
     except Exception as e:
         print(f"Termin email gönderilirken hata: {e}")
-        raise e
+        return {"success": False, "error": f"Fehler beim Senden der E-Mail: {str(e)}"}
 
 
 @require_POST
@@ -1102,53 +1104,58 @@ def termin_email_gonder(request, form_id):
         except MusteriFormModel.DoesNotExist:
             return JsonResponse({
                 'ok': False,
-                'error': 'Form bulunamadı',
+                'error': 'Formular nicht gefunden',
                 'code': 'FORM_NOT_FOUND',
-                'detail': f'form_id={form_id} ile kayıt yok'
+                'detail': f'Kein Datensatz mit form_id={form_id} vorhanden'
             }, status=404)
 
         # Kullanıcı yetkisi kontrol et (opsiyonel)
         if not request.user.is_authenticated:
             return JsonResponse({
                 'ok': False,
-                'error': 'Yetki gerekli',
+                'error': 'Berechtigung erforderlich',
                 'code': 'AUTH_REQUIRED',
-                'detail': 'Kullanıcı oturum açmamış'
+                'detail': 'Benutzer ist nicht angemeldet'
             }, status=401)
 
         # Email adresi var mı kontrol et
         if not form.email:
             return JsonResponse({
                 'ok': False,
-                'error': 'Bu formda e-mail adresi bulunmuyor',
+                'error': 'In diesem Formular ist keine E-Mail-Adresse hinterlegt',
                 'code': 'NO_EMAIL',
-                'detail': f'Form id={form_id} için email alanı boş'
+                'detail': f'E-Mail-Feld für Form ID={form_id} ist leer'
             }, status=400)
 
         # Termin onay emailini gönder
-        try:
-            result = _send_termin_confirmation_email(form, request)
-        except Exception as e:
-            print(f"Termin email gönderim fonksiyonunda hata: {e}")
-            return JsonResponse({
-                'ok': False,
-                'error': 'E-posta gönderim fonksiyonunda hata oluştu',
-                'code': 'EMAIL_SEND_EXCEPTION',
-                'detail': str(e)
-            }, status=500)
-
-        if result:
-            return JsonResponse({
-                'ok': True,
-                'message': f'Termin onay e-postası {form.email} adresine başarıyla gönderildi'
-            })
+        result = _send_termin_confirmation_email(form, request)
+        
+        # Yeni result formatını kontrol et
+        if isinstance(result, dict):
+            if result.get('success'):
+                return JsonResponse({
+                    'ok': True,
+                    'message': result.get('message')
+                })
+            else:
+                return JsonResponse({
+                    'ok': False,
+                    'error': result.get('error'),
+                    'code': 'EMAIL_SEND_FAILED'
+                }, status=400)
         else:
-            return JsonResponse({
-                'ok': False,
-                'error': 'E-posta gönderilemedi',
-                'code': 'EMAIL_SEND_FAILED',
-                'detail': f'Email gönderim sonucu: {result}'
-            }, status=500)
+            # Eski format uyumluluğu
+            if result:
+                return JsonResponse({
+                    'ok': True,
+                    'message': f'Termin-Bestätigungs-E-Mail wurde erfolgreich an {form.email} gesendet'
+                })
+            else:
+                return JsonResponse({
+                    'ok': False,
+                    'error': 'E-Mail konnte nicht gesendet werden - unbekannter Fehler',
+                    'code': 'EMAIL_SEND_FAILED'
+                }, status=500)
 
     except Exception as e:
         import traceback
@@ -1156,7 +1163,7 @@ def termin_email_gonder(request, form_id):
         print(f"Manuel termin email gönderme hatası: {e}\n{tb}")
         return JsonResponse({
             'ok': False,
-            'error': f'Hata: {str(e)}',
+            'error': f'Fehler: {str(e)}',
             'code': 'UNEXPECTED_ERROR',
             'detail': tb
         }, status=500)

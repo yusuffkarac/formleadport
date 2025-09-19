@@ -128,7 +128,7 @@
                   <dt class="ehepartner-info d-none">Partner &amp; Versicherung</dt><dd class="ehepartner-info d-none" id="mf-es-cocuk-sigorta">—</dd>
                   <dt class="ehepartner-info d-none">Alter des Ehepartners</dt><dd class="ehepartner-info d-none" id="mf-es-yasi">—</dd>
                   <dt class="ehepartner-info d-none">Kinderalter</dt><dd class="ehepartner-info d-none" id="mf-cocuk-yaslari">—</dd>
-                  <dt>Zusatz</dt><dd id="mf-sigorta-ekyazi">—</dd>
+                  <dt>Zusätzliche Versicherungsnotiz</dt><dd id="mf-sigorta-ekyazi">—</dd>
                 </dl>
               </section>
 
@@ -138,11 +138,11 @@
         </div>
       </div>
 
-      <div class="modal-footer modern-footer">
-        <button type="button" id="btn-termin-email" class="btn btn-primary me-2 d-none">
+      <div class="modal-footer modern-footer d-flex flex-wrap gap-2 justify-content-end">
+        <button type="button" id="btn-termin-email" class="btn btn-primary d-none">
           <i class="ki-duotone ki-send fs-4 me-1"><span class="path1"></span><span class="path2"></span></i> Termin E-Mail senden
         </button>
-        <button type="button" id="btn-pdf-open" class="btn btn-light me-2">
+        <button type="button" id="btn-pdf-open" class="btn btn-light">
           <i class="ki-duotone ki-mouse-square fs-4 me-1"></i> PDF herunterladen
         </button>
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Schließen</button>
@@ -718,5 +718,25 @@
     /* Sigorta şirketi satırı (logo + metin) rahat sarsın */
     #modalFormGoruntule .insurer{ flex-wrap:wrap; gap:.4rem; }
     #modalFormGoruntule .insurer-logo{ max-width:68px; max-height:40px; }
+    
+    /* Modal footer butonları mobilde optimize et - yan yana küçük */
+    .modal-footer {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 0.4rem !important;
+      padding: 0.75rem !important;
+    }
+    .modal-footer .btn {
+      flex: 1 1 auto !important;
+      font-size: 0.85rem !important;
+      padding: 0.6rem 0.9rem !important;
+      min-width: auto !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+    .modal-footer .btn i {
+      font-size: 0.8rem !important;
+      margin-right: 0.3rem !important;
+    }
   }
 </style>

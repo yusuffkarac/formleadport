@@ -20,6 +20,33 @@
   <style>
     .auth-page-bg { background-image: url("{% static 'assets/media/illustrations/dozzy-1/14.png' %}"); }
     [data-bs-theme="dark"] .auth-page-bg { background-image: url("{% static 'assets/media/illustrations/dozzy-1/14-dark.png' %}"); }
+    
+    /* Auth sayfaları için responsive ayarları */
+    @media (max-width: 768px) {
+      .w-lg-500px {
+        max-width: 95% !important;
+        padding: 1.5rem !important;
+      }
+      
+      .p-10 {
+        padding: 1.5rem !important;
+      }
+      
+      .p-lg-15 {
+        padding: 1.5rem !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .w-lg-500px {
+        max-width: 98% !important;
+        padding: 1rem !important;
+      }
+      
+      .p-10, .p-lg-15 {
+        padding: 1rem !important;
+      }
+    }
   </style>
 </head>
 <body id="kt_body" class="auth-bg">
