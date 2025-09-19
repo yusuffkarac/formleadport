@@ -31,9 +31,9 @@
       text-align: left;
     }
     
-    /* Mobilde tüm span elementlerinin font boyutu 8px */
+    /* Mobilde tüm span elementlerinin font boyutu 9px */
     #logs_table span {
-      font-size: 8px !important;
+      font-size: 9px !important;
     }
 
     #logs_table tbody td:before {
@@ -55,7 +55,7 @@
     #logs_table tbody tr.open .mobile-hidden { display: flex; }
     
 
-    /* Kapalı (open değil) durumda: sadece Zaman, Başlık ve Detay göster; tek satır yap */
+    /* Kapalı (open değil) durumda: Zaman, Kullanıcı, Aksiyon ve Detay göster; tek satır yap */
     #logs_table tbody tr { white-space: normal; }
     #logs_table tbody tr:not(.open) {
       white-space: nowrap;
@@ -63,38 +63,42 @@
 
     }
     #logs_table tbody tr:not(.open) td { display: none; }
-    /* Kapalı: sadece Zaman (saat), Önem (durum) ve Detay butonu */
+    /* Kapalı: Zaman, Kullanıcı, Aksiyon ve Detay butonu */
     #logs_table tbody tr:not(.open) td[data-label="Zaman"],
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"],
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"],
     #logs_table tbody tr:not(.open) td[data-label="Detay"] {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 0.25rem 0.25rem;
+      gap: 2px;
+      padding: 0.15rem 0.1rem;
     }
-    #logs_table tbody tr:not(.open) td[data-label="Zaman"] {order: 1;border: none;min-width: 10rem;}
+
 
 
     /* tek satır hizası */
     #logs_table tbody tr:not(.open) { 
       display: flex; 
       align-items: center; 
-      gap: 0px; 
+      gap: 2px; 
       overflow: hidden;
       justify-content: space-between;
+      width: 100%;
     }
-    #logs_table tbody tr:not(.open) td[data-label="Zaman"] { order: 1; border: none; }
-    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] { order: 2; border: none; }
-    #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 3; margin-left: auto; border: none; }
-    /* Zaman ve Aksiyon etiketlerini gizle, sadece değer kalsın */
+    #logs_table tbody tr:not(.open) td[data-label="Zaman"] { order: 1; border: none; flex-shrink: 0; max-width: 110px; }
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"] { order: 2; border: none; flex-shrink: 1; min-width: 0; max-width: 65px; }
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] { order: 3; border: none; flex-shrink: 1; max-width: 90px; }
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 4;border: none; flex-shrink: 0; max-width: 45px; }
+    /* Etiketleri gizle, sadece değer kalsın */
     #logs_table tbody tr:not(.open) td[data-label="Zaman"]:before { display: none; }
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"]:before { display: none; }
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"]:before { display: none; }
     /* Detay butonunu satırın sağına it - kontrollü */
     #logs_table tbody tr:not(.open) td[data-label="Detay"] { 
-      margin-left: auto; 
+
       margin-right: 0;
       flex-shrink: 0;
-      max-width: 50px;
+      max-width: 45px;
     }
     #logs_table tbody tr:not(.open) td[data-label="Detay"]:before { display: none; }
 
@@ -102,11 +106,64 @@
     #logs_table tbody tr:not(.open) td[data-label="Zaman"] span {
       background: #ffffff;
       border: 1px solid #e5e7eb;
-      padding: 6px 10px;
-      border-radius: 10px;
+      padding: 3px 7px;
+      border-radius: 6px;
       font-weight: 600;
       color: #111827;
+      font-size: 9px !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 105px;
+      display: inline-block;
     }
+    
+    /* Kullanıcı kısaltması */
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"] {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 55px;
+      min-width: 55px;
+    }
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"] span {
+      font-size: 9px !important;
+      color: #6b7280;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      display: inline-block;
+    }
+    #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"] div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    
+    /* Aksiyon badge küçültme */
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] .badge {
+      padding: 3px 6px !important;
+      font-size: 8px !important;
+      min-height: 20px !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 85px;
+      display: inline-block;
+    }
+    
+    /* Aksiyon container da ellipsis */
+    #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 90px;
+      
+    }
+    
 
     /* Açık görünüm karta geçiş */
     #logs_table tbody tr.open { 
@@ -430,20 +487,12 @@
                 <td class="align-middle" data-label="Kullanıcı">
                   {% if log.kullanici %}
                     <div class="d-flex align-items-center">
-                      <div class="symbol symbol-35px symbol-circle me-3">
+                      <div class="symbol symbol-35px symbol-circle me-3 mobile-hidden">
                         <span class=" symbol symbol-label symbol-30px bg-light fw-bold text-gray-600">
                           <img src="{% if log.kullanici.resim %}{{ log.kullanici.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
                         </span>
                       </div>
-                      <div class="d-flex flex-column">
-                        <span class="text-gray-800 fw-bold fs-7">{{ log.kullanici.username }}</span>
-                        {% if log.kullanici.get_full_name %}
-                          <span class="fs-8 text-muted mobile-hidden">{{ log.kullanici.get_full_name }}</span>
-                        {% endif %}
-                        {% if log.kullanici.email %}
-                          <span class="fs-8 text-muted mobile-hidden">{{ log.kullanici.email }}</span>
-                        {% endif %}
-                      </div>
+                      <span class="text-gray-800 fw-bold fs-7">{{ log.kullanici.username }}</span>
                     </div>
                   {% else %}
                     <span class="text-muted fs-7">Sistem</span>

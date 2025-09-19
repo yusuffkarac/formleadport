@@ -1,15 +1,15 @@
 <!--begin::Footer-->
 <div class="footer py-4" id="kt_footer">
   <!--begin::Container-->
-  <div class="container-xxl d-flex flex-row align-items-center justify-content-between flex-nowrap overflow-auto">
+  <div class="container-xxl d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
     <!--begin::Copyright-->
-    <div class="text-dark me-3 text-nowrap pt-5">
+    <div class="text-dark me-3 pt-5">
       {{ footer.icerik_sol|safe }}
     </div>
     <!--end::Copyright-->
 
     <!--begin::Menu-->
-    <ul class="menu menu-gray-600 menu-hover-primary fw-bold d-flex flex-row flex-nowrap gap-3 mb-0 ps-0 text-nowrap">
+    <ul class="menu menu-gray-600 menu-hover-primary fw-bold d-flex flex-column flex-md-row flex-wrap gap-2 gap-md-3 mb-0 ps-0">
 
       {% if footer.buton_yazi_sag %}
       <li>
