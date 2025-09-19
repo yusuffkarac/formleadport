@@ -46,6 +46,194 @@
     padding-left: 2.5rem !important;
     padding-right: 2.5rem !important;
   }
+  
+  /* Mobilde kenarlardaki boşlukları daha da azalt */
+  @media (max-width: 768px) {
+    .container-xxl {
+      max-width: 95% !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* Kartlar arası boşlukları da azalt */
+    .card {
+      margin-bottom: 1rem !important;
+    }
+    
+    /* İçerik alanındaki padding'i azalt */
+    .card-body {
+      padding: 1rem !important;
+    }
+    
+    /* Toolbar padding'ini azalt */
+    .toolbar {
+      padding: 1rem 0 !important;
+    }
+    
+    #kt_toolbar_container {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+  }
+  
+  /* Çok küçük ekranlar için daha da sıkıştır */
+  @media (max-width: 576px) {
+    .container-xxl {
+      max-width: 95% !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+    
+    .card-body {
+      padding: 0.75rem !important;
+    }
+    
+    #kt_toolbar_container {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+  }
+  
+  /* DataTable responsive mobil görünümü */
+  @media (max-width: 768px) {
+    /* Tablo başlıklarını gizle */
+    #dt_forms thead {
+      display: none;
+    }
+    
+    /* Satırları kart görünümüne çevir - kompakt */
+    #dt_forms tbody tr {
+      display: block;
+      border: 1px solid #e4e6ea;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Hücreleri blok yap - kompakt tasarım */
+    #dt_forms tbody td {
+      display: block;
+      border: none;
+      padding: 0.25rem 0;
+      text-align: left;
+    }
+    
+    /* Her hücreye etiket ekle - tek satırda başlık ve değer */
+    #dt_forms tbody td:before {
+      content: attr(data-label) ": ";
+      font-weight: bold;
+      color: #6b7280;
+      display: inline;
+      margin-right: 8px;
+    }
+    
+    /* Erstellt von bölümünü mobilde düzenle - sadece admin ve tarih */
+    #dt_forms tbody td:first-child .d-flex {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+    
+    #dt_forms tbody td:first-child .symbol {
+      width: 20px !important;
+      height: 20px !important;
+      margin-right: 4px !important;
+    }
+    
+    #dt_forms tbody td:first-child .d-flex .d-flex.flex-column {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+    
+    /* Sadece admin adını ve tarihi göster, müşteri bilgisini gizle */
+    #dt_forms tbody td:first-child .d-flex .d-flex.flex-column span:first-child {
+      display: inline !important;
+      margin-right: 6px !important;
+      font-size: 0.8rem !important;
+    }
+    
+    #dt_forms tbody td:first-child .d-flex .d-flex.flex-column span:nth-child(2) {
+      display: none !important;
+    }
+    
+    #dt_forms tbody td:first-child .d-flex .d-flex.flex-column span:last-child {
+      display: inline !important;
+      margin-left: 6px !important;
+      font-size: 0.75rem !important;
+      color: #6b7280 !important;
+    }
+    
+    /* Tüm hücrelerdeki içeriği tek satırda göster */
+    #dt_forms tbody td {
+      display: flex !important;
+      align-items: center !important;
+
+      flex-wrap: nowrap !important;
+    }
+    
+    /* İçerik alanlarını düzenle */
+    #dt_forms tbody td > * {
+      display: inline !important;
+      margin: 0 !important;
+    }
+    
+    /* D-flex container'ları düzelt */
+    #dt_forms tbody td .d-flex {
+      display: inline !important;
+      flex-direction: row !important;
+      align-items: center !important;
+    }
+    
+    /* Flex-column'ları düzelt */
+    #dt_forms tbody td .flex-column {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+    
+    /* Span elementlerini düzelt - kompakt */
+    #dt_forms tbody td span {
+      display: inline !important;
+      margin-right: 4px !important;
+      font-size: 0.85rem !important;
+    }
+    
+    /* Telefon ve email alanlarındaki d-flex yapısını düzelt */
+    #dt_forms tbody td[data-label="Handy"] .d-flex,
+    #dt_forms tbody td[data-label="E-Mail"] .d-flex {
+      display: inline !important;
+      flex-direction: row !important;
+      align-items: center !important;
+    }
+    
+    /* Status dropdown'unu düzelt */
+    #dt_forms tbody td[data-label="Status"] .d-flex {
+      display: inline !important;
+      flex-direction: row !important;
+      align-items: center !important;
+    }
+    
+    /* Select elementini düzelt */
+    #dt_forms tbody td select {
+      display: inline !important;
+      margin: 0 !important;
+    }
+    
+    /* Aktionen sütununu sağa hizala - kompakt */
+    #dt_forms tbody td:last-child {
+      text-align: right;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #f1f3f6;
+    }
+    
+    #dt_forms tbody td:last-child:before {
+      display: none;
+    }
+  }
 </style>
 {% endblock %}
 {% block content %}
@@ -256,8 +444,8 @@
               {% for f in formlar %}
               <tr>
                 <!-- Erstellt von (creator) -->
-                <td>
-                  <div class="d-flex align-items-center">
+                <td data-label="Erstellt von">
+                  <div class="d-flex align-items-center" style="display: flex!important;">
                     <div class="symbol symbol-35px symbol-circle me-3">
                       <span class="symbol-label bg-light fw-bold text-gray-600">
                           <img src="{% if f.kullanici and f.kullanici.resim %}{{ f.kullanici.resim.url }}{% else %}{% static 'assets/media/avatars/user.png' %}{% endif %}" alt="" class="img-circle">
@@ -270,7 +458,9 @@
                         {% else %}
                           — 
                         {% endif %}
+                        
                       </span>
+                       
                       <span class="fs-8">
                         {{ f.olusturma_tarihi|localtime|date:"d.m.Y, H:i" }} Uhr
                       </span>
@@ -279,7 +469,7 @@
                 </td>
 
                 <!-- Kunde -->
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                <td data-label="Kunde" style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.musteri_isim or f.musteri_soyisim %}
                     {{ f.musteri_isim }} {{ f.musteri_soyisim }}
                   {% else %}
@@ -287,8 +477,8 @@
                   {% endif %}
                 </td>
                 <!-- Telefon -->
-                <td class="text-start" style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
-                  <div class="d-flex align-items-center">
+                <td data-label="Handy" class="text-start" style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
+                  <div class="d-flex align-items-center" >
                     <span class="text-truncate" style="max-width: calc(100% - 20px);">
                       {% if f.telefon %}{{ f.telefon }}{% else %}—{% endif %}
                     </span>
@@ -301,7 +491,7 @@
                 </td>
 
                 <!-- E-Mail -->
-                <td style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
+                <td data-label="E-Mail" style="word-wrap: break-word; overflow-wrap: break-word; white-space: nowrap;">
                   <div class="d-flex align-items-center">
                     <span class="text-truncate" style="max-width: calc(100% - 20px);">
                       {% if f.email %}{{ f.email }}{% else %}—{% endif %}
@@ -315,7 +505,7 @@
                 </td>
 
                 <!-- Termin -->
-                <td data-order="{{ f.randevu_tarihi|date:'c' }}" style="word-wrap: break-word; overflow-wrap: break-word;">
+                <td data-label="Termin" data-order="{{ f.randevu_tarihi|date:'c' }}" style="word-wrap: break-word; overflow-wrap: break-word;">
                   {% if f.randevu_tarihi %}
                     {{ f.randevu_tarihi|localtime|date:"d.m.Y, H:i" }} Uhr
                   {% else %}
@@ -324,7 +514,7 @@
                 </td>
 
                 <!-- Status -->
-                <td>
+                <td data-label="Status">
                   <div class="d-flex align-items-center gap-2">
                     <select class="form-select form-select-sm form-select-solid w-auto"
                             data-status-select
@@ -340,7 +530,7 @@
                 </td>
 
                 <!-- Aktionen -->
-                <td class="text-start" style="white-space: nowrap;" data-order="Invalid date">
+                <td data-label="Aktionen" class="text-start" style="white-space: nowrap;" data-order="Invalid date">
                   <div class="d-inline-flex align-items-center gap-2" role="group" aria-label="Aktionen"
                       data-form-id="{{ f.id }}"
                       data-full-name="{{ f.musteri_isim|default:'' }} {{ f.musteri_soyisim|default:'' }}"
