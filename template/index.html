@@ -120,13 +120,16 @@
       text-align: left;
     }
     
-    /* Her hücreye etiket ekle - tek satırda başlık ve değer */
+    /* Her hücreye etiket ekle - sabit genişlik + tek satır */
     #dt_forms tbody td:before {
       content: attr(data-label) ": ";
-      font-weight: bold;
+      font-weight: 600;
       color: #6b7280;
-      display: inline;
-      margin-right: 8px;
+      display: inline-block;
+      min-width: 70px; /* tüm değerleri aynı hizaya getir */
+      margin-right: 10px;
+      vertical-align: middle;
+      text-align: left;
     }
     
     /* Erstellt von bölümünü mobilde düzenle - sadece admin ve tarih */
@@ -166,12 +169,14 @@
       color: #6b7280 !important;
     }
     
-    /* Tüm hücrelerdeki içeriği tek satırda göster */
+    /* Tüm hücrelerdeki içeriği tek satırda göster + sola hizala */
     #dt_forms tbody td {
       display: flex !important;
       align-items: center !important;
-
+      justify-content: flex-start !important;
+      text-align: left !important;
       flex-wrap: nowrap !important;
+      gap: 6px;
     }
     
     /* İçerik alanlarını düzenle */
@@ -194,11 +199,20 @@
       gap: 8px !important;
     }
     
+    /* Değer yazı tipini/ölçüsünü tutarlı yap */
+    #dt_forms tbody td span,
+    #dt_forms tbody td div,
+    #dt_forms tbody td a,
+    #dt_forms tbody td select {
+      font-family: inherit !important;
+      font-size: 0.95rem !important;
+      line-height: 1.2 !important;
+    }
+
     /* Span elementlerini düzelt - kompakt */
     #dt_forms tbody td span {
       display: inline !important;
       margin-right: 4px !important;
-      font-size: 0.85rem !important;
     }
     
     /* Telefon ve email alanlarındaki d-flex yapısını düzelt */
@@ -222,16 +236,32 @@
       margin: 0 !important;
     }
     
-    /* Aktionen sütununu sağa hizala - kompakt */
-    #dt_forms tbody td:last-child {
-      text-align: right;
+    /* Aktionen: butonlar tüm satırı kaplasın */
+    #dt_forms tbody td[data-label="Aktionen"] {
+      text-align: left !important;
       margin-top: 0.5rem;
       padding-top: 0.5rem;
       border-top: 1px solid #f1f3f6;
+      width: 100% !important;
     }
-    
-    #dt_forms tbody td:last-child:before {
+
+    #dt_forms tbody td[data-label="Aktionen"]:before {
       display: none;
+    }
+
+    #dt_forms tbody td[data-label="Aktionen"] > div {
+      display: flex !important;
+      width: 100% !important;
+      gap: 8px !important;
+      justify-content: space-between !important;
+    }
+
+    #dt_forms tbody td[data-label="Aktionen"] > div .btn {
+      flex: 1 1 0 !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
     }
   }
 </style>
