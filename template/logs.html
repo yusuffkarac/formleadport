@@ -15,11 +15,12 @@
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       margin-bottom: 0.75rem;
-      padding: 0.75rem;
+      padding: 0;
       background: #f9fafb;
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
       cursor: pointer;
       transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
+      overflow: hidden;
     }
     #logs_table tbody tr:hover { background: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-color: #e5e7eb; }
 
@@ -71,7 +72,7 @@
       display: inline-flex;
       align-items: center;
       gap: 2px;
-      padding: 0.15rem 0.1rem;
+      padding: 0.2rem 0.15rem;
     }
 
 
@@ -80,15 +81,16 @@
     #logs_table tbody tr:not(.open) { 
       display: flex; 
       align-items: center; 
-      gap: 2px; 
+      gap: 3px; 
       overflow: hidden;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
+      padding: 0.5rem 0.75rem !important;
     }
     #logs_table tbody tr:not(.open) td[data-label="Zaman"] { order: 1; border: none; flex-shrink: 0; max-width: 110px; }
     #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"] { order: 2; border: none; flex-shrink: 1; min-width: 0; max-width: 65px; }
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] { order: 3; border: none; flex-shrink: 1; max-width: 90px; }
-    #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 4;border: none; flex-shrink: 0; max-width: 45px; }
+    #logs_table tbody tr:not(.open) td[data-label="Detay"] { order: 4; border: none; flex-shrink: 0; max-width: 45px; margin-left: auto; }
     /* Etiketleri gizle, sadece değer kalsın */
     #logs_table tbody tr:not(.open) td[data-label="Zaman"]:before { display: none; }
     #logs_table tbody tr:not(.open) td[data-label="Kullanıcı"]:before { display: none; }
@@ -146,7 +148,7 @@
     /* Aksiyon badge küçültme */
     #logs_table tbody tr:not(.open) td[data-label="Aksiyon"] .badge {
       padding: 3px 6px !important;
-      font-size: 8px !important;
+      font-size: 7px !important;
       min-height: 20px !important;
       overflow: hidden;
       text-overflow: ellipsis;
